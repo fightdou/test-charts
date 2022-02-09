@@ -1,0 +1,7 @@
+chart-dirs:
+  - charts
+chart-repos:
+  - fightdou=https://fightdou.github.io/test-charts
+debug: true
+remote: origin
+target-branch: main
