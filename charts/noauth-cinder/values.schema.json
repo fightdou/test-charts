@@ -2,140 +2,34 @@
     "title": "Chart Values",
     "type": "object",
     "properties": {
-        "global": {
-            "type": "object",
-            "properties": {
-                "imageRegistry": {
-                    "type": "string",
-                    "description": "Global Docker image registry",
-                    "default": ""
-                },
-                "imagePullSecrets": {
-                    "type": "array",
-                    "description": "Global Docker registry secret names as an array",
-                    "default": []
-                },
-                "storageClass": {
-                    "type": "string",
-                    "description": "Global StorageClass for Persistent Volume(s)",
-                    "default": ""
-                }
-            }
-        },
         "image": {
             "type": "object",
             "properties": {
                 "registry": {
                     "type": "string",
+                    "title": "Cinder API Image Registry",
                     "description": "Moodle image registry",
                     "default": "docker.io"
                 },
                 "repository": {
                     "type": "string",
+                    "title": "Cinder API Image Repository",
                     "description": "Moodle image repository",
                     "default": "douyali/cinder-api"
                 },
                 "tag": {
                     "type": "string",
+                    "title": "Cinder API Image Tag",
                     "description": "Moodle image tag (immutable tags are recommended)",
                     "default": "latest"
-                },
-                "pullPolicy": {
-                    "type": "string",
-                    "description": "Moodle image pull policy",
-                    "default": "IfNotPresent"
-                },
-                "pullSecrets": {
-                    "type": "array",
-                    "description": "Specify docker-registry secret names as an array",
-                    "default": []
-                },
-                "debug": {
-                    "type": "boolean",
-                    "description": "Specify if debug logs should be enabled",
-                    "default": false
                 }
             }
         },
         "replicaCount": {
             "type": "number",
+            "title": "Cinder API Replica Number",
             "description": "Number of Moodle replicas (requires ReadWriteMany PVC support)",
             "default": 1
-        },
-        "containerPorts": {
-            "type": "object",
-            "properties": {
-                "http": {
-                    "type": "number",
-                    "description": "Cinder HTTP container port",
-                    "default": 8776
-                }
-            }
-        },
-        "service": {
-            "type": "object",
-            "properties": {
-                "type": {
-                    "type": "string",
-                    "description": "Cinder service type",
-                    "default": "ClusterIP"
-                },
-                "port": {
-                    "type": "number",
-                    "description": "Cinder service HTTP port",
-                    "default": 8776
-                },
-                "httpsPort": {
-                    "type": "number",
-                    "description": "Cinder service HTTPS port",
-                    "default": 443
-                },
-                "httpsTargetPort": {
-                    "type": "string",
-                    "description": "Target port for HTTPS",
-                    "default": "https"
-                },
-                "nodePorts": {
-                    "type": "object",
-                    "properties": {
-                        "http": {
-                            "type": "string",
-                            "description": "Node port for HTTP",
-                            "default": ""
-                        }
-                    }
-                },
-                "clusterIP": {
-                    "type": "string",
-                    "description": "Cinder service Cluster IP",
-                    "default": ""
-                },
-                "loadBalancerIP": {
-                    "type": "string",
-                    "description": "Cinder service Load Balancer IP",
-                    "default": ""
-                },
-                "loadBalancerSourceRanges": {
-                    "type": "array",
-                    "description": "Cinder service Load Balancer sources",
-                    "default": []
-                },
-                "externalTrafficPolicy": {
-                    "type": "string",
-                    "description": "Cinder service external traffic policy",
-                    "default": "Cluster"
-                },
-                "annotations": {
-                    "type": "object",
-                    "description": "Additional custom annotations for Cinder service",
-                    "default": {}
-                },
-                "extraPorts": {
-                    "type": "array",
-                    "description": "Extra port to expose on Cinder service",
-                    "default": []
-                }
-            }
         },
         "conf": {
             "type": "object",
@@ -145,45 +39,17 @@
                     "properties": {
                         "auth_strategy": {
                             "type": "string",
+                            "title": "Auth Strategy",
                             "description": "Auth strategy for cinder api",
                             "default": "noauth"
                         },
                         "auth_type": {
                             "type": "string",
+                            "title": "Auth Type",
                             "description": "Auth type for cinder api",
                             "default": "none"
                         }
                     }
-                }
-            }
-        },
-        "autoscaling": {
-            "type": "object",
-            "properties": {
-                "enabled": {
-                    "type": "boolean",
-                    "description": "Enable Horizontal POD autoscaling for WordPress",
-                    "default": false
-                },
-                "minReplicas": {
-                    "type": "number",
-                    "description": "Minimum number of WordPress replicas",
-                    "default": 1
-                },
-                "maxReplicas": {
-                    "type": "number",
-                    "description": "Maximum number of WordPress replicas",
-                    "default": 11
-                },
-                "targetCPU": {
-                    "type": "number",
-                    "description": "Target CPU utilization percentage",
-                    "default": 50
-                },
-                "targetMemory": {
-                    "type": "number",
-                    "description": "Target Memory utilization percentage",
-                    "default": 50
                 }
             }
         },
@@ -192,11 +58,13 @@
             "properties": {
                 "enabled": {
                     "type": "boolean",
+                    "title": "Enabled mariadb service",
                     "description": "Whether to deploy a mariadb server to satisfy the applications database requirements",
                     "default": true
                 },
                 "architecture": {
                     "type": "string",
+                    "title": "Mariadb architecture",
                     "description": "MariaDB architecture. Allowed values: `standalone` or `replication`",
                     "default": "standalone"
                 },
@@ -205,21 +73,25 @@
                     "properties": {
                         "rootPassword": {
                             "type": "string",
+                            "title": "Mariadb Root Password",
                             "description": "Password for the MariaDB `root` user",
                             "default": ""
                         },
                         "database": {
                             "type": "string",
+                            "title": "Mariadb Database Name",
                             "description": "Database name to create",
                             "default": "cinder"
                         },
                         "username": {
                             "type": "string",
+                            "title": "Mariadb Database UserName",
                             "description": "Database user to create",
                             "default": "cinder"
                         },
                         "password": {
                             "type": "string",
+                            "title": "Mariadb Database Password",
                             "description": "Password for the database",
                             "default": "123456"
                         }
@@ -233,16 +105,19 @@
                             "properties": {
                                 "enabled": {
                                     "type": "boolean",
+                                    "title": "Enable database persistence using PVC",
                                     "description": "Enable database persistence using PVC",
                                     "default": true
                                 },
                                 "storageClass": {
                                     "type": "string",
+                                    "title": "MariaDB primary persistent volume storage Class",
                                     "description": "MariaDB primary persistent volume storage Class",
                                     "default": ""
                                 },
                                 "accessModes": {
                                     "type": "array",
+                                    "title": "Database Persistent Volume Access Modes",
                                     "description": "Database Persistent Volume Access Modes",
                                     "default": [
                                         "ReadWriteOnce"
@@ -250,80 +125,11 @@
                                 },
                                 "size": {
                                     "type": "string",
+                                    "title": "Database Persistent Volume Size",
                                     "description": "Database Persistent Volume Size",
                                     "default": "8Gi"
-                                },
-                                "hostPath": {
-                                    "type": "string",
-                                    "description": "Set path in case you want to use local host path volumes (not recommended in production)",
-                                    "default": ""
-                                },
-                                "existingClaim": {
-                                    "type": "string",
-                                    "description": "Name of an existing `PersistentVolumeClaim` for MariaDB primary replicas",
-                                    "default": ""
                                 }
                             }
-                        }
-                    }
-                }
-            }
-        },
-        "externalDatabase": {
-            "type": "object",
-            "properties": {
-                "host": {
-                    "type": "string",
-                    "description": "External Database server host",
-                    "default": "localhost"
-                },
-                "port": {
-                    "type": "number",
-                    "description": "External Database server port",
-                    "default": 3306
-                },
-                "user": {
-                    "type": "string",
-                    "description": "External Database username",
-                    "default": "bn_wordpress"
-                },
-                "password": {
-                    "type": "string",
-                    "description": "External Database user password",
-                    "default": ""
-                },
-                "database": {
-                    "type": "string",
-                    "description": "External Database database name",
-                    "default": "bitnami_wordpress"
-                },
-                "existingSecret": {
-                    "type": "string",
-                    "description": "The name of an existing secret with database credentials",
-                    "default": ""
-                }
-            }
-        },
-        "rabbitmq": {
-            "type": "object",
-            "properties": {
-                "enabled": {
-                    "type": "boolean",
-                    "description": "Enable/disable RabbitMQ chart installation",
-                    "default": true
-                },
-                "auth": {
-                    "type": "object",
-                    "properties": {
-                        "username": {
-                            "type": "string",
-                            "description": "RabbitMQ username",
-                            "default": "openstack"
-                        },
-                        "password": {
-                            "type": "string",
-                            "description": "RabbitMQ password",
-                            "default": "openstack"
                         }
                     }
                 }

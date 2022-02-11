@@ -47,11 +47,38 @@ image:
   ## Set to true if you would like to see extra information on logs
   ##
   debug: false
+## @param entrypointImage.registry Moodle image registry
+## @param entrypointImage.repository Moodle image repository
+## @param entrypointImage.tag Moodle image tag (immutable tags are recommended)
+## @param entrypointImage.pullPolicy Moodle image pull policy
+## @param entrypointImage.pullSecrets Specify docker-registry secret names as an array
+## @param entrypointImage.debug Specify if debug logs should be enabled
+entrypointImage:
+  registry: quay.io
+  repository: airshipit/kubernetes-entrypoint
+  tag: v1.0.0
+  ## Specify a imagePullPolicy
+  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+  ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
+  pullPolicy: IfNotPresent
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ## e.g:
+  ## pullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  pullSecrets: []
+  ## Set to true if you would like to see extra information on logs
+  ##
+  debug: false
 ## @param replicaCount Number of Moodle replicas (requires ReadWriteMany PVC support)
 ##
 replicaCount: 1
 ## Container ports
 ## @param containerPorts.http Cinder HTTP container port
+## @param containerPorts.https Cinder HTTPS container port
 ##
 containerPorts:
   http: 8776
@@ -75,10 +102,12 @@ service:
   httpsTargetPort: https
   ## Node ports to expose
   ## @param service.nodePorts.http Node port for HTTP
+  ## @param service.nodePorts.https Node port for HTTPS
   ## NOTE: choose port between <30000-32767>
   ##
   nodePorts:
     http: ""
+    https: ""
   ## @param service.clusterIP Cinder service Cluster IP
   ## e.g.:
   ## clusterIP: None
@@ -109,7 +138,18 @@ service:
 ## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
 ##
 
-## @section Cinder API Config File Parameters
+## @skip dependencies
+dependencies:
+  api:
+    jobs:
+      - cinder-db-sync
+  db_sync:
+    pod:
+      - requireSameNode: false
+        labels:
+          app.kubernetes.io/name: mariadb
+
+## @section Noauth Cinder API Config File Parameters
 ## Cinder conf parameters
 ##
 conf:
@@ -120,9 +160,8 @@ conf:
     auth_strategy: noauth
     auth_type: none
 
-## @section Other Parameters
-
-## Cinder API Autoscaling configuration
+## @section Noauth Cinder API Autoscaling configuration
+## Cinder Autoscaling configuration
 ## ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
 ## @param autoscaling.enabled Enable Horizontal POD autoscaling for WordPress
 ## @param autoscaling.minReplicas Minimum number of WordPress replicas
@@ -209,34 +248,15 @@ externalDatabase:
   port: 3306
   ## @param externalDatabase.user External Database username
   ##
-  user: bn_wordpress
+  user: cinder
   ## @param externalDatabase.password External Database user password
   ##
   password: ""
   ## @param externalDatabase.database External Database database name
   ##
-  database: bitnami_wordpress
+  database: cinder
   ## @param externalDatabase.existingSecret The name of an existing secret with database credentials
   ## NOTE: Must contain key `mariadb-password`
   ## NOTE: When it's set, the `externalDatabase.password` parameter is ignored
   ##
   existingSecret: ""
-## Memcached chart configuration
-## ref: https://github.com/bitnami/charts/blob/master/bitnami/memcached/values.yaml
-##
-
-## @section RabbitMQ chart parameters
-
-## RabbitMQ chart configuration
-## https://github.com/bitnami/charts/blob/master/bitnami/rabbitmq/values.yaml
-##
-rabbitmq:
-  ## @param rabbitmq.enabled Enable/disable RabbitMQ chart installation
-  ##
-  enabled: true
-  ## @param rabbitmq.auth.username RabbitMQ username
-  ## @param rabbitmq.auth.password RabbitMQ password
-  ##
-  auth:
-    username: openstack
-    password: openstack

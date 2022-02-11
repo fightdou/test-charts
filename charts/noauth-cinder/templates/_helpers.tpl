@@ -8,6 +8,13 @@ Return the proper Cinder image name
 {{- end -}}
 
 {{/*
+Return the proper Kubernetes Entrypoint image name
+*/}}
+{{- define "entrypoint.image" -}}
+{{- include "common.images.image" (dict "imageRoot" .Values.entrypointImage "global" .Values.global) -}}
+{{- end -}}
+
+{{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
@@ -72,4 +79,22 @@ Return the MariaDB Password
 {{- else -}}
     {{- printf "%s" .Values.externalDatabase.password -}}
 {{- end -}}
+{{- end -}}
+
+{{/*
+abstract: |
+  Joins a list of values into a comma separated string
+values: |
+  test:
+    - foo
+    - bar
+usage: |
+  {{ include "joinListWithComma" .Values.test }}
+return: |
+  foo,bar
+*/}}
+
+{{- define "joinListWithComma" -}}
+{{- $local := dict "first" true -}}
+{{- range $k, $v := . -}}{{- if not $local.first -}},{{- end -}}{{- $v -}}{{- $_ := set $local "first" false -}}{{- end -}}
 {{- end -}}
