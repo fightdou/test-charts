@@ -4,26 +4,28 @@
         "image": {
             "type": "object",
             "title": "Cinder API Image Config",
+            "form": true,
+            "description": "cinder image config parameter",
             "properties": {
                 "registry": {
                     "type": "string",
                     "title": "Cinder API Image Registry",
                     "form": true,
-                    "description": "Moodle image registry",
+                    "description": "Cinder image registry",
                     "default": "docker.io"
                 },
                 "repository": {
                     "type": "string",
                     "title": "Cinder API Image Repository",
                     "form": true,
-                    "description": "Moodle image repository",
+                    "description": "Cinder image repository",
                     "default": "douyali/cinder-api"
                 },
                 "tag": {
                     "type": "string",
                     "title": "Cinder API Image Tag",
                     "form": true,
-                    "description": "Moodle image tag (immutable tags are recommended)",
+                    "description": "Cinder image tag (immutable tags are recommended)",
                     "default": "latest"
                 }
             }
@@ -32,12 +34,13 @@
             "type": "number",
             "title": "Cinder API Replica Number",
             "form": true,
-            "description": "Number of Moodle replicas (requires ReadWriteMany PVC support)",
+            "description": "Number of Cinder replicas (requires ReadWriteMany PVC support)",
             "default": 1
         },
         "conf": {
             "type": "object",
             "title": "Cinder Config File",
+            "form": true,
             "properties": {
                 "cinder": {
                     "type": "object",
@@ -89,6 +92,13 @@
                                     "sliderMin": 1,
                                     "sliderMax": 100,
                                     "sliderUnit": "Gi"
+                                },
+                                "storageClass": {
+                                    "type": "string",
+                                    "title": "Mariadb StorageClass Name",
+                                    "form": true,
+                                    "description": "mariadb service storage class name",
+                                    "default": ""
                                 }
                             }
                         }
