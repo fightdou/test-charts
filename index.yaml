@@ -1,6 +1,50 @@
 apiVersion: v1
 entries:
+  cinder-csi-plugin:
+  - annotations:
+      category: Kungze
+    apiVersion: v2
+    appVersion: v2
+    created: "2022-02-11T07:57:06.438485117Z"
+    dependencies:
+    - name: noauth-cinder
+      repository: https://fightdou.github.io/test-charts
+      version: 1.x.x
+    description: Cinder CSI Chart for OpenStack
+    digest: 5a33c9276d6c0abddfd843769449be6c5baf38b0f438f69389f82f271fe97e92
+    home: https://github.com/kungzu/cinder-csi-plugin
+    icon: https://github.com/kubernetes/kubernetes/blob/master/logo/logo.png
+    maintainers:
+    - name: Kungze
+    name: cinder-csi-plugin
+    urls:
+    - https://github.com/fightdou/test-charts/releases/download/cinder-csi-plugin-1.0.0/cinder-csi-plugin-1.0.0.tgz
+    version: 1.0.0
   noauth-cinder:
+  - annotations:
+      category: Openstack
+    apiVersion: v2
+    appVersion: v2
+    created: "2022-02-11T07:57:06.658781049Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: https://charts.bitnami.com/bitnami
+      version: 10.x.x
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 1.x.x
+    description: Deploy openstack cinder noauth service
+    digest: c5efd28905543abc15b378814c7b8261a1279bbc515b30a5ee47bbb55a42cef2
+    home: https://kungze.github.io/charts/
+    maintainers:
+    - name: Kungze
+    name: noauth-cinder
+    urls:
+    - https://github.com/fightdou/test-charts/releases/download/noauth-cinder-1.0.5/noauth-cinder-1.0.5.tgz
+    version: 1.0.5
   - annotations:
       category: Openstack
     apiVersion: v2
@@ -49,4 +93,4 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/noauth-cinder-1.0.3/noauth-cinder-1.0.3.tgz
     version: 1.0.3
-generated: "2022-02-11T05:31:55.644600344Z"
+generated: "2022-02-11T07:57:06.65879875Z"
