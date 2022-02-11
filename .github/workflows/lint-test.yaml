@@ -21,6 +21,10 @@ jobs:
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.2.0
 
+      - name: Add dependency chart repos
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+
       - name: Run chart-testing (lint)
         run: ct lint --config .github/ct-lint.yaml
 
@@ -38,6 +42,11 @@ jobs:
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.2.0
+
+      - name: Add dependency chart repos
+        run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add cinder https://fightdou.github.io/test-charts
 
       - name: Run chart-testing (install)
         run: ct install --config .github/ct-install.yaml
