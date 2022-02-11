@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-configmap
+  namespace: {{ .Release.Namespace }}
+data:
+  cloud.conf: |-
+    {{- if eq .Values.cloud.auth_strategy "keystone" }}
+    [Global]
+    auth-strategy = keystone
+    username = {{ .Values.cloud.username }}
+    password = {{ .Values.cloud.password }}
+    tenant-name = {{ .Values.cloud.tenant_name }}
+    auth-url = {{ .Values.cloud.auth_url }}
+    os-endpoint-type = public
+    domain-name = default
+    region = RegionOne
+    [BlockStorage]
+    force-snapshot = true
+    auth-strategy = keystone
+    {{- else if eq .Values.cloud.auth_strategy "noauth" }}
+    [Global]
+    auth-strategy = noauth
+    [BlockStorage]
+    force-snapshot = true
+    auth-strategy = noauth
+    cinder-listen-addr = http://{{ .Release.Name }}-noauth-cinder:8776/v3/
+    {{- end }}
