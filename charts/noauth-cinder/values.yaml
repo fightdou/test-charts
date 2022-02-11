@@ -222,7 +222,7 @@ mariadb:
       ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
       ##   GKE, AWS & OpenStack)
       ##
-      storageClass: "rook-ceph-block"
+      storageClass: ""
       ## @param mariadb.primary.persistence.accessModes Database Persistent Volume Access Modes
       ##
       accessModes:
