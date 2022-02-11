@@ -1,25 +1,28 @@
 {
-    "title": "Chart Values",
     "type": "object",
     "properties": {
         "image": {
             "type": "object",
+            "title": "Cinder API Image Config",
             "properties": {
                 "registry": {
                     "type": "string",
                     "title": "Cinder API Image Registry",
+                    "form": true,
                     "description": "Moodle image registry",
                     "default": "docker.io"
                 },
                 "repository": {
                     "type": "string",
                     "title": "Cinder API Image Repository",
+                    "form": true,
                     "description": "Moodle image repository",
                     "default": "douyali/cinder-api"
                 },
                 "tag": {
                     "type": "string",
                     "title": "Cinder API Image Tag",
+                    "form": true,
                     "description": "Moodle image tag (immutable tags are recommended)",
                     "default": "latest"
                 }
@@ -28,11 +31,13 @@
         "replicaCount": {
             "type": "number",
             "title": "Cinder API Replica Number",
+            "form": true,
             "description": "Number of Moodle replicas (requires ReadWriteMany PVC support)",
             "default": 1
         },
         "conf": {
             "type": "object",
+            "title": "Cinder Config File",
             "properties": {
                 "cinder": {
                     "type": "object",
@@ -40,12 +45,14 @@
                         "auth_strategy": {
                             "type": "string",
                             "title": "Auth Strategy",
+                            "form": true,
                             "description": "Auth strategy for cinder api",
                             "default": "noauth"
                         },
                         "auth_type": {
                             "type": "string",
                             "title": "Auth Type",
+                            "form": true,
                             "description": "Auth type for cinder api",
                             "default": "none"
                         }
@@ -55,47 +62,14 @@
         },
         "mariadb": {
             "type": "object",
+            "title": "MariaDB Details",
+            "form": true,
             "properties": {
                 "enabled": {
-                    "type": "boolean",
-                    "title": "Enabled mariadb service",
-                    "description": "Whether to deploy a mariadb server to satisfy the applications database requirements",
-                    "default": true
-                },
-                "architecture": {
-                    "type": "string",
-                    "title": "Mariadb architecture",
-                    "description": "MariaDB architecture. Allowed values: `standalone` or `replication`",
-                    "default": "standalone"
-                },
-                "auth": {
-                    "type": "object",
-                    "properties": {
-                        "rootPassword": {
-                            "type": "string",
-                            "title": "Mariadb Root Password",
-                            "description": "Password for the MariaDB `root` user",
-                            "default": ""
-                        },
-                        "database": {
-                            "type": "string",
-                            "title": "Mariadb Database Name",
-                            "description": "Database name to create",
-                            "default": "cinder"
-                        },
-                        "username": {
-                            "type": "string",
-                            "title": "Mariadb Database UserName",
-                            "description": "Database user to create",
-                            "default": "cinder"
-                        },
-                        "password": {
-                            "type": "string",
-                            "title": "Mariadb Database Password",
-                            "description": "Password for the database",
-                            "default": "123456"
-                        }
-                    }
+                "type": "boolean",
+                "title": "Use a new MariaDB database hosted in the cluster",
+                "form": true,
+                "description": "Whether to deploy a mariadb server to satisfy the applications database requirements. To use an external database switch this off and configure the external database details"
                 },
                 "primary": {
                     "type": "object",
@@ -103,31 +77,18 @@
                         "persistence": {
                             "type": "object",
                             "properties": {
-                                "enabled": {
-                                    "type": "boolean",
-                                    "title": "Enable database persistence using PVC",
-                                    "description": "Enable database persistence using PVC",
-                                    "default": true
-                                },
-                                "storageClass": {
-                                    "type": "string",
-                                    "title": "MariaDB primary persistent volume storage Class",
-                                    "description": "MariaDB primary persistent volume storage Class",
-                                    "default": ""
-                                },
-                                "accessModes": {
-                                    "type": "array",
-                                    "title": "Database Persistent Volume Access Modes",
-                                    "description": "Database Persistent Volume Access Modes",
-                                    "default": [
-                                        "ReadWriteOnce"
-                                    ]
-                                },
                                 "size": {
                                     "type": "string",
-                                    "title": "Database Persistent Volume Size",
-                                    "description": "Database Persistent Volume Size",
-                                    "default": "8Gi"
+                                    "title": "Volume Size",
+                                    "form": true,
+                                    "hidden": {
+                                        "value": false,
+                                        "path": "mariadb/enabled"
+                                    },
+                                    "render": "slider",
+                                    "sliderMin": 1,
+                                    "sliderMax": 100,
+                                    "sliderUnit": "Gi"
                                 }
                             }
                         }

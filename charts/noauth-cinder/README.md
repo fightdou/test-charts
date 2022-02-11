@@ -1,5 +1,7 @@
 # noauth-cinder
 
+noauth-cinder charts 是为了在 k8s 集群上部署 noauth 的 cinder-api 服务，是为了满足 cinder-csi-plugin 测试任务使用的。
+
 ## Parameters
 
 ### Global parameters
@@ -13,16 +15,22 @@
 
 ### Moodle&trade; parameters
 
-| Name                  | Description                                                    | Value                |
-| --------------------- | -------------------------------------------------------------- | -------------------- |
-| `image.registry`      | Moodle image registry                                          | `docker.io`          |
-| `image.repository`    | Moodle image repository                                        | `douyali/cinder-api` |
-| `image.tag`           | Moodle image tag (immutable tags are recommended)              | `latest`             |
-| `image.pullPolicy`    | Moodle image pull policy                                       | `IfNotPresent`       |
-| `image.pullSecrets`   | Specify docker-registry secret names as an array               | `[]`                 |
-| `image.debug`         | Specify if debug logs should be enabled                        | `false`              |
-| `replicaCount`        | Number of Moodle replicas (requires ReadWriteMany PVC support) | `1`                  |
-| `containerPorts.http` | Cinder HTTP container port                                     | `8776`               |
+| Name                          | Description                                                    | Value                             |
+| ----------------------------- | -------------------------------------------------------------- | --------------------------------- |
+| `image.registry`              | Moodle image registry                                          | `docker.io`                       |
+| `image.repository`            | Moodle image repository                                        | `douyali/cinder-api`              |
+| `image.tag`                   | Moodle image tag (immutable tags are recommended)              | `latest`                          |
+| `image.pullPolicy`            | Moodle image pull policy                                       | `IfNotPresent`                    |
+| `image.pullSecrets`           | Specify docker-registry secret names as an array               | `[]`                              |
+| `image.debug`                 | Specify if debug logs should be enabled                        | `false`                           |
+| `entrypointImage.registry`    | Moodle image registry                                          | `quay.io`                         |
+| `entrypointImage.repository`  | Moodle image repository                                        | `airshipit/kubernetes-entrypoint` |
+| `entrypointImage.tag`         | Moodle image tag (immutable tags are recommended)              | `v1.0.0`                          |
+| `entrypointImage.pullPolicy`  | Moodle image pull policy                                       | `IfNotPresent`                    |
+| `entrypointImage.pullSecrets` | Specify docker-registry secret names as an array               | `[]`                              |
+| `entrypointImage.debug`       | Specify if debug logs should be enabled                        | `false`                           |
+| `replicaCount`                | Number of Moodle replicas (requires ReadWriteMany PVC support) | `1`                               |
+| `containerPorts.http`         | Cinder HTTP container port                                     | `8776`                            |
 
 
 ### Traffic Exposure Parameters
@@ -42,7 +50,7 @@
 | `service.extraPorts`               | Extra port to expose on Cinder service           | `[]`        |
 
 
-### Cinder API Config File Parameters
+### Noauth Cinder API Config File Parameters
 
 | Name                        | Description                  | Value    |
 | --------------------------- | ---------------------------- | -------- |
@@ -50,7 +58,7 @@
 | `conf.cinder.auth_type`     | Auth type for cinder api     | `none`   |
 
 
-### Other Parameters
+### Noauth Cinder API Autoscaling configuration
 
 | Name                       | Description                                     | Value   |
 | -------------------------- | ----------------------------------------------- | ------- |
@@ -79,16 +87,7 @@
 | `mariadb.primary.persistence.existingClaim` | Name of an existing `PersistentVolumeClaim` for MariaDB primary replicas                 | `""`                |
 | `externalDatabase.host`                     | External Database server host                                                            | `localhost`         |
 | `externalDatabase.port`                     | External Database server port                                                            | `3306`              |
-| `externalDatabase.user`                     | External Database username                                                               | `bn_wordpress`      |
+| `externalDatabase.user`                     | External Database username                                                               | `cinder`            |
 | `externalDatabase.password`                 | External Database user password                                                          | `""`                |
-| `externalDatabase.database`                 | External Database database name                                                          | `bitnami_wordpress` |
+| `externalDatabase.database`                 | External Database database name                                                          | `cinder`            |
 | `externalDatabase.existingSecret`           | The name of an existing secret with database credentials                                 | `""`                |
-
-
-### RabbitMQ chart parameters
-
-| Name                     | Description                                | Value       |
-| ------------------------ | ------------------------------------------ | ----------- |
-| `rabbitmq.enabled`       | Enable/disable RabbitMQ chart installation | `true`      |
-| `rabbitmq.auth.username` | RabbitMQ username                          | `openstack` |
-| `rabbitmq.auth.password` | RabbitMQ password                          | `openstack` |
