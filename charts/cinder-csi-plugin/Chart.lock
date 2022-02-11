@@ -1,0 +1,6 @@
+dependencies:
+- name: noauth-cinder
+  repository: https://fightdou.github.io/test-charts
+  version: 1.0.4
+digest: sha256:112aec04cec5d5e7c0071aaa289e4cad97747203b4ae3b634876ebb7eabd2a0b
+generated: "2022-02-11T14:11:52.655417726+08:00"

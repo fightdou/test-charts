@@ -14,7 +14,7 @@ apiVersion: v2
 appVersion: v2
 description: Deploy openstack cinder noauth service
 name: noauth-cinder
-version: 1.0.4
+version: 1.0.5
 home: https://kungze.github.io/charts/
 dependencies:
   - condition: mariadb.enabled
