@@ -25,6 +25,30 @@ entries:
       category: Openstack
     apiVersion: v2
     appVersion: v2
+    created: "2022-02-11T08:49:19.771641649Z"
+    dependencies:
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: https://charts.bitnami.com/bitnami
+      version: 10.x.x
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 1.x.x
+    description: Deploy openstack cinder noauth service
+    digest: 58c26b018c6dab5193338048a8dc500cd68c45cc40b863949eeae5ec4761fcf8
+    home: https://kungze.github.io/charts/
+    maintainers:
+    - name: Kungze
+    name: noauth-cinder
+    urls:
+    - https://github.com/fightdou/test-charts/releases/download/noauth-cinder-1.0.6/noauth-cinder-1.0.6.tgz
+    version: 1.0.6
+  - annotations:
+      category: Openstack
+    apiVersion: v2
+    appVersion: v2
     created: "2022-02-11T07:57:06.658781049Z"
     dependencies:
     - condition: mariadb.enabled
@@ -93,4 +117,4 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/noauth-cinder-1.0.3/noauth-cinder-1.0.3.tgz
     version: 1.0.3
-generated: "2022-02-11T07:57:06.65879875Z"
+generated: "2022-02-11T08:49:19.77165695Z"
