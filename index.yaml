@@ -77,6 +77,21 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/cinder-csi-plugin-1.0.0/cinder-csi-plugin-1.0.0.tgz
     version: 1.0.0
+  gen-password:
+  - annotations:
+      category: Kungze
+    apiVersion: v2
+    appVersion: v2
+    created: "2022-02-14T07:46:39.045001249Z"
+    description: Automatic generation openstack mariadb relate password
+    digest: 24147281c7069192f0308af51266080d10ad50aa4eb8aff4f65391f08de23541
+    home: https://kungze.github.io/charts/
+    maintainers:
+    - name: Kungze
+    name: gen-password
+    urls:
+    - https://github.com/fightdou/test-charts/releases/download/gen-password-1.0.0/gen-password-1.0.0.tgz
+    version: 1.0.0
   noauth-cinder:
   - annotations:
       category: Openstack
@@ -198,4 +213,4 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/noauth-cinder-1.0.3/noauth-cinder-1.0.3.tgz
     version: 1.0.3
-generated: "2022-02-14T05:16:00.227367542Z"
+generated: "2022-02-14T07:46:39.045214848Z"
