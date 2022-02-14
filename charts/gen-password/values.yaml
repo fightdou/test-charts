@@ -1,0 +1,70 @@
+## @section Openstack mariadb related parameter
+## Openstack mariadb related parameter
+## param mariadb.root.username mariadb root user name
+## param mariadb.root.password mariadb root password
+## param mariadb.keystone.username mariadb keystone user name
+## param mariadb.keystone.password mariadb keystone password
+## param mariadb.glance.username mariadb glance user name
+## param mariadb.glance.password mariadb glance password
+## param mariadb.cinder.username mariadb cinder user name
+## param mariadb.cinder.password mariadb cinder password
+## param mariadb.neutron.username mariadb neutron user name
+## param mariadb.neutron.password mariadb neutron password
+## param mariadb.nova.username mariadb neutron user name
+## param mariadb.nova.password mariadb neutron password
+mariadb:
+  secretName: mariadb-secrets
+  root:
+    username: root
+    password: ""
+  keystone:
+    database: keystone
+    username: keystone
+    password: ""
+  glance:
+    database: glance
+    username: glance
+    password: ""
+  cinder:
+    database: cinder
+    username: cinder
+    password: ""
+  neutron:
+    database: neutron
+    username: neutron
+    password: ""
+  nova:
+    database: nova
+    apiDatabase: nova_api
+    cellDatabase: nova_cell0
+    username: nova
+    password: ""
+  placement:
+    database: placement
+    username: placement
+    password: ""
+
+## @skip user
+user:
+  secretName: openstack-user-secrets
+  admin:
+    username: admin
+    password: ""
+  keystone:
+    username: keystone
+    password: ""
+  glance:
+    username: glance
+    password: ""
+  cinder:
+    username: cinder
+    password: ""
+  neutron:
+    username: neutron
+    password: ""
+  nova:
+    username: nova
+    password: ""
+  placement:
+    username: placement
+    password: ""
