@@ -20,7 +20,7 @@
                     "title": "Keystone authentication username",
                     "form": true,
                     "hidden": {
-                        "value": "keystone",
+                        "value": "noauth",
                         "path": "cloud/authStrategy"
                     },
                     "description": "Keystone authentication username",
@@ -31,7 +31,7 @@
                     "title": "Keystone authentication password",
                     "form": true,
                     "hidden": {
-                        "value": "keystone",
+                        "value": "noauth",
                         "path": "cloud/authStrategy"
                     },
                     "description": "Keystone authentication password",
@@ -42,7 +42,7 @@
                     "title": "Keystone authentication tenantName",
                     "form": true,
                     "hidden": {
-                        "value": "keystone",
+                        "value": "noauth",
                         "path": "cloud/authStrategy"
                     },
                     "description": "Keystone authentication tenantName",
@@ -53,7 +53,7 @@
                     "title": "Keystone authentication authUrl",
                     "form": true,
                     "hidden": {
-                        "value": "keystone",
+                        "value": "noauth",
                         "path": "cloud/authStrategy"
                     },
                     "description": "Keystone authentication authUrl",
@@ -77,7 +77,10 @@
                     "type": "string",
                     "title": "The user keyring name using the Ceph pool",
                     "form": true,
-                    "hidden": "ceph/enabledCephAuth",
+                    "hidden": {
+                        "value": false,
+                        "path": "ceph/enabledCephAuth"
+                    },
                     "description": "The user keyring name using the Ceph pool",
                     "default": "cinder-volume-rbd-keyring"
                 },
@@ -85,7 +88,10 @@
                     "type": "string",
                     "title": "The user keyring using the Ceph pool",
                     "form": true,
-                    "hidden": "ceph/enabledCephAuth",
+                    "hidden": {
+                        "value": false,
+                        "path": "ceph/enabledCephAuth"
+                    },
                     "description": "The user keyring using the Ceph pool",
                     "default": "W2NsaWVudC5jaW5kZXJdCiAgICBrZXkgPSBBUUI0QTZwaDlNZFREUkFBZEZCdmFPYXR6a2xWUlJBcWtaSmtCZz09Cg=="
                 }
