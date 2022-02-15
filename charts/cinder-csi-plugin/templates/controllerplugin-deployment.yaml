@@ -42,8 +42,6 @@ spec:
                 fieldPath: metadata.namespace
           - name: PATH
             value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
-          - name: DEPENDENCY_SERVICE
-            value: {{ .Release.Namespace }}:{{ .Release.Name }}-noauth-cinder
       containers:
         - name: csi-attacher
           image: "{{ .Values.csi.attacher.image.repository }}:{{ .Values.csi.attacher.image.tag }}"
