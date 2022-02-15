@@ -24,5 +24,9 @@ data:
     [BlockStorage]
     force-snapshot = true
     auth-strategy = noauth
+    {{- if not (empty .Values.cloud.cinderListenAddr) }}
+    cinder-listen-addr = {{ .Values.cloud.cinderListenAddr }}
+    {{- else }}
     cinder-listen-addr = http://{{ .Release.Name }}-noauth-cinder:8776/v3/
+    {{- end }}
     {{- end }}

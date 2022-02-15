@@ -7,7 +7,7 @@
             "title": "The Openstack Cloud Authentication File",
             "form": true,
             "properties": {
-                "authStrategy": {
+                "auth_strategy": {
                     "type": "string",
                     "title": "The strategy to use for authentication",
                     "form": true,
@@ -37,7 +37,7 @@
                     "description": "Keystone authentication password",
                     "default": "password"
                 },
-                "tenantName": {
+                "tenant_name": {
                     "type": "string",
                     "title": "Keystone authentication tenantName",
                     "form": true,
@@ -48,7 +48,7 @@
                     "description": "Keystone authentication tenantName",
                     "default": "admin"
                 },
-                "authUrl": {
+                "auth_url": {
                     "type": "string",
                     "title": "Keystone authentication authUrl",
                     "form": true,
@@ -58,6 +58,17 @@
                     },
                     "description": "Keystone authentication authUrl",
                     "default": "http://keystone.openstack.svc.cluster.local/v3"
+                },
+                "cinderListenAddr": {
+                    "type": "string",
+                    "title": "Cinder Api Listen Addr",
+                    "form": true,
+                    "hidden": {
+                        "value": "keystone",
+                        "path": "cloud/authStrategy"
+                    },
+                    "description": "Cinder Api Listen Addr",
+                    "default": ""
                 }
             }
         },
