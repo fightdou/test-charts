@@ -5,6 +5,25 @@ entries:
       category: Kungze
     apiVersion: v2
     appVersion: v2
+    created: "2022-02-15T02:34:04.563518558Z"
+    dependencies:
+    - name: noauth-cinder
+      repository: https://fightdou.github.io/test-charts
+      version: 1.x.x
+    description: Cinder CSI Chart for OpenStack
+    digest: 86e1f8677bb33b161e6bfc954ed03be42f474b81bf38e9ff1c22399e7a839c64
+    home: https://github.com/kungzu/cinder-csi-plugin
+    icon: https://github.com/kubernetes/kubernetes/blob/master/logo/logo.png
+    maintainers:
+    - name: Kungze
+    name: cinder-csi-plugin
+    urls:
+    - https://github.com/fightdou/test-charts/releases/download/cinder-csi-plugin-1.0.4/cinder-csi-plugin-1.0.4.tgz
+    version: 1.0.4
+  - annotations:
+      category: Kungze
+    apiVersion: v2
+    appVersion: v2
     created: "2022-02-14T05:16:00.227055641Z"
     dependencies:
     - name: noauth-cinder
@@ -213,4 +232,4 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/noauth-cinder-1.0.3/noauth-cinder-1.0.3.tgz
     version: 1.0.3
-generated: "2022-02-14T07:46:39.045214848Z"
+generated: "2022-02-15T02:34:04.563551058Z"
