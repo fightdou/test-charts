@@ -1,0 +1,37 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keystone-etc
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  {{- $memcachedFullname := include "keystone.cacheHost" . }}
+  {{- $memcachedPort := include "keystone.cachePort" . | int }}
+  keystone.sh: |-
+    echo "
+    [DEFAULT]
+    debug = False
+    transport_url = rabbit://{{ include "keystone.rabbitmq.user" . }}:{{ include "keystone.rabbitmq.password" . }}@{{ include "keystone.rabbitmq.host" . }}:{{ include "keystone.rabbitmq.port" . }}
+    use_stderr = True
+    [oslo_middleware]
+    enable_proxy_headers_parsing = True
+    [token]
+    revoke_by_id = False
+    provider = fernet
+    expiration = 86400
+    allow_expired_window = 172800
+    [fernet_tokens]
+    max_active_keys = 3
+    [cache]
+    backend = dogpile.cache.memcached
+    enabled = {{ .Values.memcached.enabled }}
+    memcache_servers = {{ $memcachedFullname }}:{{  $memcachedPort }}
+    [oslo_messaging_notifications]
+    transport_url = rabbit://{{ include "keystone.rabbitmq.user" . }}:{{ include "keystone.rabbitmq.password" . }}@{{ include "keystone.rabbitmq.host" . }}:{{ include "keystone.rabbitmq.port" . }}
+    driver = messagingv2
+    topics = barbican_notifications
+    [database]
+    connection = mysql+pymysql://{{ .Values.mariadb.auth.username }}:$KEYSTONE_DATABASE_PASSWORD@{{ include "keystone.databaseHost" . }}:{{ include "keystone.databasePort" . }}/{{ .Values.mariadb.auth.database }}
+    connection_recycle_time = 10
+    max_pool_size = 1
+    max_retries = -1
+    " > /etc/keystone/keystone.conf

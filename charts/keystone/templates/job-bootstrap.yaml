@@ -1,0 +1,107 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keystone-bootstrap
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+spec:
+  template:
+    metadata:
+      labels: {{- include "common.labels.standard" . | nindent 8 }}
+    spec:
+      containers:
+        - name: bootstrap
+          image: {{ template "keystone.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          command:
+            - /tmp/bootstrap.sh
+          env:
+            - name: OS_IDENTITY_API_VERSION
+              value: "3"
+            - name: OS_AUTH_URL
+              valueFrom:
+                secretKeyRef:
+                  key: OS_AUTH_URL
+                  name: {{ .Values.secrets.identity.admin }}
+            - name: OS_REGION_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: OS_REGION_NAME
+                  name: {{ .Values.secrets.identity.admin }}
+            - name: OS_INTERFACE
+              valueFrom:
+                secretKeyRef:
+                  key: OS_INTERFACE
+                  name: {{ .Values.secrets.identity.admin }}
+            - name: OS_ENDPOINT_TYPE
+              valueFrom:
+                secretKeyRef:
+                  key: OS_INTERFACE
+                  name: {{ .Values.secrets.identity.admin }}
+            - name: OS_PROJECT_DOMAIN_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: OS_PROJECT_DOMAIN_NAME
+                  name: {{ .Values.secrets.identity.admin }}
+            - name: OS_PROJECT_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: OS_PROJECT_NAME
+                  name: {{ .Values.secrets.identity.admin }}
+            - name: OS_USER_DOMAIN_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: OS_USER_DOMAIN_NAME
+                  name: {{ .Values.secrets.identity.admin }}
+            - name: OS_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: OS_USERNAME
+                  name: {{ .Values.secrets.identity.admin }}
+            - name: OS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: OS_PASSWORD
+                  name: {{ .Values.secrets.identity.admin }}
+            - name: OS_DEFAULT_DOMAIN
+              valueFrom:
+                secretKeyRef:
+                  key: OS_DEFAULT_DOMAIN
+                  name: {{ .Values.secrets.identity.admin }}
+          volumeMounts:
+          - mountPath: /tmp
+            name: pod-tmp
+          - mountPath: /tmp/bootstrap.sh
+            name: keystone-bin
+            subPath: bootstrap.sh
+      initContainers:
+        - name: init
+          image: {{ template "entrypoint.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          command:
+            - kubernetes-entrypoint
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: PATH
+              value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
+            - name: DEPENDENCY_SERVICE
+              value: {{ .Release.Namespace }}:{{ .Release.Name }}-keystone-api
+      restartPolicy: OnFailure
+      serviceAccount: keystone-api
+      serviceAccountName: keystone-api
+      volumes:
+      - emptyDir: {}
+        name: pod-tmp
+      - configMap:
+          defaultMode: 365
+          name: keystone-bin
+        name: keystone-bin

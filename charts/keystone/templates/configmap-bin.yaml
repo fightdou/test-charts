@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keystone-bin
+  namespace: {{ .Release.Namespace | quote }}
+data:
+  sync-db.sh: |-
+    #!/bin/bash
+    set -ex
+    exec keystone-manage db_sync
+    keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
+    keystone-manage credential_setup --keystone-user keystone --keystone-group keystone
+    keystone-manage bootstrap --bootstrap-username ${OS_USERNAME} --bootstrap-password ${OS_PASSWORD} --bootstrap-admin-url ${OS_BOOTSTRAP_ADMIN_URL} --bootstrap-internal-url ${OS_BOOTSTRAP_INTERNAL_URL} --bootstrap-public-url ${OS_BOOTSTRAP_PUBLIC_URL} --bootstrap-region-id ${OS_REGION_NAME}  
+  keystone-api.sh: |-
+    #!/bin/bash
+    set -ex
+    COMMAND="${@:-start}"
+    function start () {
+      for KEYSTONE_WSGI_SCRIPT in keystone-wsgi-public; do
+        cp -a $(type -p ${KEYSTONE_WSGI_SCRIPT}) /var/www/cgi-bin/keystone/
+      done
+      if [ -f /etc/apache2/envvars ]; then
+         # Loading Apache2 ENV variables
+         source /etc/apache2/envvars
+      fi
+      if [ -f /var/run/apache2/apache2.pid ]; then
+         # Remove the stale pid for debian/ubuntu images
+         rm -f /var/run/apache2/apache2.pid
+      fi
+      # Start Apache2
+      exec apache2 -DFOREGROUND
+    }
+    function stop () {
+      if [ -f /etc/apache2/envvars ]; then
+         # Loading Apache2 ENV variables
+         source /etc/apache2/envvars
+      fi
+      apache2 -k graceful-stop
+    }
+    $COMMAND
+  bootstrap.sh: |-
+    #!/bin/bash
+    set -ex
+    # admin needs the admin role for the default domain
+    openstack role add \
+          --user="${OS_USERNAME}" \
+          --domain="${OS_DEFAULT_DOMAIN}" \
+          "admin"

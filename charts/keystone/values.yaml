@@ -1,0 +1,285 @@
+## @section Keystone parameters
+
+## @section Common parameters
+
+## @param nameOverride String to partially override scdf.fullname template (will maintain the release name).
+##
+nameOverride: ""
+## @param fullnameOverride String to fully override scdf.fullname template.
+##
+fullnameOverride: ""
+
+## Bitnami Moodle&trade; image version
+## ref: https://hub.docker.com/r/bitnami/moodle/tags/
+## @param image.registry Moodle image registry
+## @param image.repository Moodle image repository
+## @param image.tag Moodle image tag (immutable tags are recommended)
+## @param image.pullPolicy Moodle image pull policy
+## @param image.pullSecrets Specify docker-registry secret names as an array
+## @param image.debug Specify if debug logs should be enabled
+##
+image:
+  registry: docker.io
+  repository: openstackhelm/keystone
+  tag: wallaby-ubuntu_focal
+  ## Specify a imagePullPolicy
+  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+  ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
+  pullPolicy: IfNotPresent
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ## e.g:
+  ## pullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  pullSecrets: []
+  ## Set to true if you would like to see extra information on logs
+  ##
+  debug: false
+## @param entrypointImage.registry Moodle image registry
+## @param entrypointImage.repository Moodle image repository
+## @param entrypointImage.tag Moodle image tag (immutable tags are recommended)
+## @param entrypointImage.pullPolicy Moodle image pull policy
+## @param entrypointImage.pullSecrets Specify docker-registry secret names as an array
+## @param entrypointImage.debug Specify if debug logs should be enabled
+entrypointImage:
+  registry: quay.io
+  repository: airshipit/kubernetes-entrypoint
+  tag: v1.0.0
+  ## Specify a imagePullPolicy
+  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+  ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
+  pullPolicy: IfNotPresent
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ## e.g:
+  ## pullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  pullSecrets: []
+  ## Set to true if you would like to see extra information on logs
+  ##
+  debug: false
+## @param replicaCount Number of Moodle replicas (requires ReadWriteMany PVC support)
+##
+replicaCount: 1
+
+dependencies:
+  keystone_api:
+    jobs:
+      - cinder-db-sync
+  db_sync:
+    services:
+      - endpoint: internal
+        service: mariadb
+
+containerPorts:
+  http: 5000
+
+endpoints:
+  cluster_domain_suffix: cluster.local
+  identity:
+    namespace: null
+    name: keystone
+    auth:
+      admin:
+        region_name: RegionOne
+        username: admin
+        password: password
+        project_name: admin
+        user_domain_name: default
+        project_domain_name: default
+        default_domain_id: default
+    hosts:
+      default: keystone
+      internal: keystone-api
+    host_fqdn_override:
+      default: null
+      # NOTE(portdirect): this chart supports TLS for fqdn over-ridden public
+      # endpoints using the following format:
+      # public:
+      #   host: null
+      #   tls:
+      #     crt: null
+      #     key: null
+    path:
+      default: /v3
+    scheme:
+      default: http
+    port:
+      api:
+        default: 80
+        # NOTE(portdirect): to retain portability across images, and allow
+        # running under a unprivileged user simply, we default to a port > 1000.
+        internal: 5000
+
+secrets:
+  identity:
+    admin: keystone-keystone-admin
+  oslo_db:
+    admin: keystone-db-admin
+    keystone: keystone-db-user
+  oslo_messaging:
+    admin: keystone-rabbitmq-admin
+    keystone: keystone-rabbitmq-user
+
+network:
+  api:
+    ingress:
+      public: true
+      classes:
+        namespace: "nginx"
+        cluster: "nginx-cluster"
+      annotations:
+        nginx.ingress.kubernetes.io/rewrite-target: /
+    external_policy_local: false
+    node_port:
+      enabled: false
+      port: 30500
+  admin:
+    node_port:
+      enabled: false
+      port: 30357
+
+manifests:
+  ingress_api: true
+  service_ingress_api: true
+  service_api: true
+
+## @section Database Parameters
+
+## MariaDB chart configuration
+## @param autoGenPasswd Automatic generate openstack password
+## 
+mariadb:
+  ## @param mariadb.enabled Deploy a MariaDB server to satisfy the applications database requirements
+  enabled: true
+  ## @param mariadb.architecture MariaDB architecture. Allowed values: `standalone` or `replication`
+  ##
+  architecture: standalone
+  ## MariaDB Authentication parameters
+  ## @param mariadb.auth.rootPassword MariaDB root password
+  ## @param mariadb.auth.database MariaDB custom database
+  ## @param mariadb.auth.username MariaDB custom user name
+  ## @param mariadb.auth.password MariaDB custom user password
+  ## @param mariadb.auth.existingSecret Use existing secret for password details
+  ## ref: https://github.com/bitnami/bitnami-docker-mariadb#setting-the-root-password-on-first-run
+  ##      https://github.com/bitnami/bitnami-docker-mariadb/blob/master/README.md#creating-a-database-on-first-run
+  ##      https://github.com/bitnami/bitnami-docker-mariadb/blob/master/README.md#creating-a-database-user-on-first-run
+  auth:
+    rootPassword: ""
+    database: keystone
+    username: keystone
+    password: ""
+    existingSecret: openstack-password
+  ## MariaDB Primary configuration
+  ##
+  primary:
+    ## MariaDB Primary Persistence parameters
+    ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
+    ## @param mariadb.primary.persistence.enabled Enable persistence on MariaDB using PVC(s)
+    ## @param mariadb.primary.persistence.storageClass Persistent Volume storage class
+    ## @param mariadb.primary.persistence.accessModes [array] Persistent Volume access modes
+    ## @param mariadb.primary.persistence.size Persistent Volume size
+    ##
+    persistence:
+      enabled: true
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      size: 8Gi
+## External Database Configuration
+## All of these values are only used if `mariadb.enabled=false`
+##
+externalDatabase:
+  ## @param externalDatabase.host External Database server host
+  ##
+  host: localhost
+  ## @param externalDatabase.port External Database server port
+  ##
+  port: 3306
+  ## @param externalDatabase.user External Database username
+  ##
+  user: keystone
+  ## @param externalDatabase.password External Database user password
+  ##
+  password: ""
+  ## @param externalDatabase.database External Database database name
+  ##
+  database: keystone
+  ## @param externalDatabase.existingSecret The name of an existing secret with database credentials
+  ## NOTE: Must contain key `mariadb-password`
+  ## NOTE: When it's set, the `externalDatabase.password` parameter is ignored
+  ##
+  existingSecret: ""
+
+## @section RabbitMQ chart parameters
+## RabbitMQ chart configuration
+## https://github.com/bitnami/charts/blob/master/bitnami/rabbitmq/values.yaml
+##
+rabbitmq:
+  ## @param rabbitmq.enabled Enable/disable RabbitMQ chart installation
+  ##
+  enabled: true
+  ## @param rabbitmq.auth.username RabbitMQ username
+  ## @param rabbitmq.auth.password RabbitMQ password
+  ##
+  auth:
+    username: openstack
+    password: openstack
+    existingPasswordSecret: openstack-password
+## External RabbitMQ Configuration
+## All of these values are ignored when rabbitmq.enabled is set to true
+##
+externalRabbitmq:
+  ## @param externalRabbitmq.enabled Enable/disable external RabbitMQ
+  ##
+  enabled: false
+  ## @param externalRabbitmq.host Host of the external RabbitMQ
+  ##
+  host: localhost
+  ## @param externalRabbitmq.port External RabbitMQ port number
+  ##
+  port: 5672
+  ## @param externalRabbitmq.username External RabbitMQ username
+  ##
+  username: guest
+  ## @param externalRabbitmq.password External RabbitMQ password. It will be saved in a kubernetes secret
+  ##
+  password: guest
+  ## @param externalRabbitmq.vhost External RabbitMQ virtual host. It will be saved in a kubernetes secret
+  ## e.g:
+  ## vhost: /
+  ##
+  vhost: ""
+  ## @param externalRabbitmq.existingPasswordSecret Existing secret with RabbitMQ password. It will be saved in a kubernetes secret
+  ##
+  existingPasswordSecret: ""
+
+## Memcached chart configuration
+## ref: https://github.com/bitnami/charts/blob/master/bitnami/memcached/values.yaml
+##
+memcached:
+  ## @param memcached.enabled Deploy a Memcached server for caching database queries
+  ##
+  enabled: true
+  ## Service parameters
+  ##
+  service:
+    ## @param memcached.service.port Memcached service port
+    ##
+    port: 11211
+## External Memcached Configuration
+## All of these values are only used if `memcached.enabled=false`
+##
+externalCache:
+  ## @param externalCache.host External cache server host
+  ##
+  host: localhost
+  ## @param externalCache.port External cache server port
+  ##
+  port: 11211

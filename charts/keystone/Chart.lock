@@ -1,0 +1,21 @@
+dependencies:
+- name: gen-password
+  repository: https://fightdou.github.io/test-charts
+  version: 1.0.3
+- name: mariadb
+  repository: https://charts.bitnami.com/bitnami
+  version: 10.3.4
+- name: rabbitmq
+  repository: https://charts.bitnami.com/bitnami
+  version: 8.29.0
+- name: memcached
+  repository: https://charts.bitnami.com/bitnami
+  version: 6.0.3
+- name: common
+  repository: https://charts.bitnami.com/bitnami
+  version: 1.11.1
+- name: helm-toolkit
+  repository: https://kungze.github.io/charts
+  version: 0.2.32
+digest: sha256:25c55b44723aea9f32153ab802bbc0877f31422f01107fb7bdd865824a790575
+generated: "2022-02-16T18:08:27.507379354+08:00"
