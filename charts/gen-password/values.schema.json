@@ -1,0 +1,97 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "passwordEnvs": {
+            "type": "array",
+            "title": "密码配置",
+            "form": true,
+            "description": "",
+            "items": {
+                "type": "object",
+                "title": "参数配置",
+                "form": true,
+                "properties": {
+                    "mariadb-root-password": {
+                        "type": "string",
+                        "title": "数据库root密码",
+                        "form": true,
+                        "description": ""
+                    },
+                    "keystone-admin-password": {
+                        "type": "string",
+                        "title": "keystone admin密码",
+                        "form": true,
+                        "description": ""
+                    },
+                    "keystone-database-password": {
+                        "type": "string",
+                        "title": "keystone 数据库密码",
+                        "form": true,
+                        "description": ""
+                    },
+                    "glance-database-password": {
+                        "type": "string",
+                        "title": "glance 数据库密码",
+                        "form": true,
+                        "description": ""
+                    },
+                    "glance-keystone-password": {
+                        "type": "string",
+                        "title": "glance keystone密码",
+                        "form": true,
+                        "description": ""
+                    },
+                    "cinder-database-password": {
+                        "type": "string",
+                        "title": "cinder 数据库密码",
+                        "form": true,
+                        "description": ""
+                    },
+                    "cinder-keystone-password": {
+                        "type": "string",
+                        "title": "cinder keystone密码",
+                        "form": true,
+                        "description": ""
+                    },
+                    "neutron-keystone-password": {
+                        "type": "string",
+                        "title": "neutron keystone密码",
+                        "form": true,
+                        "description": ""
+                    },
+                    "neutron-database-password": {
+                        "type": "string",
+                        "title": "neutron 数据库密码",
+                        "form": true,
+                        "description": ""
+                    },
+                    "nova-database-password": {
+                        "type": "string",
+                        "title": "nova 数据库密码",
+                        "form": true,
+                        "description": ""
+                    },
+                    "nova-keystone-password": {
+                        "type": "string",
+                        "title": "nova keystone密码",
+                        "form": true,
+                        "description": ""
+                    },
+                    "placement-database-password": {
+                        "type": "string",
+                        "title": "placement 数据库密码",
+                        "form": true,
+                        "description": ""
+                    },
+                    "placement-keystone-password": {
+                        "type": "string",
+                        "title": "placement keystone密码",
+                        "form": true,
+                        "description": ""
+                    }
+                }
+            }
+        }
+    }
+}
