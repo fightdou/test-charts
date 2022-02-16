@@ -2,160 +2,92 @@
     "$schema": "http://json-schema.org/schema#",
     "type": "object",
     "properties": {
-        "autoGenPasswd": {
-            "type": "boolean",
-            "title": "自动生成密码",
-            "form": true,
-            "description": "配置是否自动生成密码，true 代表自动生成，如果为 false 则需自己手动配置以下相关密码",
-            "default": true
-        },
-        "passwordConfig": {
-            "type": "object",
+        "passwordEnvs": {
+            "type": "array",
             "title": "密码配置",
             "form": true,
-            "properties": {
-                "mariadb-root-password": {
-                    "type": "string",
-                    "title": "数据库 root 用户密码",
-                    "form": true,
-                    "hidden": {
-                        "value": true,
-                        "path": "autoGenPasswd"
+            "description": "",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "mariadb-root-password": {
+                        "type": "string",
+                        "title": "数据库root密码",
+                        "form": true,
+                        "description": ""
                     },
-                    "description": "数据库 root 用户密码",
-                    "default": ""
-                },
-                "keystone-database-password": {
-                    "type": "string",
-                    "title": "Keystone 数据库密码",
-                    "form": true,
-                    "hidden": {
-                        "value": true,
-                        "path": "autoGenPasswd"
+                    "keystone-admin-password": {
+                        "type": "string",
+                        "title": "keystone admin密码",
+                        "form": true,
+                        "description": ""
                     },
-                    "description": "Keystone 数据库密码",
-                    "default": ""
-                },
-                "keystone-admin-password": {
-                    "type": "string",
-                    "title": "Keystone admin 用户密码",
-                    "form": true,
-                    "hidden": {
-                        "value": true,
-                        "path": "autoGenPasswd"
+                    "keystone-database-password": {
+                        "type": "string",
+                        "title": "keystone 数据库密码",
+                        "form": true,
+                        "description": ""
                     },
-                    "description": "Keystone admin 用户密码",
-                    "default": ""
-                },
-                "glance-database-password": {
-                    "type": "string",
-                    "title": "Glance 数据库密码",
-                    "form": true,
-                    "hidden": {
-                        "value": true,
-                        "path": "autoGenPasswd"
+                    "glance-database-password": {
+                        "type": "string",
+                        "title": "glance 数据库密码",
+                        "form": true,
+                        "description": ""
                     },
-                    "description": "Glance 数据库密码",
-                    "default": ""
-                },
-                "glance-keystone-password": {
-                    "type": "string",
-                    "title": "Glance 用户密码",
-                    "form": true,
-                    "hidden": {
-                        "value": true,
-                        "path": "autoGenPasswd"
+                    "glance-keystone-password": {
+                        "type": "string",
+                        "title": "glance keystone密码",
+                        "form": true,
+                        "description": ""
                     },
-                    "description": "Glance 用户密码",
-                    "default": ""
-                },
-                "cinder-database-password": {
-                    "type": "string",
-                    "title": "Cinder 数据库密码",
-                    "form": true,
-                    "hidden": {
-                        "value": true,
-                        "path": "autoGenPasswd"
+                    "cinder-database-password": {
+                        "type": "string",
+                        "title": "cinder 数据库密码",
+                        "form": true,
+                        "description": ""
                     },
-                    "description": "Cinder 数据库密码",
-                    "default": ""
-                },
-                "cinder-keystone-password": {
-                    "type": "string",
-                    "title": "Cinder 用户密码",
-                    "form": true,
-                    "hidden": {
-                        "value": true,
-                        "path": "autoGenPasswd"
+                    "cinder-keystone-password": {
+                        "type": "string",
+                        "title": "cinder keystone密码",
+                        "form": true,
+                        "description": ""
                     },
-                    "description": "Cinder 用户密码",
-                    "default": ""
-                },
-                "neutron-database-password": {
-                    "type": "string",
-                    "title": "Neutron 数据库密码",
-                    "form": true,
-                    "hidden": {
-                        "value": true,
-                        "path": "autoGenPasswd"
+                    "neutron-keystone-password": {
+                        "type": "string",
+                        "title": "neutron keystone密码",
+                        "form": true,
+                        "description": ""
                     },
-                    "description": "Neutron 数据库密码",
-                    "default": ""
-                },
-                "neutron-keystone-password": {
-                    "type": "string",
-                    "title": "Neutron 用户密码",
-                    "form": true,
-                    "hidden": {
-                        "value": true,
-                        "path": "autoGenPasswd"
+                    "neutron-database-password": {
+                        "type": "string",
+                        "title": "neutron 数据库密码",
+                        "form": true,
+                        "description": ""
                     },
-                    "description": "Neutron 用户密码",
-                    "default": ""
-                },
-                "nova-database-password": {
-                    "type": "string",
-                    "title": "Nova 数据库密码",
-                    "form": true,
-                    "hidden": {
-                        "value": true,
-                        "path": "autoGenPasswd"
+                    "nova-database-password": {
+                        "type": "string",
+                        "title": "nova 数据库密码",
+                        "form": true,
+                        "description": ""
                     },
-                    "description": "Nova 数据库密码",
-                    "default": ""
-                },
-                "nova-keystone-password": {
-                    "type": "string",
-                    "title": "Nova 用户密码",
-                    "form": true,
-                    "hidden": {
-                        "value": true,
-                        "path": "autoGenPasswd"
+                    "nova-keystone-password": {
+                        "type": "string",
+                        "title": "nova keystone密码",
+                        "form": true,
+                        "description": ""
                     },
-                    "description": "Nova 用户密码",
-                    "default": ""
-                },
-                "placement-database-password": {
-                    "type": "string",
-                    "title": "Placement 数据库密码",
-                    "form": true,
-                    "hidden": {
-                        "value": true,
-                        "path": "autoGenPasswd"
+                    "placement-database-password": {
+                        "type": "string",
+                        "title": "placement 数据库密码",
+                        "form": true,
+                        "description": ""
                     },
-                    "description": "Placement 数据库密码",
-                    "default": ""
-                },
-                "placement-keystone-password": {
-                    "type": "string",
-                    "title": "Placement 用户密码",
-                    "form": true,
-                    "hidden": {
-                        "value": true,
-                        "path": "autoGenPasswd"
-                    },
-                    "description": "Placement 用户密码",
-                    "default": ""
+                    "placement-keystone-password": {
+                        "type": "string",
+                        "title": "placement keystone密码",
+                        "form": true,
+                        "description": ""
+                    }
                 }
             }
         }

@@ -1,36 +1,18 @@
 ## @section 自动生成openstack keystone 和 mariadb 密码
+
 ## Generate openstack keystone and mariadb password
-
-## @param autoGenPasswd 配置是否自动生成密码，true 代表自动生成，如果为 false 则需自己手动配置以下相关密码
-autoGenPasswd: true
-
-## @section Auto generate relate password
-
-## passwordConfig 密码配置
-## @param passwordConfig.mariadb-root-password 数据库 root 用户密码
-## @param passwordConfig.keystone-database-password Keystone 数据库密码
-## @param passwordConfig.keystone-admin-password Keystone admin 用户密码
-## @param passwordConfig.glance-database-password Glance 数据库密码
-## @param passwordConfig.glance-keystone-password Glance 用户密码
-## @param passwordConfig.cinder-database-password Cinder 数据库密码
-## @param passwordConfig.cinder-keystone-password Cinder 用户密码
-## @param passwordConfig.neutron-database-password Neutron 数据库密码
-## @param passwordConfig.neutron-keystone-password Neutron 用户密码
-## @param passwordConfig.nova-database-password Nova 数据库密码
-## @param passwordConfig.nova-keystone-password Nova 用户密码
-## @param passwordConfig.placement-database-password Placement 数据库密码
-## @param passwordConfig.placement-keystone-password Placement 用户密码
-passwordConfig:
-  mariadb-root-password: ""
-  keystone-admin-password: ""
-  keystone-database-password: ""
-  glance-database-password: ""
-  glance-keystone-password: ""
-  cinder-database-password: ""
-  cinder-keystone-password: ""
-  neutron-keystone-password: ""
-  neutron-database-password: ""
-  nova-database-password: ""
-  nova-keystone-password: ""
-  placement-database-password: ""
-  placement-keystone-password: ""
+## @param passwordEnvs [m#array] [t#密码配置] 密码配置
+passwordEnvs:
+  - mariadb-root-password: ""
+  - keystone-admin-password: ""
+  - keystone-database-password: ""
+  - glance-database-password: ""
+  - glance-keystone-password: ""
+  - cinder-database-password: ""
+  - cinder-keystone-password: ""
+  - neutron-keystone-password: ""
+  - neutron-database-password: ""
+  - nova-database-password: ""
+  - nova-keystone-password: ""
+  - placement-database-password: ""
+  - placement-keystone-password: ""
