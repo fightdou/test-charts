@@ -6,8 +6,6 @@ metadata:
   labels: {{- include "common.labels.standard" . | nindent 4 }}
 spec:
   template:
-    metadata:
-      labels: {{- include "common.labels.standard" . | nindent 8 }}
     spec:
       containers:
         - name: bootstrap
@@ -17,12 +15,14 @@ spec:
             - /tmp/bootstrap.sh
           env:
             - name: OS_IDENTITY_API_VERSION
-              value: "3"
+              value: {{ .Values.endpoints.auth.admin.version | quote }}
             - name: OS_AUTH_URL
+              value: {{ include "keystone.public.endpoints" . }}
+            - name: OS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: OS_AUTH_URL
-                  name: {{ .Values.secrets.identity.admin }}
+                  key: keystone-admin-password
+                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
             - name: OS_REGION_NAME
               valueFrom:
                 secretKeyRef:
@@ -58,11 +58,6 @@ spec:
                 secretKeyRef:
                   key: OS_USERNAME
                   name: {{ .Values.secrets.identity.admin }}
-            - name: OS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: OS_PASSWORD
-                  name: {{ .Values.secrets.identity.admin }}
             - name: OS_DEFAULT_DOMAIN
               valueFrom:
                 secretKeyRef:
@@ -94,10 +89,10 @@ spec:
             - name: PATH
               value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
             - name: DEPENDENCY_SERVICE
-              value: {{ .Release.Namespace }}:keystone-api
+              value: {{ .Release.Namespace }}:{{ include "joinListWithComma" .Values.dependencies.bootstrap.service }}
       restartPolicy: OnFailure
-      serviceAccount: keystone-api
-      serviceAccountName: keystone-api
+      serviceAccount: {{ .Values.serviceAccountName}}
+      serviceAccountName: {{ .Values.serviceAccountName}}
       volumes:
       - emptyDir: {}
         name: pod-tmp

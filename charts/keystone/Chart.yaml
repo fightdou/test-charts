@@ -11,7 +11,6 @@
 # limitations under the License.
 
 apiVersion: v2
-appVersion: v2
 description: Openstack keystone service
 name: keystone
 version: 1.0.0
@@ -19,29 +18,14 @@ home: https://kungze.github.io/charts/
 maintainers:
   - name: Kungze
 dependencies:
-  - name: gen-password
+  - name: openstack-dep
     repository: https://fightdou.github.io/test-charts
     version: 1.x.x
-  - condition: mariadb.enabled
-    name: mariadb
-    repository: https://charts.bitnami.com/bitnami
-    version: 10.x.x
-  - condition: rabbitmq.enabled
-    name: rabbitmq
-    repository: https://charts.bitnami.com/bitnami
-    version: 8.x.x
-  - condition: memcached.enabled
-    name: memcached
-    repository: https://charts.bitnami.com/bitnami
-    version: 6.x.x
   - name: common
     repository: https://charts.bitnami.com/bitnami
     tags:
       - bitnami-common
     version: 1.x.x
-  - name: helm-toolkit
-    repository: https://kungze.github.io/charts
-    version: ">= 0.1.0"
 engine: gotpl
 annotations:
   category: Openstack

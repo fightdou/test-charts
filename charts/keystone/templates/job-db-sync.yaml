@@ -6,8 +6,6 @@ metadata:
   labels: {{- include "common.labels.standard" . | nindent 4 }}
 spec:
   template:
-    metadata:
-      labels: {{- include "common.labels.standard" . | nindent 8 }}
     spec:
       containers:
         - name: keystone-db-sync
@@ -21,11 +19,11 @@ spec:
               /tmp/db-sync.sh
           env:
             - name: OS_BOOTSTRAP_ADMIN_URL
-              value: {{ include "keystone.admin.api" . }}
+              value: {{ include "keystone.public.endpoints" . }}
             - name: OS_BOOTSTRAP_INTERNAL_URL
-              value: {{ include "keystone.internal.api" . }}
+              value: {{ include "keystone.internal.endpoints" . }}
             - name: OS_BOOTSTRAP_PUBLIC_URL
-              value: {{ include "keystone.public.api" . }}
+              value: {{ include "keystone.public.endpoints" . }}
             - name: OPENSTACK_CONFIG_FILE
               value: /etc/keystone/keystone.conf
             - name: OPENSTACK_CONFIG_DB_SECTION
@@ -36,19 +34,21 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: keystone-database-password
-                  name: {{ .Values.mariadb.auth.existingSecret }}
+                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
             - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: rabbitmq-password
-                  name: {{ .Values.rabbitmq.auth.existingPasswordSecret }}
+                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
             - name: OS_IDENTITY_API_VERSION
-              value: "3"
+              value: {{ .Values.endpoints.auth.admin.version | quote }}
             - name: OS_AUTH_URL
+              value: {{ include "keystone.public.endpoints" . }}
+            - name: OS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: OS_AUTH_URL
-                  name: {{ .Values.secrets.identity.admin }}
+                  key: keystone-admin-password
+                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
             - name: OS_REGION_NAME
               valueFrom:
                 secretKeyRef:
@@ -83,11 +83,6 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: OS_USERNAME
-                  name: {{ .Values.secrets.identity.admin }}
-            - name: OS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: OS_PASSWORD
                   name: {{ .Values.secrets.identity.admin }}
             - name: OS_DEFAULT_DOMAIN
               valueFrom:
@@ -130,10 +125,10 @@ spec:
             - name: PATH
               value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
             - name: DEPENDENCY_JOBS
-              value: {{ include "helm-toolkit.utils.joinListWithComma" .Values.dependencies.db_sync.jobs }}
+              value: {{ include "joinListWithComma" .Values.dependencies.db_sync.jobs }}
       restartPolicy: OnFailure
-      serviceAccount: keystone-api
-      serviceAccountName: keystone-api
+      serviceAccount: {{ .Values.serviceAccountName}}
+      serviceAccountName: {{ .Values.serviceAccountName}}
       volumes:
       - emptyDir: {}
         name: pod-tmp

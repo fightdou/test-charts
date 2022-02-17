@@ -1,21 +1,9 @@
 dependencies:
-- name: gen-password
+- name: openstack-dep
   repository: https://fightdou.github.io/test-charts
-  version: 1.0.4
-- name: mariadb
-  repository: https://charts.bitnami.com/bitnami
-  version: 10.3.4
-- name: rabbitmq
-  repository: https://charts.bitnami.com/bitnami
-  version: 8.29.0
-- name: memcached
-  repository: https://charts.bitnami.com/bitnami
-  version: 6.0.3
+  version: 1.0.0
 - name: common
   repository: https://charts.bitnami.com/bitnami
   version: 1.11.1
-- name: helm-toolkit
-  repository: https://kungze.github.io/charts
-  version: 0.2.32
-digest: sha256:81a7eb0e0919ec31d0de3a99cb9b2c3f058e8321400e38a53fc251b93a999fcd
-generated: "2022-02-17T10:24:18.086192032+08:00"
+digest: sha256:598d94abeb353012f15b651cc73d719061dbb86867bfe90bd480a83cbb954403
+generated: "2022-02-23T13:12:55.004057658+08:00"

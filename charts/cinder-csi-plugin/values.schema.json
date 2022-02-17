@@ -21,7 +21,7 @@
                     "form": true,
                     "hidden": {
                         "value": "noauth",
-                        "path": "cloud/authStrategy"
+                        "path": "cloud/auth_strategy"
                     },
                     "description": "Keystone authentication username",
                     "default": "admin"
@@ -32,7 +32,7 @@
                     "form": true,
                     "hidden": {
                         "value": "noauth",
-                        "path": "cloud/authStrategy"
+                        "path": "cloud/auth_strategy"
                     },
                     "description": "Keystone authentication password",
                     "default": "password"
@@ -43,7 +43,7 @@
                     "form": true,
                     "hidden": {
                         "value": "noauth",
-                        "path": "cloud/authStrategy"
+                        "path": "cloud/auth_strategy"
                     },
                     "description": "Keystone authentication tenantName",
                     "default": "admin"
@@ -54,7 +54,7 @@
                     "form": true,
                     "hidden": {
                         "value": "noauth",
-                        "path": "cloud/authStrategy"
+                        "path": "cloud/auth_strategy"
                     },
                     "description": "Keystone authentication authUrl",
                     "default": "http://keystone.openstack.svc.cluster.local/v3"
@@ -65,7 +65,7 @@
                     "form": true,
                     "hidden": {
                         "value": "keystone",
-                        "path": "cloud/authStrategy"
+                        "path": "cloud/auth_strategy"
                     },
                     "description": "Cinder Api Listen Addr",
                     "default": ""

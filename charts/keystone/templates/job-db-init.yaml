@@ -6,8 +6,6 @@ metadata:
   labels: {{- include "common.labels.standard" . | nindent 4 }}
 spec:
   template:
-    metadata:
-      labels: {{- include "common.labels.standard" . | nindent 8 }}
     spec:
       containers:
         - name: keystone-db-init
@@ -38,17 +36,17 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: mariadb-root-password
-                  name: {{ .Values.mariadb.auth.existingSecret }}
+                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
             - name: KEYSTONE_DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: keystone-database-password
-                  name: {{ .Values.mariadb.auth.existingSecret }}
+                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
             - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: rabbitmq-password
-                  name: {{ .Values.rabbitmq.auth.existingPasswordSecret }}
+                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
           volumeMounts:
           - mountPath: /tmp
             name: pod-tmp
@@ -80,10 +78,10 @@ spec:
             - name: PATH
               value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
             - name: DEPENDENCY_SERVICE
-              value: {{ .Release.Namespace }}:{{ .Release.Name }}-mariadb
+              value: {{ .Release.Namespace }}:{{ include "keystone.mariadb.fullname" . }}
       restartPolicy: OnFailure
-      serviceAccount: keystone-api
-      serviceAccountName: keystone-api
+      serviceAccount: {{ .Values.serviceAccountName}}
+      serviceAccountName: {{ .Values.serviceAccountName}}
       volumes:
       - emptyDir: {}
         name: pod-tmp

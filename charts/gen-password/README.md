@@ -1,28 +1,25 @@
 # Automatic Genrate Openstack Password
 
+gen-password charts 可以自动生成部署openstack环境所需要的密码
+
 ## Parameters
+
 
 ### 自动生成openstack keystone 和 mariadb 密码
 
-| Name            | Description                                     | Value  |
-| --------------- | ----------------------------------------------- | ------ |
-| `autoGenPasswd` | 配置是否自动生成密码，true 代表自动生成，如果为 false 则需自己手动配置以下相关密码 | `true` |
-
-
-### Auto generate relate password
-
-| Name                                         | Description         | Value |
-| -------------------------------------------- | ------------------- | ----- |
-| `passwordConfig.mariadb-root-password`       | 数据库 root 用户密码       | `""`  |
-| `passwordConfig.keystone-database-password`  | Keystone 数据库密码      | `""`  |
-| `passwordConfig.keystone-admin-password`     | Keystone admin 用户密码 | `""`  |
-| `passwordConfig.glance-database-password`    | Glance 数据库密码        | `""`  |
-| `passwordConfig.glance-keystone-password`    | Glance 用户密码         | `""`  |
-| `passwordConfig.cinder-database-password`    | Cinder 数据库密码        | `""`  |
-| `passwordConfig.cinder-keystone-password`    | Cinder 用户密码         | `""`  |
-| `passwordConfig.neutron-database-password`   | Neutron 数据库密码       | `""`  |
-| `passwordConfig.neutron-keystone-password`   | Neutron 用户密码        | `""`  |
-| `passwordConfig.nova-database-password`      | Nova 数据库密码          | `""`  |
-| `passwordConfig.nova-keystone-password`      | Nova 用户密码           | `""`  |
-| `passwordConfig.placement-database-password` | Placement 数据库密码     | `""`  |
-| `passwordConfig.placement-keystone-password` | Placement 用户密码      | `""`  |
+| Name                                       | Form title          | Description         | Value |
+| ------------------------------------------ | ------------------- | ------------------- | ----- |
+| `passwordEnvs.mariadb-root-password`       | root 密码             | 数据库 root 用户密码       | `""`  |
+| `passwordEnvs.keystone-database-password`  | Keystone 数据库密码      | Keystone 数据库密码      | `""`  |
+| `passwordEnvs.keystone-admin-password`     | Keystone admin 用户密码 | Keystone admin 用户密码 | `""`  |
+| `passwordEnvs.glance-database-password`    | Glance 数据库密码        | Glance 数据库密码        | `""`  |
+| `passwordEnvs.glance-keystone-password`    | Glance 用户密码         | Glance 用户密码         | `""`  |
+| `passwordEnvs.cinder-database-password`    | Cinder 数据库密码        | Cinder 数据库密码        | `""`  |
+| `passwordEnvs.cinder-keystone-password`    | Cinder 用户密码         | Cinder 用户密码         | `""`  |
+| `passwordEnvs.neutron-database-password`   | Neutron 数据库密码       | Neutron 数据库密码       | `""`  |
+| `passwordEnvs.neutron-keystone-password`   | Neutron 用户密码        | Neutron 用户密码        | `""`  |
+| `passwordEnvs.nova-database-password`      | Nova 数据库密码          | Nova 数据库密码          | `""`  |
+| `passwordEnvs.nova-keystone-password`      | Nova 用户密码           | Nova 用户密码           | `""`  |
+| `passwordEnvs.placement-database-password` | Placement 数据库密码     | Placement 数据库密码     | `""`  |
+| `passwordEnvs.placement-keystone-password` | Placement 用户密码      | Placement 用户密码      | `""`  |
+| `passwordEnvs.rabbitmq-password`           | Rabbitmq 用户密码       | Rabbitmq 用户密码       | `""`  |

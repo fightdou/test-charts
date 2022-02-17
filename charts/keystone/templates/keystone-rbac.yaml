@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: keystone-api
+  name: {{ .Values.serviceAccountName}}
   namespace: {{ .Release.Namespace | quote }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
 
@@ -9,7 +9,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: keystone-api
+  name: {{ .Values.serviceAccountName}}
   namespace: {{ .Release.Namespace | quote }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
 rules:
@@ -34,14 +34,14 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: keystone-api
+  name: {{ .Values.serviceAccountName}}
   namespace: {{ .Release.Namespace | quote }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: keystone-api
+  name: {{ .Values.serviceAccountName}}
 subjects:
 - kind: ServiceAccount
-  name: keystone-api
+  name: {{ .Values.serviceAccountName}}
   namespace: {{ .Release.Namespace | quote }}

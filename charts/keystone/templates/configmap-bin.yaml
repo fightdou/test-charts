@@ -76,11 +76,14 @@ data:
 
 
     # Get the connection string for the service db root user
-    if "ROOT_DB_CONNECTION" in os.environ:
-        db_connection = os.environ['ROOT_DB_CONNECTION']
+    if "ROOT_PASSWORD" in os.environ:
+        db_connection = "mysql+pymysql://root:" + os.environ['ROOT_PASSWORD'] + "@" + \
+            os.environ['KEYSTONE_DATABASE_HOST'] + ":" + \
+            os.environ['KEYSTONE_DATABASE_PORT'] + "/" + \
+            os.environ['KEYSTONE_DATABASE_NAME']
         logger.info('Got DB root connection')
     else:
-        logger.critical('environment variable ROOT_DB_CONNECTION not set')
+        logger.critical('environment variable ROOT_PASSWORD not set')
         sys.exit(1)
 
     mysql_x509 = os.getenv('MARIADB_X509', "")
@@ -201,11 +204,14 @@ data:
 
 
     # Get the connection string for the service db root user
-    if "ROOT_DB_CONNECTION" in os.environ:
-        db_connection = os.environ['ROOT_DB_CONNECTION']
+    if "ROOT_PASSWORD" in os.environ:
+        db_connection = "mysql+pymysql://root:" + os.environ['ROOT_PASSWORD'] + "@" + \
+            os.environ['KEYSTONE_DATABASE_HOST'] + ":" + \
+            os.environ['KEYSTONE_DATABASE_PORT'] + "/" + \
+            os.environ['KEYSTONE_DATABASE_NAME']
         logger.info('Got DB root connection')
     else:
-        logger.critical('environment variable ROOT_DB_CONNECTION not set')
+        logger.critical('environment variable ROOT_PASSWORD not set')
         sys.exit(1)
 
     mysql_x509 = os.getenv('MARIADB_X509', "")

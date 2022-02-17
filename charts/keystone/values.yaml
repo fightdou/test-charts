@@ -1,105 +1,203 @@
-## @section Keystone parameters
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+
+## @param global.imageRegistry Global Docker image registry
+## @param global.imagePullSecrets Global Docker registry secret names as an array
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  imagePullSecrets: []
+  storageClass: ""
 
 ## @section Common parameters
 
-## @param nameOverride String to partially override scdf.fullname template (will maintain the release name).
-##
-nameOverride: ""
-## @param fullnameOverride String to fully override scdf.fullname template.
-##
-fullnameOverride: ""
-
-## Bitnami Moodle&trade; image version
-## ref: https://hub.docker.com/r/bitnami/moodle/tags/
-## @param image.registry Moodle image registry
-## @param image.repository Moodle image repository
-## @param image.tag Moodle image tag (immutable tags are recommended)
-## @param image.pullPolicy Moodle image pull policy
-## @param image.pullSecrets Specify docker-registry secret names as an array
-## @param image.debug Specify if debug logs should be enabled
-##
-image:
-  registry: docker.io
-  repository: openstackhelm/keystone
-  tag: wallaby-ubuntu_focal
-  ## Specify a imagePullPolicy
-  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-  ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-  ##
-  pullPolicy: IfNotPresent
-  ## Optionally specify an array of imagePullSecrets.
-  ## Secrets must be manually created in the namespace.
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-  ## e.g:
-  ## pullSecrets:
-  ##   - myRegistryKeySecretName
-  ##
-  pullSecrets: []
-  ## Set to true if you would like to see extra information on logs
-  ##
-  debug: false
-## @param entrypointImage.registry Moodle image registry
-## @param entrypointImage.repository Moodle image repository
-## @param entrypointImage.tag Moodle image tag (immutable tags are recommended)
-## @param entrypointImage.pullPolicy Moodle image pull policy
-## @param entrypointImage.pullSecrets Specify docker-registry secret names as an array
-## @param entrypointImage.debug Specify if debug logs should be enabled
-entrypointImage:
-  registry: quay.io
-  repository: airshipit/kubernetes-entrypoint
-  tag: v1.0.0
-  ## Specify a imagePullPolicy
-  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-  ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-  ##
-  pullPolicy: IfNotPresent
-  ## Optionally specify an array of imagePullSecrets.
-  ## Secrets must be manually created in the namespace.
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-  ## e.g:
-  ## pullSecrets:
-  ##   - myRegistryKeySecretName
-  ##
-  pullSecrets: []
-  ## Set to true if you would like to see extra information on logs
-  ##
-  debug: false
-## @param heatImage.registry Moodle image registry
-## @param heatImage.repository Moodle image repository
-## @param heatImage.tag Moodle image tag (immutable tags are recommended)
-## @param heatImage.pullPolicy Moodle image pull policy
-## @param heatImage.pullSecrets Specify docker-registry secret names as an array
-## @param heatImage.debug Specify if debug logs should be enabled
-heatImage:
-  registry: docker.io
-  repository: openstackhelm/heat
-  tag: wallaby-ubuntu_focal
-  ## Specify a imagePullPolicy
-  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-  ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-  ##
-  pullPolicy: IfNotPresent
-  ## Optionally specify an array of imagePullSecrets.
-  ## Secrets must be manually created in the namespace.
-  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-  ## e.g:
-  ## pullSecrets:
-  ##   - myRegistryKeySecretName
-  ##
-  pullSecrets: []
-  ## Set to true if you would like to see extra information on logs
-  ##
-  debug: false
-## @param replicaCount Number of Moodle replicas (requires ReadWriteMany PVC support)
-##
+## @param replicaCount Number of keystone replicas to deploy (requires ReadWriteMany PVC support)
 replicaCount: 1
+## @param existingSecret [t#openstack 密钥名称] Name of existing secret containing keystone credentials
+existingSecret: openstack-password
+## @param serviceAccountName ServiceAccount name
+serviceAccountName: keystone
+## Controller containers' resource requests and limits
+## ref: https://kubernetes.io/docs/user-guide/compute-resources
+## We usually recommend not to specify default resources and to leave this as a conscious
+## choice for the user. This also increases chances charts run on environments with little
+## resources, such as Minikube. If you do want to specify resources, uncomment the following
+## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+## @param resources.limits The resources limits for the Controller container
+## @param resources.requests The requested resources for the Controller container
+resources:
+  ## Example:
+  ## limits:
+  ##    cpu: 250m
+  ##    memory: 256Mi
+  limits: {}
+  ## Examples:
+  ## requests:
+  ##    cpu: 250m
+  ##    memory: 256Mi
+  requests: {}
+## Configure Pods Security Context
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+## @param podSecurityContext.enabled Enabled keystone pods' Security Context
+## @param podSecurityContext.fsGroup Set keystone pod's Security Context fsGroup
+## @param podSecurityContext.runAsUser Set keystone container's Security Context runAsUser
+podSecurityContext:
+  enabled: true
+  fsGroup: 42424
+  runAsUser: 42424
+## Configure Container Security Context (only main container)
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+## @param containerSecurityContext.enabled Enabled keystone containers' Security Context
+## @param containerSecurityContext.runAsGroup Group ID for the container
+## @param containerSecurityContext.allowPrivilegeEscalation Switch privilegeEscalation possibility on or off
+## @param containerSecurityContext.readOnlyRootFilesystem mount / (root) as a readonly filesystem
+containerSecurityContext:
+  enabled: true
+  runAsGroup: 42424
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+## Controller containers' liveness probe. Evaluated as a template.
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes
+## @param livenessProbe.enabled Enable livenessProbe
+## @param livenessProbe.httpGet.path Request path for livenessProbe
+## @param livenessProbe.httpGet.port Port for livenessProbe
+## @param livenessProbe.httpGet.scheme Scheme for livenessProbe
+## @param livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+## @param livenessProbe.periodSeconds Period seconds for livenessProbe
+## @param livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+## @param livenessProbe.failureThreshold Failure threshold for livenessProbe
+## @param livenessProbe.successThreshold Success threshold for livenessProbe
+livenessProbe:
+  enabled: true
+  httpGet:
+    path: /v3/
+    port: 5000
+    scheme: HTTP
+  failureThreshold: 3
+  initialDelaySeconds: 50
+  periodSeconds: 60
+  successThreshold: 1
+  timeoutSeconds: 15
+## Controller containers' readiness probe. Evaluated as a template.
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes
+## @param readinessProbe.enabled Enable readinessProbe
+## @param readinessProbe.httpGet.path Request path for readinessProbe
+## @param readinessProbe.httpGet.port Port for readinessProbe
+## @param readinessProbe.httpGet.scheme Scheme for readinessProbe
+## @param readinessProbe.initialDelaySeconds Initial delay seconds for readinessProbe
+## @param readinessProbe.periodSeconds Period seconds for readinessProbe
+## @param readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+## @param readinessProbe.failureThreshold Failure threshold for readinessProbe
+## @param readinessProbe.successThreshold Success threshold for readinessProbe
+readinessProbe:
+  enabled: true
+  httpGet:
+    path: /v3/
+    port: 5000
+    scheme: HTTP
+  failureThreshold: 3
+  initialDelaySeconds: 50
+  periodSeconds: 60
+  successThreshold: 1
+  timeoutSeconds: 15
+## @param customLivenessProbe Override default liveness probe
+customLivenessProbe: {}
+## @param customReadinessProbe Override default readiness probe
+customReadinessProbe: {}
+## @param lifecycle.preStop.exec.command LifecycleHooks to set additional configuration at startup
+lifecycle:
+  preStop:
+    exec:
+      command:
+        - /tmp/keystone-api.sh
+        - stop
+
+## @section Keystone Image parameters
+
+## openstack Keystone image
+image:
+  ## @param image.keystoneImage.registry Moodle image registry
+  ## @param image.keystoneImage.repository Moodle image repository
+  ## @param image.keystoneImage.tag Moodle image tag (immutable tags are recommended)
+  ## @param image.keystoneImage.pullPolicy Moodle image pull policy
+  ## @param image.keystoneImage.pullSecrets Specify docker-registry secret names as an array
+  keystoneImage:
+    registry: docker.io
+    repository: openstackhelm/keystone
+    tag: wallaby-ubuntu_focal
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    pullSecrets: []
+  ## @param image.entrypointImage.registry Moodle image registry
+  ## @param image.entrypointImage.repository Moodle image repository
+  ## @param image.entrypointImage.tag Moodle image tag (immutable tags are recommended)
+  ## @param image.entrypointImage.pullPolicy Moodle image pull policy
+  ## @param image.entrypointImage.pullSecrets Specify docker-registry secret names as an array
+  entrypointImage:
+    registry: quay.io
+    repository: airshipit/kubernetes-entrypoint
+    tag: v1.0.0
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    pullSecrets: []
+  ## @param image.heatImage.registry Moodle image registry
+  ## @param image.heatImage.repository Moodle image repository
+  ## @param image.heatImage.tag Moodle image tag (immutable tags are recommended)
+  ## @param image.heatImage.pullPolicy Moodle image pull policy
+  ## @param image.heatImage.pullSecrets Specify docker-registry secret names as an array
+  heatImage:
+    registry: docker.io
+    repository: openstackhelm/heat
+    tag: wallaby-ubuntu_focal
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    pullSecrets: []
+
+## @skip dependencies
 dependencies:
   keystone_api:
     jobs:
       - keystone-db-sync
+      - keystone-credential-setup
+      - keystone-fernet-setup
+  db_init:
+    service:
+      - mariadb
   db_sync:
     jobs:
       - keystone-db-init
+  bootstrap:
+    service:
+      - keystone-api
   credential_rotate:
     jobs:
       - keystone-credential-setup
@@ -107,6 +205,7 @@ dependencies:
     jobs:
       - keystone-fernet-setup
 
+## @skip jobs
 jobs:
   fernet_setup:
     user: keystone
@@ -135,217 +234,110 @@ jobs:
       success: 3
       failed: 1
 
-containerPorts:
-  http: 5000
-
+## @skip endpoints
 endpoints:
   cluster_domain_suffix: cluster.local
-  identity:
-    namespace: null
-    name: keystone
-    auth:
-      admin:
-        region_name: RegionOne
-        username: admin
-        password: password
-        project_name: admin
-        user_domain_name: default
-        project_domain_name: default
-        default_domain_id: default
-    hosts:
-      default: keystone
-      internal: keystone-api
-    host_fqdn_override:
-      default: null
-      # NOTE(portdirect): this chart supports TLS for fqdn over-ridden public
-      # endpoints using the following format:
-      # public:
-      #   host: null
-      #   tls:
-      #     crt: null
-      #     key: null
-    path:
-      default: /v3
-    scheme:
-      default: http
-    port:
-      api:
-        default: 80
-        # NOTE(portdirect): to retain portability across images, and allow
-        # running under a unprivileged user simply, we default to a port > 1000.
-        internal: 5000
+  auth:
+    admin:
+      region_name: RegionOne
+      username: admin
+      project_name: admin
+      user_domain_name: default
+      project_domain_name: default
+      default_domain_id: default
+      interface: internal
+      version: "3"
   oslo_db:
     username: keystone
     database: keystone
 
+## @skip secrets
 secrets:
   identity:
     admin: keystone-keystone-admin
-  oslo_db:
-    admin: keystone-db-admin
-    keystone: keystone-db-user
-  oslo_messaging:
-    admin: keystone-rabbitmq-admin
-    keystone: keystone-rabbitmq-user
+  cerdentialKey: keystone-credential-keys
+  fernetKey: keystone-fernet-keys
 
-network:
-  api:
-    ingress:
-      public: true
-      classes:
-        namespace: "nginx"
-        cluster: "nginx-cluster"
-      annotations:
-        nginx.ingress.kubernetes.io/rewrite-target: /
-    external_policy_local: false
-    node_port:
-      enabled: false
-      port: 30500
-  admin:
-    node_port:
-      enabled: false
-      port: 30357
+## @section Traffic Exposure Parameters
 
-manifests:
-  ingress_api: true
-  service_ingress_api: true
-  service_api: true
-
-## @section Database Parameters
-
-## MariaDB chart configuration
-## @param autoGenPasswd Automatic generate openstack password
-## 
-mariadb:
-  ## @param mariadb.enabled Deploy a MariaDB server to satisfy the applications database requirements
+## Keystone service parameters
+service:
+  ## @param service.type Kubernetes Service type
+  type: ClusterIP
+  ## @param service.publicService.name keystone public svc name
+  ## @param service.publicService.port keystone public svc port
+  ## @param service.publicService.portname keystone public svc port name
+  publicService:
+    name: keystone-api
+    port: 5000
+    portname: ks-pub
+  ## @param service.internalService.name keystone internal svc name
+  ## @param service.internalService.httpPort keystone internal svc http port
+  ## @param service.internalService.httpName keystone internal svc http port name
+  ## @param service.internalService.httpsPort keystone internal svc https port
+  ## @param service.internalService.httpsName keystone internal svc https port name
+  internalService:
+    name: keystone
+    httpPort: 80
+    httpName: http
+    httpsPort: 443
+    httpsName: https
+  ## Node ports to expose
+  ## @param service.nodePorts.http Node port for HTTP
+  ## @param service.nodePorts.https Node port for HTTPS
+  ## NOTE: choose port between <30000-32767>
+  nodePorts:
+    http: ""
+    https: ""
+  ## @param service.clusterIP Cluster internal IP of the service
+  ## This is the internal IP address of the service and is usually assigned randomly.
+  ## ref: https://kubernetes.io/docs/reference/kubernetes-api/service-resources/service-v1/#ServiceSpec
+  clusterIP: ""
+  ## @param service.loadBalancerIP keystone service Load Balancer IP
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+  loadBalancerIP: ""
+  ## @param service.externalTrafficPolicy keystone service external traffic policy
+  ## ref https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+  externalTrafficPolicy: Cluster
+## Configure the ingress resource that allows you to access the keystone installation
+## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
+ingress:
+  ## @param ingress.enabled Enable ingress record generation for keystone
   enabled: true
-  ## @param mariadb.architecture MariaDB architecture. Allowed values: `standalone` or `replication`
-  ##
-  architecture: standalone
-  ## MariaDB Authentication parameters
-  ## @param mariadb.auth.rootPassword MariaDB root password
-  ## @param mariadb.auth.database MariaDB custom database
-  ## @param mariadb.auth.username MariaDB custom user name
-  ## @param mariadb.auth.password MariaDB custom user password
-  ## @param mariadb.auth.existingSecret Use existing secret for password details
-  ## ref: https://github.com/bitnami/bitnami-docker-mariadb#setting-the-root-password-on-first-run
-  ##      https://github.com/bitnami/bitnami-docker-mariadb/blob/master/README.md#creating-a-database-on-first-run
-  ##      https://github.com/bitnami/bitnami-docker-mariadb/blob/master/README.md#creating-a-database-user-on-first-run
-  auth:
-    rootPassword: ""
-    database: ""
-    username: ""
-    password: ""
-    existingSecret: openstack-password
-  ## MariaDB Primary configuration
-  ##
-  primary:
-    ## MariaDB Primary Persistence parameters
-    ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
-    ## @param mariadb.primary.persistence.enabled Enable persistence on MariaDB using PVC(s)
-    ## @param mariadb.primary.persistence.storageClass Persistent Volume storage class
-    ## @param mariadb.primary.persistence.accessModes [array] Persistent Volume access modes
-    ## @param mariadb.primary.persistence.size Persistent Volume size
-    ##
-    persistence:
-      enabled: true
-      storageClass: ""
-      accessModes:
-        - ReadWriteOnce
-      size: 8Gi
-## External Database Configuration
-## All of these values are only used if `mariadb.enabled=false`
-##
-externalDatabase:
-  ## @param externalDatabase.host External Database server host
-  ##
-  host: localhost
-  ## @param externalDatabase.port External Database server port
-  ##
-  port: 3306
-  ## @param externalDatabase.user External Database username
-  ##
-  user: keystone
-  ## @param externalDatabase.password External Database user password
-  ##
-  password: ""
-  ## @param externalDatabase.database External Database database name
-  ##
-  database: keystone
-  ## @param externalDatabase.existingSecret The name of an existing secret with database credentials
-  ## NOTE: Must contain key `mariadb-password`
-  ## NOTE: When it's set, the `externalDatabase.password` parameter is ignored
-  ##
-  existingSecret: ""
+  ## @param ingress.pathType Ingress path type
+  pathType: ImplementationSpecific
+  ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+  apiVersion: ""
+  ## @param ingress.ingressClassName IngressClass that will be be used to implement the Ingress (Kubernetes 1.18+)
+  ## This is supported in Kubernetes 1.18+ and required if you have more than one IngressClass marked as the default for your cluster .
+  ## ref: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/
+  ingressClassName: "nginx"
+  ## @param ingress.hostname Default host for the ingress record
+  hostname: keystone
+  ## @param ingress.path Default path for the ingress record
+  ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+  path: /
 
-## @section RabbitMQ chart parameters
-## RabbitMQ chart configuration
-## https://github.com/bitnami/charts/blob/master/bitnami/rabbitmq/values.yaml
-##
-rabbitmq:
-  ## @param rabbitmq.enabled Enable/disable RabbitMQ chart installation
-  ##
-  enabled: true
-  ## @param rabbitmq.auth.username RabbitMQ username
-  ## @param rabbitmq.auth.password RabbitMQ password
-  ##
-  auth:
-    username: openstack
-    password: openstack
-    existingPasswordSecret: openstack-password
-  persistence:
+## @section Openstack dependency environment parameter
+
+## @param openstack-dep.gen-password.secretName auto generate openstack password secret name
+## @param openstack-dep.mariadb.enabled openstack dependency environment enable mariadb
+## @param openstack-dep.mariadb.architecture openstack dependency environment mariadb architecture support (`standalone` or `replication`)
+## @param openstack-dep.rabbitmq.enabled openstack dependency environment enable rabbitmq
+## @param openstack-dep.rabbitmq.auth.username openstack dependency environment enable rabbitmq service username
+## @param openstack-dep.memcached.enabled openstack dependency environment enable memcached
+## @param openstack-dep.nginx-ingress-controller.enabled openstack dependency environment enable nginx-ingress-controller
+openstack-dep:
+  gen-password:
+    secretName: openstack-password
+  mariadb:
     enabled: true
-    storageClass: ""
-    accessMode: ReadWriteOnce
-    size: 8Gi
-## External RabbitMQ Configuration
-## All of these values are ignored when rabbitmq.enabled is set to true
-##
-externalRabbitmq:
-  ## @param externalRabbitmq.enabled Enable/disable external RabbitMQ
-  ##
-  enabled: false
-  ## @param externalRabbitmq.host Host of the external RabbitMQ
-  ##
-  host: localhost
-  ## @param externalRabbitmq.port External RabbitMQ port number
-  ##
-  port: 5672
-  ## @param externalRabbitmq.username External RabbitMQ username
-  ##
-  username: guest
-  ## @param externalRabbitmq.password External RabbitMQ password. It will be saved in a kubernetes secret
-  ##
-  password: guest
-  ## @param externalRabbitmq.vhost External RabbitMQ virtual host. It will be saved in a kubernetes secret
-  ## e.g:
-  ## vhost: /
-  ##
-  vhost: ""
-  ## @param externalRabbitmq.existingPasswordSecret Existing secret with RabbitMQ password. It will be saved in a kubernetes secret
-  ##
-  existingPasswordSecret: ""
-
-## Memcached chart configuration
-## ref: https://github.com/bitnami/charts/blob/master/bitnami/memcached/values.yaml
-##
-memcached:
-  ## @param memcached.enabled Deploy a Memcached server for caching database queries
-  ##
-  enabled: true
-  ## Service parameters
-  ##
-  service:
-    ## @param memcached.service.port Memcached service port
-    ##
-    port: 11211
-## External Memcached Configuration
-## All of these values are only used if `memcached.enabled=false`
-##
-externalCache:
-  ## @param externalCache.host External cache server host
-  ##
-  host: localhost
-  ## @param externalCache.port External cache server port
-  ##
-  port: 11211
+    architecture: standalone
+  rabbitmq:
+    enabled: true
+    auth:
+      username: openstack
+  memcached:
+    enabled: true
+  nginx-ingress-controller:
+    enabled: true

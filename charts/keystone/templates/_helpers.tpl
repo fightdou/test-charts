@@ -4,21 +4,21 @@
 Return the proper Keystone image name
 */}}
 {{- define "keystone.image" -}}
-{{- include "common.images.image" (dict "imageRoot" .Values.image "global") -}}
+{{- include "common.images.image" (dict "imageRoot" .Values.image.keystoneImage "global") -}}
 {{- end -}}
 
 {{/*
 Return the proper Kubernetes Entrypoint image name
 */}}
 {{- define "entrypoint.image" -}}
-{{- include "common.images.image" (dict "imageRoot" .Values.entrypointImage "global") -}}
+{{- include "common.images.image" (dict "imageRoot" .Values.image.entrypointImage "global") -}}
 {{- end -}}
 
 {{/*
-Return the proper Kubernetes heat image name
+Return the proper Heat image name
 */}}
 {{- define "heat.image" -}}
-{{- include "common.images.image" (dict "imageRoot" .Values.heatImage "global") -}}
+{{- include "common.images.image" (dict "imageRoot" .Values.image.heatImage "global") -}}
 {{- end -}}
 
 {{/*
@@ -33,8 +33,8 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 Return the MariaDB Hostname
 */}}
 {{- define "keystone.databaseHost" -}}
-{{- if .Values.mariadb.enabled }}
-    {{- if eq .Values.mariadb.architecture "replication" }}
+{{- if (index .Values "openstack-dep" "mariadb" "enabled") }}
+    {{- if eq (index .Values "openstack-dep" "mariadb" "architecture") "replication" }}
         {{- printf "%s-primary" (include "keystone.mariadb.fullname" .) | trunc 63 | trimSuffix "-" -}}
     {{- else -}}
         {{- printf "%s" (include "keystone.mariadb.fullname" .) -}}
@@ -48,7 +48,7 @@ Return the MariaDB Hostname
 Return the MariaDB Database Name
 */}}
 {{- define "keystone.databaseName" -}}
-{{- if .Values.mariadb.enabled }}
+{{- if (index .Values "openstack-dep" "mariadb" "enabled") }}
     {{- printf "%s" .Values.endpoints.oslo_db.database -}}
 {{- else -}}
     {{- printf "%s" .Values.externalDatabase.database -}}
@@ -59,7 +59,7 @@ Return the MariaDB Database Name
 Return the MariaDB User
 */}}
 {{- define "keystone.databaseUser" -}}
-{{- if .Values.mariadb.enabled }}
+{{- if (index .Values "openstack-dep" "mariadb" "enabled") }}
     {{- printf "%s" .Values.endpoints.oslo_db.username -}}
 {{- else -}}
     {{- printf "%s" .Values.externalDatabase.user -}}
@@ -70,7 +70,7 @@ Return the MariaDB User
 Return the MariaDB Port
 */}}
 {{- define "keystone.databasePort" -}}
-{{- if .Values.mariadb.enabled }}
+{{- if (index .Values "openstack-dep" "mariadb" "enabled") }}
     {{- printf "3306" -}}
 {{- else -}}
     {{- printf "%d" (.Values.externalDatabase.port | int ) -}}
@@ -82,10 +82,10 @@ Create a default fully qualified app name for RabbitMQ subchart
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
 {{- define "keystone.rabbitmq.fullname" -}}
-{{- if .Values.rabbitmq.fullnameOverride -}}
+{{- if (index .Values "openstack-dep" "rabbitmq" "fullnameOverride") -}}
 {{- .Values.rabbitmq.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
-{{- $name := default "rabbitmq" .Values.rabbitmq.nameOverride -}}
+{{- $name := default "rabbitmq" (index .Values "openstack-dep" "rabbitmq" "nameOverride") -}}
 {{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 {{- end -}}
@@ -94,7 +94,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 Return the RabbitMQ host
 */}}
 {{- define "keystone.rabbitmq.host" -}}
-{{- if .Values.rabbitmq.enabled }}
+{{- if (index .Values "openstack-dep" "rabbitmq" "enabled") }}
     {{- printf "%s" (include "keystone.rabbitmq.fullname" .) -}}
 {{- else -}}
     {{- printf "%s" .Values.externalRabbitmq.host -}}
@@ -105,8 +105,8 @@ Return the RabbitMQ host
 Return the RabbitMQ Port
 */}}
 {{- define "keystone.rabbitmq.port" -}}
-{{- if .Values.rabbitmq.enabled }}
-    {{- printf "%d" (.Values.rabbitmq.service.port | int ) -}}
+{{- if (index .Values "openstack-dep" "rabbitmq" "enabled") }}
+    {{- printf "%d" ((index .Values "openstack-dep" "rabbitmq" "port") | int ) -}}
 {{- else -}}
     {{- printf "%d" (.Values.externalRabbitmq.port | int ) -}}
 {{- end -}}
@@ -116,45 +116,10 @@ Return the RabbitMQ Port
 Return the RabbitMQ username
 */}}
 {{- define "keystone.rabbitmq.user" -}}
-{{- if .Values.rabbitmq.enabled }}
-    {{- printf "%s" .Values.rabbitmq.auth.username -}}
+{{- if (index .Values "openstack-dep" "rabbitmq" "enabled") }}
+    {{- printf "%s" (index .Values "openstack-dep" "rabbitmq" "auth" "username") -}}
 {{- else -}}
     {{- printf "%s" .Values.externalRabbitmq.username -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the RabbitMQ password
-*/}}
-{{- define "keystone.rabbitmq.password" -}}
-{{- if .Values.rabbitmq.enabled }}
-    {{- printf "%s" .Values.rabbitmq.auth.password -}}
-{{- else -}}
-    {{- printf "%s" .Values.externalRabbitmq.password -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the RabbitMQ secret name
-*/}}
-{{- define "keystone.rabbitmq.secretName" -}}
-{{- if .Values.externalRabbitmq.existingPasswordSecret -}}
-    {{- printf "%s" .Values.externalRabbitmq.existingPasswordSecret -}}
-{{- else if .Values.rabbitmq.enabled }}
-    {{- printf "%s" (include "keystone.rabbitmq.fullname" .) -}}
-{{- else -}}
-    {{- printf "%s-%s" (include "keystone.fullname" .) "externalrabbitmq" -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the RabbitMQ host
-*/}}
-{{- define "keystone.rabbitmq.vhost" -}}
-{{- if .Values.rabbitmq.enabled }}
-    {{- printf "/" -}}
-{{- else -}}
-    {{- printf "%s" .Values.externalRabbitmq.vhost -}}
 {{- end -}}
 {{- end -}}
 
@@ -163,14 +128,14 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
 {{- define "keystone.memcached.fullname" -}}
-{{- include "common.names.dependency.fullname" (dict "chartName" "memcached" "chartValues" .Values.memcached "context" $) -}}
+{{- include "common.names.dependency.fullname" (dict "chartName" "memcached" "chartValues" (index .Values "openstack-dep" "memcached") "context" $) -}}
 {{- end -}}
 
 {{/*
 Return the Memcached Hostname
 */}}
 {{- define "keystone.cacheHost" -}}
-{{- if .Values.memcached.enabled }}
+{{- if (index .Values "openstack-dep" "memcached" "enabled") }}
     {{- $releaseNamespace := .Release.Namespace }}
     {{- $clusterDomain := .Values.endpoints.cluster_domain_suffix }}
     {{- printf "%s.%s.svc.%s" (include "keystone.memcached.fullname" .) $releaseNamespace $clusterDomain -}}
@@ -183,7 +148,7 @@ Return the Memcached Hostname
 Return the Memcached Port
 */}}
 {{- define "keystone.cachePort" -}}
-{{- if .Values.memcached.enabled }}
+{{- if (index .Values "openstack-dep" "memcached" "enabled") }}
     {{- printf "11211" -}}
 {{- else -}}
     {{- printf "%d" (.Values.externalCache.port | int ) -}}
@@ -191,49 +156,54 @@ Return the Memcached Port
 {{- end -}}
 
 {{/*
-Return the keystone.admin.api
+Return the keystone.internal.endpoints
 */}}
-{{- define "keystone.admin.api" -}}
-{{- $envAll := . -}}
-{{ tuple "identity" "admin" "api" $envAll | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
+{{- define "keystone.internal.endpoints" -}}
+{{- if not (empty .Values.endpoints.auth.admin) }}
+    {{- $internalService := .Values.service.publicService.name }}
+    {{- $releaseNamespace := .Release.Namespace }}
+    {{- $clusterDomain := .Values.endpoints.cluster_domain_suffix }}
+    {{- printf "http://%s.%s.svc.%s:%d/v3" $internalService $releaseNamespace $clusterDomain (.Values.service.publicService.port | int) }}
+{{- end }}
 {{- end }}
 
 {{/*
-Return the keystone.public.api
+Return the keystone.public.endpoints
 */}}
-{{- define "keystone.public.api" -}}
-{{- $envAll := . -}}
-{{ tuple "identity" "public" "api" $envAll | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
+{{- define "keystone.public.endpoints" -}}
+{{- if not (empty .Values.endpoints.auth.admin) }}
+    {{- $publicService := .Values.service.internalService.name }}
+    {{- $publicPort := .Values.service.internalService.httpPort }}
+    {{- $releaseNamespace := .Release.Namespace }}
+    {{- $clusterDomain := .Values.endpoints.cluster_domain_suffix }}
+    {{- printf "http://%s.%s.svc.%s/v3" $publicService $releaseNamespace $clusterDomain }}
+{{- end }}
 {{- end }}
 
 {{/*
-Return the keystone.internal.api
+abstract: |
+  Joins a list of values into a comma separated string
+values: |
+  test:
+    - foo
+    - bar
+usage: |
+  {{ include "joinListWithComma" .Values.test }}
+return: |
+  foo,bar
 */}}
-{{- define "keystone.internal.api" -}}
-{{- $envAll := . -}}
-{{ tuple "identity" "internal" "api" $envAll | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
-{{- end }}
-
-{{/*
-Return the keystone.env
-*/}}
-{{- define "keystone.env" -}}
-{{- $envAll := . }}
-{{- tuple "admin" "internal" $envAll | include "helm-toolkit.snippets.keystone_secret_openrc" }}
+{{- define "joinListWithComma" -}}
+{{- $local := dict "first" true -}}
+{{- range $k, $v := . -}}{{- if not $local.first -}},{{- end -}}{{- $v -}}{{- $_ := set $local "first" false -}}{{- end -}}
 {{- end -}}
 
 {{/*
-Return the keystone.credential.rotate
+Get the keystone endpoints secret name
 */}}
-{{- define "keystone.credential.rotate" -}}
-{{- $envAll := . }}
-{{ tuple $envAll "keystone" "credential-rotate" | include "helm-toolkit.snippets.kubernetes_metadata_labels" }}
+{{- define "keystone.endpoints.secretName" -}}
+{{- if not (empty .Values.secrets.identity.admin) -}}
+  {{- printf "%s" .Values.secrets.identity.admin -}}
+{{- else -}}
+  {{- printf "%s" (include "common.names.fullname" .) -}}
 {{- end -}}
-
-{{/*
-Return the keystone.fernet.rotate
-*/}}
-{{- define "keystone.fernet.rotate" -}}
-{{- $envAll := . }}
-{{ tuple $envAll "keystone" "fernet-rotate" | include "helm-toolkit.snippets.kubernetes_metadata_labels" }}
 {{- end -}}
