@@ -110,6 +110,7 @@ cloud:
   password: password
   tenant_name: admin
   auth_url: http://keystone.openstack.svc.cluster.local/v3
+  cinderListenAddr: ""
 
 ceph:
   enabledCephAuth: true
