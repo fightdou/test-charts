@@ -119,6 +119,19 @@ entries:
   - annotations:
       category: Openstack
     apiVersion: v2
+    created: "2022-02-17T01:44:23.035515373Z"
+    description: Automatic generation openstack relate password
+    digest: 9456549d0985c55819636deff886813dca9e464968e3ff7f9afcd10c85143396
+    home: https://kungze.github.io/charts/
+    maintainers:
+    - name: Kungze
+    name: gen-password
+    urls:
+    - https://github.com/fightdou/test-charts/releases/download/gen-password-1.0.4/gen-password-1.0.4.tgz
+    version: 1.0.4
+  - annotations:
+      category: Openstack
+    apiVersion: v2
     created: "2022-02-16T07:22:21.631051573Z"
     description: Automatic generation openstack relate password
     digest: 398f7b7d920e42026383eedc8106139160baccc80472f09acaad9d31f197b12c
@@ -291,4 +304,4 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/noauth-cinder-1.0.3/noauth-cinder-1.0.3.tgz
     version: 1.0.3
-generated: "2022-02-16T07:22:21.631090773Z"
+generated: "2022-02-17T01:44:23.035560576Z"
