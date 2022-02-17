@@ -1,5 +1,3 @@
-{{- define "keystone.templates._job_db_sync.env_vars" -}}
-{{- $envAll := index . 0 -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -20,21 +18,30 @@ spec:
             - -c
             - |
               /tmp/keystone.sh
-              /tmp/sync-db.sh
+              /tmp/db-sync.sh
           env:
             - name: OS_BOOTSTRAP_ADMIN_URL
-              value: {{ tuple "identity" "admin" "api" $envAll | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
+              value: {{ include "keystone.admin.api" . }}
             - name: OS_BOOTSTRAP_INTERNAL_URL
-              value: {{ tuple "identity" "internal" "api" $envAll | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
+              value: {{ include "keystone.internal.api" . }}
             - name: OS_BOOTSTRAP_PUBLIC_URL
-              value: {{ tuple "identity" "public" "api" $envAll | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
+              value: {{ include "keystone.public.api" . }}
             - name: OPENSTACK_CONFIG_FILE
               value: /etc/keystone/keystone.conf
+            - name: OPENSTACK_CONFIG_DB_SECTION
+              value: database
+            - name: OPENSTACK_CONFIG_DB_KEY
+              value: connection
             - name: KEYSTONE_DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: mariadb-secrets
-                  key: mariadb-keystone-password
+                  key: keystone-database-password
+                  name: {{ .Values.mariadb.auth.existingSecret }}
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: rabbitmq-password
+                  name: {{ .Values.rabbitmq.auth.existingPasswordSecret }}
             - name: OS_IDENTITY_API_VERSION
               value: "3"
             - name: OS_AUTH_URL
@@ -93,9 +100,16 @@ spec:
           - mountPath: /tmp/keystone.sh
             name: keystone-etc
             subPath: keystone.sh
-          - mountPath: /tmp/sync-db.sh
+          - mountPath: /tmp/db-sync.sh
             name: keystone-bin
-            subPath: sync-db.sh
+            subPath: db-sync.sh
+          - mountPath: /tmp/endpoint-update.py
+            name: keystone-bin
+            readOnly: true
+            subPath: endpoint-update.py
+          - mountPath: /etc/keystone/fernet-keys/
+            name: keystone-fernet-keys
+            readOnly: true
       initContainers:
         - name: init
           image: {{ template "entrypoint.image" . }}
@@ -115,8 +129,8 @@ spec:
                   fieldPath: metadata.namespace
             - name: PATH
               value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
-            - name: DEPENDENCY_SERVICE
-              value: {{ .Release.Namespace }}:{{ .Release.Name }}-mairadb
+            - name: DEPENDENCY_JOBS
+              value: {{ include "helm-toolkit.utils.joinListWithComma" .Values.dependencies.db_sync.jobs }}
       restartPolicy: OnFailure
       serviceAccount: keystone-api
       serviceAccountName: keystone-api
@@ -131,4 +145,7 @@ spec:
           defaultMode: 365
           name: keystone-bin
         name: keystone-bin
-{{- end }}
+      - name: keystone-fernet-keys
+        secret:
+          defaultMode: 420
+          secretName: keystone-fernet-keys

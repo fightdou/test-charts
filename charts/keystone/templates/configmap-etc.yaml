@@ -10,7 +10,7 @@ data:
     echo "
     [DEFAULT]
     debug = False
-    transport_url = rabbit://{{ include "keystone.rabbitmq.user" . }}:{{ include "keystone.rabbitmq.password" . }}@{{ include "keystone.rabbitmq.host" . }}:{{ include "keystone.rabbitmq.port" . }}
+    transport_url = rabbit://{{ include "keystone.rabbitmq.user" . }}:$RABBITMQ_PASSWORD@{{ include "keystone.rabbitmq.host" . }}:{{ include "keystone.rabbitmq.port" . }}
     use_stderr = True
     [oslo_middleware]
     enable_proxy_headers_parsing = True
@@ -26,12 +26,359 @@ data:
     enabled = {{ .Values.memcached.enabled }}
     memcache_servers = {{ $memcachedFullname }}:{{  $memcachedPort }}
     [oslo_messaging_notifications]
-    transport_url = rabbit://{{ include "keystone.rabbitmq.user" . }}:{{ include "keystone.rabbitmq.password" . }}@{{ include "keystone.rabbitmq.host" . }}:{{ include "keystone.rabbitmq.port" . }}
+    transport_url = rabbit://{{ include "keystone.rabbitmq.user" . }}:$RABBITMQ_PASSWORD@{{ include "keystone.rabbitmq.host" . }}:{{ include "keystone.rabbitmq.port" . }}
     driver = messagingv2
     topics = barbican_notifications
     [database]
-    connection = mysql+pymysql://{{ .Values.mariadb.auth.username }}:$KEYSTONE_DATABASE_PASSWORD@{{ include "keystone.databaseHost" . }}:{{ include "keystone.databasePort" . }}/{{ .Values.mariadb.auth.database }}
+    connection = mysql+pymysql://{{ include "keystone.databaseUser" . }}:$KEYSTONE_DATABASE_PASSWORD@{{ include "keystone.databaseHost" . }}:{{ include "keystone.databasePort" . }}/{{ include "keystone.databaseName" . }}
     connection_recycle_time = 10
     max_pool_size = 1
     max_retries = -1
     " > /etc/keystone/keystone.conf
+  access_rules.json: |-
+    {}
+  logging.conf: |-
+    [formatter_context]
+    class = oslo_log.formatters.ContextFormatter
+    datefmt = %Y-%m-%d %H:%M:%S
+    [formatter_default]
+    datefmt = %Y-%m-%d %H:%M:%S
+    format = %(message)s
+    [formatters]
+    keys = context,default
+    [handler_null]
+    args = ()
+    class = logging.NullHandler
+    formatter = default
+    [handler_stderr]
+    args = (sys.stderr,)
+    class = StreamHandler
+    formatter = context
+    [handler_stdout]
+    args = (sys.stdout,)
+    class = StreamHandler
+    formatter = context
+    [handlers]
+    keys = stdout,stderr,null
+    [logger_amqp]
+    handlers = stderr
+    level = WARNING
+    qualname = amqp
+    [logger_amqplib]
+    handlers = stderr
+    level = WARNING
+    qualname = amqplib
+    [logger_boto]
+    handlers = stderr
+    level = WARNING
+    qualname = boto
+    [logger_eventletwsgi]
+    handlers = stderr
+    level = WARNING
+    qualname = eventlet.wsgi.server
+    [logger_keystone]
+    handlers = stdout
+    level = INFO
+    qualname = keystone
+    [logger_root]
+    handlers = null
+    level = WARNING
+    [logger_sqlalchemy]
+    handlers = stderr
+    level = WARNING
+    qualname = sqlalchemy
+    [loggers]
+    keys = root,keystone
+  policy.yaml: |-
+    admin_or_owner: rule:admin_required or rule:owner
+    admin_or_token_subject: rule:admin_required or rule:token_subject
+    admin_required: role:admin or is_admin:1
+    default: rule:admin_required
+    identity:add_endpoint_group_to_project: rule:admin_required
+    identity:add_endpoint_to_project: rule:admin_required
+    identity:add_user_to_group: rule:admin_required
+    identity:authorize_request_token: rule:admin_required
+    identity:change_password: rule:admin_or_owner
+    identity:check_endpoint_in_project: rule:admin_required
+    identity:check_grant: rule:admin_required
+    identity:check_implied_role: rule:admin_required
+    identity:check_policy_association_for_endpoint: rule:admin_required
+    identity:check_policy_association_for_region_and_service: rule:admin_required
+    identity:check_policy_association_for_service: rule:admin_required
+    identity:check_token: rule:admin_or_token_subject
+    identity:check_user_in_group: rule:admin_required
+    identity:create_consumer: rule:admin_required
+    identity:create_credential: rule:admin_required
+    identity:create_domain: rule:admin_required
+    identity:create_domain_config: rule:admin_required
+    identity:create_domain_role: rule:admin_required
+    identity:create_endpoint: rule:admin_required
+    identity:create_endpoint_group: rule:admin_required
+    identity:create_grant: rule:admin_required
+    identity:create_group: rule:admin_required
+    identity:create_identity_provider: rule:admin_required
+    identity:create_implied_role: rule:admin_required
+    identity:create_mapping: rule:admin_required
+    identity:create_policy: rule:admin_required
+    identity:create_policy_association_for_endpoint: rule:admin_required
+    identity:create_policy_association_for_region_and_service: rule:admin_required
+    identity:create_policy_association_for_service: rule:admin_required
+    identity:create_project: rule:admin_required
+    identity:create_protocol: rule:admin_required
+    identity:create_region: rule:admin_required
+    identity:create_role: rule:admin_required
+    identity:create_service: rule:admin_required
+    identity:create_service_provider: rule:admin_required
+    identity:create_trust: user_id:%(trust.trustor_user_id)s
+    identity:create_user: rule:admin_required
+    identity:delete_access_token: rule:admin_required
+    identity:delete_consumer: rule:admin_required
+    identity:delete_credential: rule:admin_required
+    identity:delete_domain: rule:admin_required
+    identity:delete_domain_config: rule:admin_required
+    identity:delete_domain_role: rule:admin_required
+    identity:delete_endpoint: rule:admin_required
+    identity:delete_endpoint_group: rule:admin_required
+    identity:delete_group: rule:admin_required
+    identity:delete_identity_provider: rule:admin_required
+    identity:delete_implied_role: rule:admin_required
+    identity:delete_mapping: rule:admin_required
+    identity:delete_policy: rule:admin_required
+    identity:delete_policy_association_for_endpoint: rule:admin_required
+    identity:delete_policy_association_for_region_and_service: rule:admin_required
+    identity:delete_policy_association_for_service: rule:admin_required
+    identity:delete_project: rule:admin_required
+    identity:delete_protocol: rule:admin_required
+    identity:delete_region: rule:admin_required
+    identity:delete_role: rule:admin_required
+    identity:delete_service: rule:admin_required
+    identity:delete_service_provider: rule:admin_required
+    identity:delete_trust: ""
+    identity:delete_user: rule:admin_required
+    identity:ec2_create_credential: rule:admin_or_owner
+    identity:ec2_delete_credential: rule:admin_required or (rule:owner and user_id:%(target.credential.user_id)s)
+    identity:ec2_get_credential: rule:admin_required or (rule:owner and user_id:%(target.credential.user_id)s)
+    identity:ec2_list_credentials: rule:admin_or_owner
+    identity:get_access_token: rule:admin_required
+    identity:get_access_token_role: rule:admin_required
+    identity:get_auth_catalog: ""
+    identity:get_auth_domains: ""
+    identity:get_auth_projects: ""
+    identity:get_consumer: rule:admin_required
+    identity:get_credential: rule:admin_required
+    identity:get_domain: rule:admin_required or token.project.domain.id:%(target.domain.id)s
+    identity:get_domain_config: rule:admin_required
+    identity:get_domain_config_default: rule:admin_required
+    identity:get_domain_role: rule:admin_required
+    identity:get_endpoint: rule:admin_required
+    identity:get_endpoint_group: rule:admin_required
+    identity:get_endpoint_group_in_project: rule:admin_required
+    identity:get_group: rule:admin_required
+    identity:get_identity_provider: rule:admin_required
+    identity:get_implied_role: 'rule:admin_required '
+    identity:get_mapping: rule:admin_required
+    identity:get_policy: rule:admin_required
+    identity:get_policy_for_endpoint: rule:admin_required
+    identity:get_project: rule:admin_required or project_id:%(target.project.id)s
+    identity:get_protocol: rule:admin_required
+    identity:get_region: ""
+    identity:get_role: rule:admin_required
+    identity:get_role_for_trust: ""
+    identity:get_service: rule:admin_required
+    identity:get_service_provider: rule:admin_required
+    identity:get_user: rule:admin_or_owner
+    identity:list_access_token_roles: rule:admin_required
+    identity:list_access_tokens: rule:admin_required
+    identity:list_consumers: rule:admin_required
+    identity:list_credentials: rule:admin_required
+    identity:list_domain_roles: rule:admin_required
+    identity:list_domains: rule:admin_required
+    identity:list_domains_for_user: ""
+    identity:list_endpoint_groups: rule:admin_required
+    identity:list_endpoint_groups_for_project: rule:admin_required
+    identity:list_endpoints: rule:admin_required
+    identity:list_endpoints_associated_with_endpoint_group: rule:admin_required
+    identity:list_endpoints_for_policy: rule:admin_required
+    identity:list_endpoints_for_project: rule:admin_required
+    identity:list_grants: rule:admin_required
+    identity:list_groups: rule:admin_required
+    identity:list_groups_for_user: rule:admin_or_owner
+    identity:list_identity_providers: rule:admin_required
+    identity:list_implied_roles: rule:admin_required
+    identity:list_mappings: rule:admin_required
+    identity:list_policies: rule:admin_required
+    identity:list_projects: rule:admin_required
+    identity:list_projects_associated_with_endpoint_group: rule:admin_required
+    identity:list_projects_for_endpoint: rule:admin_required
+    identity:list_projects_for_user: ""
+    identity:list_protocols: rule:admin_required
+    identity:list_regions: ""
+    identity:list_revoke_events: ""
+    identity:list_role_assignments: rule:admin_required
+    identity:list_role_assignments_for_tree: rule:admin_required
+    identity:list_role_inference_rules: rule:admin_required
+    identity:list_roles: rule:admin_required
+    identity:list_roles_for_trust: ""
+    identity:list_service_providers: rule:admin_required
+    identity:list_services: rule:admin_required
+    identity:list_trusts: ""
+    identity:list_user_projects: rule:admin_or_owner
+    identity:list_users: rule:admin_required
+    identity:list_users_in_group: rule:admin_required
+    identity:remove_endpoint_from_project: rule:admin_required
+    identity:remove_endpoint_group_from_project: rule:admin_required
+    identity:remove_user_from_group: rule:admin_required
+    identity:revocation_list: rule:service_or_admin
+    identity:revoke_grant: rule:admin_required
+    identity:revoke_token: rule:admin_or_token_subject
+    identity:update_consumer: rule:admin_required
+    identity:update_credential: rule:admin_required
+    identity:update_domain: rule:admin_required
+    identity:update_domain_config: rule:admin_required
+    identity:update_domain_role: rule:admin_required
+    identity:update_endpoint: rule:admin_required
+    identity:update_endpoint_group: rule:admin_required
+    identity:update_group: rule:admin_required
+    identity:update_identity_provider: rule:admin_required
+    identity:update_mapping: rule:admin_required
+    identity:update_policy: rule:admin_required
+    identity:update_project: rule:admin_required
+    identity:update_protocol: rule:admin_required
+    identity:update_region: rule:admin_required
+    identity:update_role: rule:admin_required
+    identity:update_service: rule:admin_required
+    identity:update_service_provider: rule:admin_required
+    identity:update_user: rule:admin_required
+    identity:validate_token: rule:service_admin_or_token_subject
+    identity:validate_token_head: rule:service_or_admin
+    owner: user_id:%(user_id)s
+    service_admin_or_token_subject: rule:service_or_admin or rule:token_subject
+    service_or_admin: rule:admin_required or rule:service_role
+    service_role: role:service
+    token_subject: user_id:%(target.token.user_id)s
+  ports.conf: |-
+    ""
+  sso_callback_template.html: |-
+    <!DOCTYPE html>
+    <html xmlns="http://www.w3.org/1999/xhtml">
+      <head>
+        <title>Keystone WebSSO redirect</title>
+      </head>
+      <body>
+        <form id="sso" name="sso" action="$host" method="post">
+          Please wait...
+          <br/>
+          <input type="hidden" name="token" id="token" value="$token"/>
+          <noscript>
+            <input type="submit" name="submit_no_javascript" id="submit_no_javascript"
+                value="If your JavaScript is disabled, please click to continue"/>
+          </noscript>
+        </form>
+        <script type="text/javascript">
+          window.onload = function() {
+            document.forms['sso'].submit();
+          }
+        </script>
+      </body>
+    </html>
+  mpm_event.conf: |-
+    <IfModule mpm_event_module>
+      ServerLimit         1024
+      StartServers        32
+      MinSpareThreads     32
+      MaxSpareThreads     256
+      ThreadsPerChild     25
+      MaxRequestsPerChild 128
+      ThreadLimit         720
+    </IfModule>
+  security.conf: |-
+    #
+    # Disable access to the entire file system except for the directories that
+    # are explicitly allowed later.
+    #
+    # This currently breaks the configurations that come with some web application
+    # Debian packages.
+    #
+    #<Directory />
+    #   AllowOverride None
+    #   Require all denied
+    #</Directory>
+
+    # Changing the following options will not really affect the security of the
+    # server, but might make attacks slightly more difficult in some cases.
+
+    #
+    # ServerTokens
+    # This directive configures what you return as the Server HTTP response
+    # Header. The default is 'Full' which sends information about the OS-Type
+    # and compiled in modules.
+    # Set to one of:  Full | OS | Minimal | Minor | Major | Prod
+    # where Full conveys the most information, and Prod the least.
+    ServerTokens Prod
+
+    #
+    # Optionally add a line containing the server version and virtual host
+    # name to server-generated pages (internal error documents, FTP directory
+    # listings, mod_status and mod_info output etc., but not CGI generated
+    # documents or custom error documents).
+    # Set to "EMail" to also include a mailto: link to the ServerAdmin.
+    # Set to one of:  On | Off | EMail
+    ServerSignature Off
+
+    #
+    # Allow TRACE method
+    #
+    # Set to "extended" to also reflect the request body (only for testing and
+    # diagnostic purposes).
+    #
+    # Set to one of:  On | Off | extended
+    TraceEnable Off
+
+    #
+    # Forbid access to version control directories
+    #
+    # If you use version control systems in your document root, you should
+    # probably deny access to their directories. For example, for subversion:
+    #
+    #<DirectoryMatch "/\.svn">
+    #   Require all denied
+    #</DirectoryMatch>
+
+    #
+    # Setting this header will prevent MSIE from interpreting files as something
+    # else than declared by the content type in the HTTP headers.
+    # Requires mod_headers to be enabled.
+    #
+    #Header set X-Content-Type-Options: "nosniff"
+
+    #
+    # Setting this header will prevent other sites from embedding pages from this
+    # site as frames. This defends against clickjacking attacks.
+    # Requires mod_headers to be enabled.
+    #
+    #Header set X-Frame-Options: "sameorigin"
+  wsgi-keystone.conf: |-
+    Listen 0.0.0.0:5000
+
+    LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
+    LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" proxy
+
+    SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded
+    CustomLog /dev/stdout combined env=!forwarded
+    CustomLog /dev/stdout proxy env=forwarded
+
+    <VirtualHost *:5000>
+        WSGIDaemonProcess keystone-public processes=1 threads=1 user=keystone group=keystone display-name=%{GROUP}
+        WSGIProcessGroup keystone-public
+        WSGIScriptAlias / /var/www/cgi-bin/keystone/keystone-wsgi-public
+        WSGIApplicationGroup %{GLOBAL}
+        WSGIPassAuthorization On
+        <IfVersion >= 2.4>
+          ErrorLogFormat "%{cu}t %M"
+        </IfVersion>
+        ErrorLog /dev/stdout
+
+        SetEnvIf X-Forwarded-For "^.*\..*\..*\..*" forwarded
+        CustomLog /dev/stdout combined env=!forwarded
+        CustomLog /dev/stdout proxy env=forwarded
+    </VirtualHost>

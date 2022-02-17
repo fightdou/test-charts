@@ -94,7 +94,7 @@ spec:
             - name: PATH
               value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
             - name: DEPENDENCY_SERVICE
-              value: {{ .Release.Namespace }}:{{ .Release.Name }}-keystone-api
+              value: {{ .Release.Namespace }}:keystone-api
       restartPolicy: OnFailure
       serviceAccount: keystone-api
       serviceAccountName: keystone-api

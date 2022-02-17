@@ -21,11 +21,14 @@ rules:
   resources:
   - services
   - endpoints
+  - secrets
   - jobs
   - pods
   verbs:
   - get
   - list
+  - create
+  - update
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1

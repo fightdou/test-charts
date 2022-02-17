@@ -1,7 +1,7 @@
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
-  name: {{ include "common.names.fullname" . }}
+  name: {{ include "common.names.fullname" . }}-api
   namespace: {{ .Release.Namespace | quote }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
 spec:
@@ -35,6 +35,21 @@ spec:
             value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
           - name: DEPENDENCY_JOBS
             value: {{ include "helm-toolkit.utils.joinListWithComma" .Values.dependencies.keystone_api.jobs }}
+        - args:
+          - set -xe; find /etc/keystone/mounted-keys -type l -exec ln -sfn {} /etc/keystone/fernet-keys/
+            \; ; chmod o-wrx /etc/keystone/fernet-keys/ ;
+          command:
+          - /bin/sh
+          - -c
+          image: {{ template "keystone.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          name: link-keys
+          resources: {}
+          volumeMounts:
+          - mountPath: /etc/keystone/mounted-keys
+            name: keystone-fernet-keys
+          - mountPath: /etc/keystone/fernet-keys/
+            name: post-keystone-fernet-keys
       containers:
         - name: keystone-api
           image: {{ template "keystone.image" . }}
@@ -57,30 +72,88 @@ spec:
             - name: KEYSTONE_DATABASE_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: keystone-database-password
+                  key: mariadb-password
                   name: {{ .Values.mariadb.auth.existingSecret }}
             - name: RABBITMQ_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: keystone-database-password
-                  name: {{ .Values.mariadb.auth.existingSecret }}
+                  key: rabbitmq-password
+                  name: {{ .Values.rabbitmq.auth.existingPasswordSecret }}
           ports:
             - name: http
               containerPort: {{ .Values.containerPorts.http }}
           volumeMounts:
+          - mountPath: /etc/keystone
+            name: etckeystone
+          - mountPath: /tmp
+            name: pod-tmp
+          - mountPath: /var/log/apache2
+            name: logs-apache
+          - mountPath: /var/run/apache2
+            name: run-apache
+          - mountPath: /var/www/cgi-bin/keystone
+            name: wsgi-keystone
           - mountPath: /tmp/keystone.sh
             name: keystone-etc
             readOnly: true
             subPath: keystone.sh
+          - mountPath: /etc/apache2/ports.conf
+            name: keystone-etc
+            readOnly: true
+            subPath: ports.conf
+          - mountPath: /etc/keystone/logging.conf
+            name: keystone-etc
+            readOnly: true
+            subPath: logging.conf
+          - mountPath: /etc/keystone/policy.yaml
+            name: keystone-etc
+            readOnly: true
+            subPath: policy.yaml
+          - mountPath: /etc/keystone/access_rules.json
+            name: keystone-etc
+            readOnly: true
+            subPath: access_rules.json
+          - mountPath: /etc/keystone/sso_callback_template.html
+            name: keystone-etc
+            readOnly: true
+            subPath: sso_callback_template.html
+          - mountPath: /etc/apache2/conf-enabled/wsgi-keystone.conf
+            name: keystone-etc
+            readOnly: true
+            subPath: wsgi-keystone.conf
+          - mountPath: /etc/apache2/mods-available/mpm_event.conf
+            name: keystone-etc
+            readOnly: true
+            subPath: mpm_event.conf
+          - mountPath: /etc/apache2/conf-enabled/security.conf
+            name: keystone-etc
+            readOnly: true
+            subPath: security.conf
           - mountPath: /tmp/keystone-api.sh
             name: keystone-bin
             readOnly: true
             subPath: keystone-api.sh
+          - mountPath: /etc/keystone/mounted-keys
+            name: keystone-fernet-keys
+          - mountPath: /etc/keystone/fernet-keys/
+            name: post-keystone-fernet-keys
+          - mountPath: /etc/keystone/credential-keys/
+            name: keystone-credential-keys
       serviceAccount: keystone-api
       serviceAccountName: keystone-api
       volumes:
       - emptyDir: {}
         name: pod-tmp
+      - name: wsgi-keystone
+        emptyDir: {}
+      - name: etckeystone
+        emptyDir: {}
+      - name: logs-apache
+        emptyDir: {}
+      - name: run-apache
+        emptyDir: {}
+      - name: post-keystone-fernet-keys
+        emptyDir: {}
       - configMap:
           defaultMode: 365
           name: keystone-etc
@@ -89,4 +162,11 @@ spec:
           defaultMode: 365
           name: keystone-bin
         name: keystone-bin
-
+      - name: keystone-fernet-keys
+        secret:
+          defaultMode: 288
+          secretName: keystone-fernet-keys
+      - name: keystone-credential-keys
+        secret:
+          defaultMode: 420
+          secretName: keystone-credential-keys

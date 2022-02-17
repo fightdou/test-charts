@@ -15,6 +15,13 @@ Return the proper Kubernetes Entrypoint image name
 {{- end -}}
 
 {{/*
+Return the proper Kubernetes heat image name
+*/}}
+{{- define "heat.image" -}}
+{{- include "common.images.image" (dict "imageRoot" .Values.heatImage "global") -}}
+{{- end -}}
+
+{{/*
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
@@ -42,7 +49,7 @@ Return the MariaDB Database Name
 */}}
 {{- define "keystone.databaseName" -}}
 {{- if .Values.mariadb.enabled }}
-    {{- printf "%s" .Values.mariadb.auth.database -}}
+    {{- printf "%s" .Values.endpoints.oslo_db.database -}}
 {{- else -}}
     {{- printf "%s" .Values.externalDatabase.database -}}
 {{- end -}}
@@ -53,20 +60,9 @@ Return the MariaDB User
 */}}
 {{- define "keystone.databaseUser" -}}
 {{- if .Values.mariadb.enabled }}
-    {{- printf "%s" .Values.mariadb.auth.username -}}
+    {{- printf "%s" .Values.endpoints.oslo_db.username -}}
 {{- else -}}
     {{- printf "%s" .Values.externalDatabase.user -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the MariaDB Password
-*/}}
-{{- define "keystone.databasePassword" -}}
-{{- if .Values.mariadb.enabled }}
-    {{- printf "%s" .Values.mariadb.auth.password -}}
-{{- else -}}
-    {{- printf "%s" .Values.externalDatabase.password -}}
 {{- end -}}
 {{- end -}}
 
@@ -198,7 +194,7 @@ Return the Memcached Port
 Return the keystone.admin.api
 */}}
 {{- define "keystone.admin.api" -}}
-{{- $envAll := index . 0 -}}
+{{- $envAll := . -}}
 {{ tuple "identity" "admin" "api" $envAll | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
 {{- end }}
 
@@ -206,7 +202,7 @@ Return the keystone.admin.api
 Return the keystone.public.api
 */}}
 {{- define "keystone.public.api" -}}
-{{- $envAll := index . 0 -}}
+{{- $envAll := . -}}
 {{ tuple "identity" "public" "api" $envAll | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
 {{- end }}
 
@@ -214,6 +210,30 @@ Return the keystone.public.api
 Return the keystone.internal.api
 */}}
 {{- define "keystone.internal.api" -}}
-{{- $envAll := index . 0 -}}
+{{- $envAll := . -}}
 {{ tuple "identity" "internal" "api" $envAll | include "helm-toolkit.endpoints.keystone_endpoint_uri_lookup" }}
 {{- end }}
+
+{{/*
+Return the keystone.env
+*/}}
+{{- define "keystone.env" -}}
+{{- $envAll := . }}
+{{- tuple "admin" "internal" $envAll | include "helm-toolkit.snippets.keystone_secret_openrc" }}
+{{- end -}}
+
+{{/*
+Return the keystone.credential.rotate
+*/}}
+{{- define "keystone.credential.rotate" -}}
+{{- $envAll := . }}
+{{ tuple $envAll "keystone" "credential-rotate" | include "helm-toolkit.snippets.kubernetes_metadata_labels" }}
+{{- end -}}
+
+{{/*
+Return the keystone.fernet.rotate
+*/}}
+{{- define "keystone.fernet.rotate" -}}
+{{- $envAll := . }}
+{{ tuple $envAll "keystone" "fernet-rotate" | include "helm-toolkit.snippets.kubernetes_metadata_labels" }}
+{{- end -}}

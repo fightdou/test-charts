@@ -1,0 +1,104 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: keystone-fernet-rotate
+  namespace: {{ .Release.Namespace | quote }}
+spec:
+  schedule: {{ .Values.jobs.fernet_rotate.cron | quote }}
+  successfulJobsHistoryLimit: {{ .Values.jobs.fernet_rotate.history.success }}
+  failedJobsHistoryLimit: {{ .Values.jobs.fernet_rotate.history.failed }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels: {{- include "common.labels.standard" . | nindent 12 }}
+        spec:
+          containers:
+            - name: keystone-fernet-rotate
+              image: {{ template "keystone.image" . }}
+              imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+              env:
+                - name: KEYSTONE_USER
+                  value: {{ .Values.jobs.fernet_rotate.user | quote }}
+                - name: KEYSTONE_GROUP
+                  value: {{ .Values.jobs.fernet_rotate.group | quote }}
+                - name: KUBERNETES_NAMESPACE
+                  value: {{ .Release.Namespace | quote }}
+                - name: KEYSTONE_KEYS_REPOSITORY
+                  value: /etc/keystone/fernet-keys/
+                - name: KEYSTONE_fernet_MIGRATE_WAIT
+                  value: {{ .Values.jobs.fernet_rotate.migrate_wait | quote }}
+                - name: KEYSTONE_DATABASE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: keystone-database-password
+                      name: {{ .Values.mariadb.auth.existingSecret }}
+                - name: RABBITMQ_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: rabbitmq-password
+                      name: {{ .Values.rabbitmq.auth.existingPasswordSecret }}
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  /tmp/keystone.sh
+                  python /tmp/fernet-manage.py fernet_rotate
+              volumeMounts:
+                - name: pod-tmp
+                  mountPath: /tmp
+                - name: etckeystone
+                  mountPath: /etc/keystone
+                - name: keystone-etc
+                  mountPath: /tmp/keystone.sh
+                  subPath: keystone.sh
+                  readOnly: true
+                - name: keystone-bin
+                  mountPath: /tmp/fernet-manage.py
+                  subPath: fernet-manage.py
+                  readOnly: true
+          initContainers:
+            - command:
+              - kubernetes-entrypoint
+              name: init
+              image: {{ template "entrypoint.image" . }}
+              imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+              env:
+              - name: POD_NAME
+                valueFrom:
+                  fieldRef:
+                    apiVersion: v1
+                    fieldPath: metadata.name
+              - name: NAMESPACE
+                valueFrom:
+                  fieldRef:
+                    apiVersion: v1
+                    fieldPath: metadata.namespace
+              - name: INTERFACE_NAME
+                value: eth0
+              - name: PATH
+                value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
+              - name: DEPENDENCY_SERVICE
+              - name: DEPENDENCY_JOBS
+                value: {{ include "helm-toolkit.utils.joinListWithComma" .Values.dependencies.fernet_rotate.jobs }}
+              - name: DEPENDENCY_DAEMONSET
+              - name: DEPENDENCY_CONTAINER
+              - name: DEPENDENCY_POD_JSON
+              - name: DEPENDENCY_CUSTOM_RESOURCE
+          restartPolicy: OnFailure
+          serviceAccount: keystone-api
+          serviceAccountName: keystone-api
+          volumes:
+            - name: pod-tmp
+              emptyDir: {}
+            - name: etckeystone
+              emptyDir: {}
+            - name: keystone-etc
+              secret:
+                secretName: keystone-etc
+                defaultMode: 0444
+            - name: keystone-bin
+              configMap:
+                name: keystone-bin
+                defaultMode: 0555

@@ -64,18 +64,76 @@ entrypointImage:
   ## Set to true if you would like to see extra information on logs
   ##
   debug: false
+## @param heatImage.registry Moodle image registry
+## @param heatImage.repository Moodle image repository
+## @param heatImage.tag Moodle image tag (immutable tags are recommended)
+## @param heatImage.pullPolicy Moodle image pull policy
+## @param heatImage.pullSecrets Specify docker-registry secret names as an array
+## @param heatImage.debug Specify if debug logs should be enabled
+heatImage:
+  registry: docker.io
+  repository: openstackhelm/heat
+  tag: wallaby-ubuntu_focal
+  ## Specify a imagePullPolicy
+  ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+  ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+  ##
+  pullPolicy: IfNotPresent
+  ## Optionally specify an array of imagePullSecrets.
+  ## Secrets must be manually created in the namespace.
+  ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  ## e.g:
+  ## pullSecrets:
+  ##   - myRegistryKeySecretName
+  ##
+  pullSecrets: []
+  ## Set to true if you would like to see extra information on logs
+  ##
+  debug: false
 ## @param replicaCount Number of Moodle replicas (requires ReadWriteMany PVC support)
 ##
 replicaCount: 1
-
 dependencies:
   keystone_api:
     jobs:
-      - cinder-db-sync
+      - keystone-db-sync
   db_sync:
-    services:
-      - endpoint: internal
-        service: mariadb
+    jobs:
+      - keystone-db-init
+  credential_rotate:
+    jobs:
+      - keystone-credential-setup
+  fernet_rotate:
+    jobs:
+      - keystone-fernet-setup
+
+jobs:
+  fernet_setup:
+    user: keystone
+    group: keystone
+  fernet_rotate:
+    # NOTE(rk760n): key rotation frequency, token expiration, active keys should statisfy the formula
+    # max_active_keys = (token_expiration / rotation_frequency) + 2
+    # as expiration is 12h, and max_active_keys set to 3 by default, rotation_frequency need to be adjusted
+    # 12 hours
+    cron: "0 */12 * * *"
+    user: keystone
+    group: keystone
+    history:
+      success: 3
+      failed: 1
+  credential_setup:
+    user: keystone
+    group: keystone
+  credential_rotate:
+    # monthly
+    cron: "0 0 1 * *"
+    migrate_wait: 120
+    user: keystone
+    group: keystone
+    history:
+      success: 3
+      failed: 1
 
 containerPorts:
   http: 5000
@@ -116,6 +174,9 @@ endpoints:
         # NOTE(portdirect): to retain portability across images, and allow
         # running under a unprivileged user simply, we default to a port > 1000.
         internal: 5000
+  oslo_db:
+    username: keystone
+    database: keystone
 
 secrets:
   identity:
@@ -172,8 +233,8 @@ mariadb:
   ##      https://github.com/bitnami/bitnami-docker-mariadb/blob/master/README.md#creating-a-database-user-on-first-run
   auth:
     rootPassword: ""
-    database: keystone
-    username: keystone
+    database: ""
+    username: ""
     password: ""
     existingSecret: openstack-password
   ## MariaDB Primary configuration
@@ -232,6 +293,11 @@ rabbitmq:
     username: openstack
     password: openstack
     existingPasswordSecret: openstack-password
+  persistence:
+    enabled: true
+    storageClass: ""
+    accessMode: ReadWriteOnce
+    size: 8Gi
 ## External RabbitMQ Configuration
 ## All of these values are ignored when rabbitmq.enabled is set to true
 ##
