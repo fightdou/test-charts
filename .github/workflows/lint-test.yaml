@@ -24,6 +24,7 @@ jobs:
       - name: Add dependency chart repos
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add kungze https://kungze.github.io/charts
 
       - name: Run chart-testing (lint)
         run: ct lint --config .github/ct-lint.yaml
@@ -46,6 +47,7 @@ jobs:
       - name: Add dependency chart repos
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add kungze https://kungze.github.io/charts
           helm repo add cinder https://fightdou.github.io/test-charts
 
       - name: Run chart-testing (install)
