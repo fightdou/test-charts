@@ -1,0 +1,199 @@
+apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
+kind: Deployment
+metadata:
+  name: keystone-api
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels: {{- include "common.labels.matchLabels" . | nindent 6 }}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels: {{- include "common.labels.standard" . | nindent 8 }}
+    spec:
+      initContainers:
+        - command:
+          - kubernetes-entrypoint
+          name: init
+          image: {{ template "entrypoint.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.namespace
+          - name: INTERFACE_NAME
+            value: eth0
+          - name: PATH
+            value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
+          - name: DEPENDENCY_JOBS
+            value: {{ include "joinListWithComma" .Values.dependencies.keystone_api.jobs }}
+        - args:
+          - set -xe; find /etc/keystone/mounted-keys -type l -exec ln -sfn {} /etc/keystone/fernet-keys/
+            \; ; chmod o-wrx /etc/keystone/fernet-keys/ ;
+          command:
+          - /bin/sh
+          - -c
+          image: {{ template "keystone.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          name: link-keys
+          resources: {}
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+          - mountPath: /etc/keystone/mounted-keys
+            name: keystone-fernet-keys
+          - mountPath: /etc/keystone/fernet-keys/
+            name: post-keystone-fernet-keys
+      containers:
+        - name: keystone-api
+          image: {{ template "keystone.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          {{- if .Values.lifecycle }}
+          lifecycle: {{- toYaml .Values.lifecycle | nindent 12 }}
+          {{- end }}
+          {{- if .Values.livenessProbe.enabled }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.livenessProbe "enabled") "context" $) | nindent 12 }}
+          {{- else if .Values.customLivenessProbe }}
+          livenessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.customLivenessProbe "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.readinessProbe.enabled }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.readinessProbe "enabled") "context" $) | nindent 12 }}
+          {{- else if .Values.customReadinessProbe }}
+          readinessProbe: {{- include "common.tplvalues.render" (dict "value" .Values.customReadinessProbe "context" $) | nindent 12 }}
+          {{- end }}
+          {{- if .Values.resources }}
+          resources: {{- toYaml .Values.resources | nindent 12 }}
+          {{- end }}
+          {{- if .Values.containerSecurityContext.enabled }}
+          # yamllint disable rule:indentation
+          securityContext: {{- omit .Values.containerSecurityContext "enabled" | toYaml | nindent 12 }}
+          # yamllint enable rule:indentation
+          {{- end }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              /tmp/keystone.sh
+              /tmp/keystone-api.sh start
+          env:
+            - name: KEYSTONE_DATABASE_HOST
+              value: {{ include "keystone.databaseHost" . | quote }}
+            - name: KEYSTONE_DATABASE_PORT
+              value: {{ include "keystone.databasePort" . | quote }}
+            - name: KEYSTONE_DATABASE_NAME
+              value: {{ include "keystone.databaseName" . | quote }}
+            - name: KEYSTONE_DATABASE_USER
+              value: {{ include "keystone.databaseUser" . | quote }}
+            - name: KEYSTONE_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: keystone-database-password
+                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: rabbitmq-password
+                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
+          ports:
+            - name: {{ .Values.service.publicService.portname }}
+              containerPort: {{ .Values.service.publicService.port }}
+              protocol: TCP
+          volumeMounts:
+          - mountPath: /etc/keystone
+            name: etckeystone
+          - mountPath: /tmp
+            name: pod-tmp
+          - mountPath: /var/log/apache2
+            name: logs-apache
+          - mountPath: /var/run/apache2
+            name: run-apache
+          - mountPath: /var/www/cgi-bin/keystone
+            name: wsgi-keystone
+          - mountPath: /tmp/keystone.sh
+            name: keystone-etc
+            readOnly: true
+            subPath: keystone.sh
+          - mountPath: /etc/apache2/ports.conf
+            name: keystone-etc
+            readOnly: true
+            subPath: ports.conf
+          - mountPath: /etc/keystone/logging.conf
+            name: keystone-etc
+            readOnly: true
+            subPath: logging.conf
+          - mountPath: /etc/keystone/policy.yaml
+            name: keystone-etc
+            readOnly: true
+            subPath: policy.yaml
+          - mountPath: /etc/keystone/access_rules.json
+            name: keystone-etc
+            readOnly: true
+            subPath: access_rules.json
+          - mountPath: /etc/keystone/sso_callback_template.html
+            name: keystone-etc
+            readOnly: true
+            subPath: sso_callback_template.html
+          - mountPath: /etc/apache2/conf-enabled/wsgi-keystone.conf
+            name: keystone-etc
+            readOnly: true
+            subPath: wsgi-keystone.conf
+          - mountPath: /etc/apache2/mods-available/mpm_event.conf
+            name: keystone-etc
+            readOnly: true
+            subPath: mpm_event.conf
+          - mountPath: /etc/apache2/conf-enabled/security.conf
+            name: keystone-etc
+            readOnly: true
+            subPath: security.conf
+          - mountPath: /tmp/keystone-api.sh
+            name: keystone-bin
+            readOnly: true
+            subPath: keystone-api.sh
+          - mountPath: /etc/keystone/mounted-keys
+            name: keystone-fernet-keys
+          - mountPath: /etc/keystone/fernet-keys/
+            name: post-keystone-fernet-keys
+          - mountPath: /etc/keystone/credential-keys/
+            name: keystone-credential-keys
+      {{- if .Values.podSecurityContext.enabled }}
+      securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      serviceAccount: {{ .Values.serviceAccountName}}
+      serviceAccountName: {{ .Values.serviceAccountName}}
+      volumes:
+      - emptyDir: {}
+        name: pod-tmp
+      - name: wsgi-keystone
+        emptyDir: {}
+      - name: etckeystone
+        emptyDir: {}
+      - name: logs-apache
+        emptyDir: {}
+      - name: run-apache
+        emptyDir: {}
+      - name: post-keystone-fernet-keys
+        emptyDir: {}
+      - configMap:
+          defaultMode: 365
+          name: keystone-etc
+        name: keystone-etc
+      - configMap:
+          defaultMode: 365
+          name: keystone-bin
+        name: keystone-bin
+      - name: keystone-fernet-keys
+        secret:
+          defaultMode: 288
+          secretName: keystone-fernet-keys
+      - name: keystone-credential-keys
+        secret:
+          defaultMode: 420
+          secretName: keystone-credential-keys

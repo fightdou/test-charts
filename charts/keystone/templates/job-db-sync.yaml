@@ -1,0 +1,146 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: keystone-db-sync
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+spec:
+  template:
+    spec:
+      containers:
+        - name: keystone-db-sync
+          image: {{ template "keystone.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              /tmp/keystone.sh
+              /tmp/db-sync.sh
+          env:
+            - name: OS_BOOTSTRAP_ADMIN_URL
+              value: {{ include "keystone.public.endpoints" . }}
+            - name: OS_BOOTSTRAP_INTERNAL_URL
+              value: {{ include "keystone.internal.endpoints" . }}
+            - name: OS_BOOTSTRAP_PUBLIC_URL
+              value: {{ include "keystone.public.endpoints" . }}
+            - name: OPENSTACK_CONFIG_FILE
+              value: /etc/keystone/keystone.conf
+            - name: OPENSTACK_CONFIG_DB_SECTION
+              value: database
+            - name: OPENSTACK_CONFIG_DB_KEY
+              value: connection
+            - name: KEYSTONE_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: keystone-database-password
+                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: rabbitmq-password
+                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
+            - name: OS_IDENTITY_API_VERSION
+              value: {{ .Values.endpoints.auth.admin.version | quote }}
+            - name: OS_AUTH_URL
+              value: {{ include "keystone.public.endpoints" . }}
+            - name: OS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: keystone-admin-password
+                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
+            - name: OS_REGION_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: OS_REGION_NAME
+                  name: {{ .Values.secrets.identity.admin }}
+            - name: OS_INTERFACE
+              valueFrom:
+                secretKeyRef:
+                  key: OS_INTERFACE
+                  name: {{ .Values.secrets.identity.admin }}
+            - name: OS_ENDPOINT_TYPE
+              valueFrom:
+                secretKeyRef:
+                  key: OS_INTERFACE
+                  name: {{ .Values.secrets.identity.admin }}
+            - name: OS_PROJECT_DOMAIN_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: OS_PROJECT_DOMAIN_NAME
+                  name: {{ .Values.secrets.identity.admin }}
+            - name: OS_PROJECT_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: OS_PROJECT_NAME
+                  name: {{ .Values.secrets.identity.admin }}
+            - name: OS_USER_DOMAIN_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: OS_USER_DOMAIN_NAME
+                  name: {{ .Values.secrets.identity.admin }}
+            - name: OS_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: OS_USERNAME
+                  name: {{ .Values.secrets.identity.admin }}
+            - name: OS_DEFAULT_DOMAIN
+              valueFrom:
+                secretKeyRef:
+                  key: OS_DEFAULT_DOMAIN
+                  name: {{ .Values.secrets.identity.admin }}
+          volumeMounts:
+          - mountPath: /tmp
+            name: pod-tmp
+          - mountPath: /tmp/keystone.sh
+            name: keystone-etc
+            subPath: keystone.sh
+          - mountPath: /tmp/db-sync.sh
+            name: keystone-bin
+            subPath: db-sync.sh
+          - mountPath: /tmp/endpoint-update.py
+            name: keystone-bin
+            readOnly: true
+            subPath: endpoint-update.py
+          - mountPath: /etc/keystone/fernet-keys/
+            name: keystone-fernet-keys
+            readOnly: true
+      initContainers:
+        - name: init
+          image: {{ template "entrypoint.image" . }}
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          command:
+            - kubernetes-entrypoint
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: PATH
+              value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
+            - name: DEPENDENCY_JOBS
+              value: {{ include "joinListWithComma" .Values.dependencies.db_sync.jobs }}
+      restartPolicy: OnFailure
+      serviceAccount: {{ .Values.serviceAccountName}}
+      serviceAccountName: {{ .Values.serviceAccountName}}
+      volumes:
+      - emptyDir: {}
+        name: pod-tmp
+      - configMap:
+          defaultMode: 365
+          name: keystone-etc
+        name: keystone-etc
+      - configMap:
+          defaultMode: 365
+          name: keystone-bin
+        name: keystone-bin
+      - name: keystone-fernet-keys
+        secret:
+          defaultMode: 420
+          secretName: keystone-fernet-keys

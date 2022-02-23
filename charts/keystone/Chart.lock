@@ -1,0 +1,9 @@
+dependencies:
+- name: openstack-dep
+  repository: https://fightdou.github.io/test-charts
+  version: 1.0.0
+- name: common
+  repository: https://charts.bitnami.com/bitnami
+  version: 1.11.1
+digest: sha256:598d94abeb353012f15b651cc73d719061dbb86867bfe90bd480a83cbb954403
+generated: "2022-02-23T13:12:55.004057658+08:00"
