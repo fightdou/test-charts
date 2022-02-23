@@ -304,4 +304,43 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/noauth-cinder-1.0.3/noauth-cinder-1.0.3.tgz
     version: 1.0.3
-generated: "2022-02-17T01:44:23.035560576Z"
+  openstack-dep:
+  - annotations:
+      category: Openstack
+    apiVersion: v2
+    created: "2022-02-23T04:40:13.328728991Z"
+    dependencies:
+    - name: gen-password
+      repository: https://kungze.github.io/charts/
+      version: 1.x.x
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: https://charts.bitnami.com/bitnami
+      version: 10.x.x
+    - condition: rabbitmq.enabled
+      name: rabbitmq
+      repository: https://charts.bitnami.com/bitnami
+      version: 8.x.x
+    - condition: memcached.enabled
+      name: memcached
+      repository: https://charts.bitnami.com/bitnami
+      version: 6.x.x
+    - condition: nginx-ingress-controller.enabled
+      name: nginx-ingress-controller
+      repository: https://charts.bitnami.com/bitnami
+      version: 9.x.x
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 1.x.x
+    description: Openstack dependency service
+    digest: 2696ca3fad9d93d0e429c6a8d154833bd92feaeebe36f8fb84a5419eb48e42c3
+    home: https://kungze.github.io/charts/
+    maintainers:
+    - name: Openstack
+    name: openstack-dep
+    urls:
+    - https://github.com/fightdou/test-charts/releases/download/openstack-dep-1.0.0/openstack-dep-1.0.0.tgz
+    version: 1.0.0
+generated: "2022-02-23T04:40:13.328764491Z"
