@@ -1,0 +1,93 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "mariadb": {
+            "type": "object",
+            "title": "MariaDB Details",
+            "form": true,
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "title": "Use a new MariaDB database hosted in the cluster",
+                    "form": true,
+                    "description": "Whether to deploy a mariadb server to satisfy the applications database requirements. To use an external database switch this off and configure the external database details"
+                },
+                "auth": {
+                    "type": "object",
+                    "title": "Mariadb auth",
+                    "form": true,
+                    "properties": {
+                        "existingSecret": {
+                            "type": "string",
+                            "title": "Use existing secret for password details",
+                            "form": true,
+                            "hidden": {
+                                "value": false,
+                                "path": "mariadb/enabled"
+                            },
+                            "defalut": "openstack-password"
+                        }
+                    }
+                }
+            }
+        },
+        "rabbitmq": {
+            "type": "object",
+            "title": "Rabbitmq Details",
+            "form": true,
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "title": "Use a new rabbitmq service in the cluster",
+                    "form": true,
+                    "description": "Whether to deploy a rabbitmq server to satisfy the applications database requirements. To use an external rabbitmq switch this off and configure the external rabbitmq details"
+                },
+                "auth": {
+                    "type": "object",
+                    "title": "rabbitmq auth details",
+                    "form": true,
+                    "properties": {
+                        "existingPasswordSecret": {
+                            "type": "string",
+                            "title": "Use existing secret for password details",
+                            "form": true,
+                            "hidden": {
+                                "value": false,
+                                "path": "rabbitmq/enabled"
+                            },
+                            "defalut": "openstack-password"
+                        }
+                    }
+                }
+            }
+        },
+        "memcached": {
+            "type": "object",
+            "title": "Memcached Details",
+            "form": true,
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "title": "Use a new Memcached server in the cluster",
+                    "form": true,
+                    "description": "Whether to deploy a Memcached server."
+                }
+            }
+        },
+        "nginx-ingress-controller": {
+            "type": "object",
+            "title": "Nginx-ingress-controller Details",
+            "form": true,
+            "properties": {
+                "enabled": {
+                    "form": true,
+                    "title": "Deploy a ingress controller server",
+                    "type": "boolean",
+                    "description": "Deploy a ingress controller server",
+                    "default": true
+                }
+            }
+        }
+    }
+}
