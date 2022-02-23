@@ -196,6 +196,29 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/gen-password-1.0.0/gen-password-1.0.0.tgz
     version: 1.0.0
+  keystone:
+  - annotations:
+      category: Openstack
+    apiVersion: v2
+    created: "2022-02-23T09:29:40.827115485Z"
+    dependencies:
+    - name: openstack-dep
+      repository: https://fightdou.github.io/test-charts
+      version: 1.x.x
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 1.x.x
+    description: Openstack keystone service
+    digest: 0c5347385aeb71d4d611c6ac6cfe0e6df471b2a2ed416b5cf9fb476efae61337
+    home: https://kungze.github.io/charts/
+    maintainers:
+    - name: Kungze
+    name: keystone
+    urls:
+    - https://github.com/fightdou/test-charts/releases/download/keystone-1.0.0/keystone-1.0.0.tgz
+    version: 1.0.0
   noauth-cinder:
   - annotations:
       category: Openstack
@@ -356,4 +379,4 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/openstack-dep-1.0.0/openstack-dep-1.0.0.tgz
     version: 1.0.0
-generated: "2022-02-23T05:03:29.033114451Z"
+generated: "2022-02-23T09:29:40.827152885Z"
