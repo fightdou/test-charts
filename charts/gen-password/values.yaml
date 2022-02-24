@@ -1,8 +1,10 @@
-## @section 自动生成openstack keystone 和 mariadb 密码
+## @section 自动生成openstack dependency 相关密码
 
-## Generate openstack keystone and mariadb password
+## openstack gen password secret name
+## @param secretName [t#secret 名称] 生成openstack相关密码的secret名称
+secretName: openstack-password
+## Generate openstack dependency password
 ## @param passwordEnvs.mariadb-root-password [t#root 密码] 数据库 root 用户密码
-## @param passwordEnvs.mariadb-password [t#database 密码] 数据库用户密码
 ## @param passwordEnvs.keystone-database-password [t#Keystone 数据库密码] Keystone 数据库密码
 ## @param passwordEnvs.keystone-admin-password [t#Keystone admin 用户密码] Keystone admin 用户密码
 ## @param passwordEnvs.glance-database-password [t#Glance 数据库密码] Glance 数据库密码
@@ -18,7 +20,6 @@
 ## @param passwordEnvs.rabbitmq-password [t#Rabbitmq 用户密码] Rabbitmq 用户密码
 passwordEnvs:
   mariadb-root-password: ""
-  mariadb-password: ""
   keystone-admin-password: ""
   keystone-database-password: ""
   glance-database-password: ""
