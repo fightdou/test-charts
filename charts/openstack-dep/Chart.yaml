@@ -13,13 +13,13 @@
 apiVersion: v2
 description: Openstack dependency service
 name: openstack-dep
-version: 1.0.0
+version: 1.0.1
 home: https://kungze.github.io/charts/
 maintainers:
   - name: Openstack
 dependencies:
   - name: gen-password
-    repository: https://kungze.github.io/charts/
+    repository: https://fightdou.github.io/test-charts
     version: 1.x.x
   - condition: mariadb.enabled
     name: mariadb
