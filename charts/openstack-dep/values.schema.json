@@ -2,6 +2,20 @@
     "$schema": "http://json-schema.org/schema#",
     "type": "object",
     "properties": {
+	    "gen-password": {
+            "type": "object",
+            "title": "Gen-password Details",
+            "form": true,
+            "properties": {
+                "secretName": {
+		            "title": "自动生成密钥名称",
+                    "form": true,
+                    "type": "string",
+                    "description": "Auto generate openstack password secret name",
+                    "default": "openstack-password"
+                }
+            }
+        },
         "mariadb": {
             "type": "object",
             "title": "MariaDB Details",
@@ -9,9 +23,17 @@
             "properties": {
                 "enabled": {
                     "type": "boolean",
-                    "title": "Use a new MariaDB database hosted in the cluster",
+                    "title": "开启mariadb",
                     "form": true,
                     "description": "Whether to deploy a mariadb server to satisfy the applications database requirements. To use an external database switch this off and configure the external database details"
+                },
+                "architecture": {
+                    "form": true,
+                    "type": "string",
+                    "description": "MariaDB architecture. Allowed values: `standalone` or `replication`",
+                    "title": "MariaDB架构",
+                    "default": "standalone",
+                    "enum": ["standalone", "replication"]
                 },
                 "auth": {
                     "type": "object",
@@ -38,25 +60,28 @@
             "form": true,
             "properties": {
                 "enabled": {
-                    "type": "boolean",
-                    "title": "Use a new rabbitmq service in the cluster",
                     "form": true,
-                    "description": "Whether to deploy a rabbitmq server to satisfy the applications database requirements. To use an external rabbitmq switch this off and configure the external rabbitmq details"
+                    "type": "boolean",
+                    "description": "Enable/disable RabbitMQ chart installation",
+                    "title": "开启rabbitmq",
+                    "default": true
                 },
                 "auth": {
                     "type": "object",
-                    "title": "rabbitmq auth details",
-                    "form": true,
                     "properties": {
-                        "existingPasswordSecret": {
-                            "type": "string",
-                            "title": "Use existing secret for password details",
+                        "username": {
                             "form": true,
-                            "hidden": {
-                                "value": false,
-                                "path": "rabbitmq/enabled"
-                            },
-                            "defalut": "openstack-password"
+                            "type": "string",
+                            "description": "RabbitMQ username",
+                            "title": "RabbitMQ用户名",
+                            "default": "openstack"
+                        },
+                        "password": {
+                            "form": true,
+                            "type": "string",
+                            "description": "RabbitMQ password",
+                            "title": "RabbitMQ密码",
+                            "default": "openstack"
                         }
                     }
                 }
@@ -69,7 +94,7 @@
             "properties": {
                 "enabled": {
                     "type": "boolean",
-                    "title": "Use a new Memcached server in the cluster",
+                    "title": "开启memcached",
                     "form": true,
                     "description": "Whether to deploy a Memcached server."
                 }
@@ -82,7 +107,7 @@
             "properties": {
                 "enabled": {
                     "form": true,
-                    "title": "Deploy a ingress controller server",
+                    "title": "开启nginx-ingress-controller",
                     "type": "boolean",
                     "description": "Deploy a ingress controller server",
                     "default": true

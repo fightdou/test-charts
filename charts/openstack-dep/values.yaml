@@ -13,19 +13,24 @@ global:
   ##   - myRegistryKeySecretName
   imagePullSecrets: []
   storageClass: ""
-## @param gen-password.secretName Auto generate openstack password secret name
+## @param connInfoSecret openstack dependency env generate conn info secret name
+connInfoSecret: openstack-conn-info
+## @param clusterDomainSuffix openstack dependency env generate conn info secret name
+clusterDomainSuffix: cluster.local
+## @param gen-password.secretName [t#自动生成密钥名称] 自动生成openstack密钥名称
 gen-password:
   secretName: openstack-password
+
 ## @section Database Parameters
 
 ## MariaDB chart configuration
 mariadb:
-  ## @param mariadb.enabled Deploy a MariaDB server to satisfy the applications database requirements
+  ## @param mariadb.enabled [t#开启mariadb] Deploy a MariaDB server to satisfy the applications database requirements
   enabled: true
-  ## @param mariadb.architecture MariaDB architecture. Allowed values: `standalone` or `replication`
+  ## @param mariadb.architecture [t#MariaDB架构] MariaDB architecture. Allowed values: `standalone` or `replication`
   architecture: standalone
   ## MariaDB Authentication parameters
-  ## @param mariadb.auth.existingSecret Use existing secret for password details
+  ## @param mariadb.auth.existingSecret [t#MariaDB auth 配置] Use existing secret for password details
   auth:
     existingSecret: openstack-password
   ## MariaDB Primary configuration
@@ -34,7 +39,7 @@ mariadb:
     ## ref: https://kubernetes.io/docs/user-guide/persistent-volumes/
     ## @param mariadb.primary.persistence.enabled Enable persistence on MariaDB using PVC(s)
     ## @param mariadb.primary.persistence.storageClass Persistent Volume storage class
-    ## @param mariadb.primary.persistence.accessModes [array] Persistent Volume access modes
+    ## @param mariadb.primary.persistence.accessModes [m#array] Persistent Volume access modes
     ## @param mariadb.primary.persistence.size Persistent Volume size
     ##
     persistence:
@@ -43,32 +48,15 @@ mariadb:
       accessModes:
         - ReadWriteOnce
       size: 8Gi
-## External Database Configuration
-## All of these values are only used if `mariadb.enabled=false`
-externalDatabase:
-  ## @param externalDatabase.host External Database server host
-  host: localhost
-  ## @param externalDatabase.port External Database server port
-  port: 3306
-  ## @param externalDatabase.user External Database username
-  user: ""
-  ## @param externalDatabase.password External Database user password
-  password: ""
-  ## @param externalDatabase.database External Database database name
-  database: ""
-  ## @param externalDatabase.existingSecret The name of an existing secret with database credentials
-  ## NOTE: Must contain key `mariadb-password`
-  ## NOTE: When it's set, the `externalDatabase.password` parameter is ignored
-  existingSecret: ""
 
 ## @section RabbitMQ chart parameters
 ## RabbitMQ chart configuration
 ## https://github.com/bitnami/charts/blob/master/bitnami/rabbitmq/values.yaml
 rabbitmq:
-  ## @param rabbitmq.enabled Enable/disable RabbitMQ chart installation
+  ## @param rabbitmq.enabled [t#开启rabbitmq] Enable/disable RabbitMQ chart installation
   enabled: true
-  ## @param rabbitmq.auth.username RabbitMQ username
-  ## @param rabbitmq.auth.existingPasswordSecret RabbitMQ password
+  ## @param rabbitmq.auth.username [t#RabbitMQ用户名] RabbitMQ username
+  ## @param rabbitmq.auth.existingPasswordSecret [t#RabbitMQ 密钥名称] Use existing secret for password details
   auth:
     username: openstack
     existingPasswordSecret: openstack-password
@@ -82,51 +70,25 @@ rabbitmq:
     accessModes:
       - ReadWriteOnce
     size: 8Gi
-## External RabbitMQ Configuration
-## All of these values are ignored when rabbitmq.enabled is set to true
-externalRabbitmq:
-  ## @param externalRabbitmq.enabled Enable/disable external RabbitMQ
-  enabled: false
-  ## @param externalRabbitmq.host Host of the external RabbitMQ
-  host: localhost
-  ## @param externalRabbitmq.port External RabbitMQ port number
-  port: 5672
-  ## @param externalRabbitmq.username External RabbitMQ username
-  username: guest
-  ## @param externalRabbitmq.password External RabbitMQ password. It will be saved in a kubernetes secret
-  password: guest
-  ## @param externalRabbitmq.vhost External RabbitMQ virtual host. It will be saved in a kubernetes secret
-  ## e.g:
-  ## vhost: /
-  vhost: ""
-  ## @param externalRabbitmq.existingPasswordSecret Existing secret with RabbitMQ password. It will be saved in a kubernetes secret
-  existingPasswordSecret: ""
 
 ## @section Memcached chart parameters
 
 ## Memcached chart configuration
 ## ref: https://github.com/bitnami/charts/blob/master/bitnami/memcached/values.yaml
 memcached:
-  ## @param memcached.enabled Deploy a Memcached server for caching database queries
+  ## @param memcached.enabled [t#开启memcached] Deploy a Memcached server for caching database queries
   enabled: true
   ## Service parameters
   service:
     ## @param memcached.service.port Memcached service port
     port: 11211
-## External Memcached Configuration
-## All of these values are only used if `memcached.enabled=false`
-externalCache:
-  ## @param externalCache.host External cache server host
-  host: localhost
-  ## @param externalCache.port External cache server port
-  port: 11211
 
 ## @section nginx-ingress-controller chart parameters
 
 ## nginx-ingress-controller chart configuration
 ## ref: https://github.com/bitnami/charts/blob/master/bitnami/nginx-ingress-controller/values.yaml
 nginx-ingress-controller:
-  ## @param nginx-ingress-controller.enabled Deploy a ingress controller server
+  ## @param nginx-ingress-controller.enabled [t#开启nginx-ingress-controller] Deploy a ingress controller server
   enabled: true
   ## @param nginx-ingress-controller.service.type controller service type
   service:
