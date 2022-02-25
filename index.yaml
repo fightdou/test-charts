@@ -357,6 +357,44 @@ entries:
   - annotations:
       category: Openstack
     apiVersion: v2
+    created: "2022-02-25T08:54:11.015177034Z"
+    dependencies:
+    - name: gen-password
+      repository: https://fightdou.github.io/test-charts
+      version: 1.x.x
+    - condition: mariadb.enabled
+      name: mariadb
+      repository: https://charts.bitnami.com/bitnami
+      version: 10.x.x
+    - condition: rabbitmq.enabled
+      name: rabbitmq
+      repository: https://charts.bitnami.com/bitnami
+      version: 8.x.x
+    - condition: memcached.enabled
+      name: memcached
+      repository: https://charts.bitnami.com/bitnami
+      version: 6.x.x
+    - condition: nginx-ingress-controller.enabled
+      name: nginx-ingress-controller
+      repository: https://charts.bitnami.com/bitnami
+      version: 9.x.x
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      tags:
+      - bitnami-common
+      version: 1.x.x
+    description: Openstack dependency service
+    digest: 101dbd92d51f38a1f0b7000b2080994379e75783c49236e51433aa8ae70d0799
+    home: https://kungze.github.io/charts/
+    maintainers:
+    - name: Openstack
+    name: openstack-dep
+    urls:
+    - https://github.com/fightdou/test-charts/releases/download/openstack-dep-1.0.2/openstack-dep-1.0.2.tgz
+    version: 1.0.2
+  - annotations:
+      category: Openstack
+    apiVersion: v2
     created: "2022-02-25T01:04:11.514630914Z"
     dependencies:
     - name: gen-password
@@ -430,4 +468,4 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/openstack-dep-1.0.0/openstack-dep-1.0.0.tgz
     version: 1.0.0
-generated: "2022-02-25T01:04:11.514685514Z"
+generated: "2022-02-25T08:54:11.015242935Z"
