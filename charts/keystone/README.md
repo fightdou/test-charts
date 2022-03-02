@@ -1,5 +1,33 @@
 # keystone
 
+keystone charts 安装 openstack keystone service.  
+keystone charts 依赖 [openstack-dep charts](https://github.com/kungze/charts/tree/main/charts/openstack-dep).
+如果配置不安装 openstack-dep charts，则需手动配置 rabbitmq、mariadb、memcached 的 URL 信息。
+
+## 快速部署
+
+```
+helm repo add kungze https://kungze.github.io/charts
+helm install keystone kungze/keystone
+```
+
+部署完成之后会生成提示信息
+
+```
+** 请耐心等待 chart 部署完成 **你可以通过 openstack cli 访问 keystone 服务
+
+设置环境变量
+
+    export OS_USERNAME=$(kubectl get secret --namespace "doudou" keystone-keystone-admin -o jsonpath="{.data.OS_USERNAME}" | base64 --decode)
+    export OS_PROJECT_DOMAIN_NAME=$(kubectl get secret --namespace "doudou" keystone-keystone-admin -o jsonpath="{.data.OS_PROJECT_DOMAIN_NAME}" | base64 --decode)
+    export OS_USER_DOMAIN_NAME=$(kubectl get secret --namespace "doudou" keystone-keystone-admin -o jsonpath="{.data.OS_USER_DOMAIN_NAME}" | base64 --decode)
+    export OS_PROJECT_NAME=$(kubectl get secret --namespace "doudou" keystone-keystone-admin -o jsonpath="{.data.OS_PROJECT_NAME}" | base64 --decode)
+    export OS_REGION_NAME=$(kubectl get secret --namespace "doudou" keystone-keystone-admin -o jsonpath="{.data.OS_REGION_NAME}" | base64 --decode)
+    export OS_IDENTITY_API_VERSION=$(kubectl get secret --namespace "doudou" keystone-keystone-admin -o jsonpath="{.data.OS_IDENTITY_API_VERSION}" | base64 --decode)
+    export OS_PASSWORD=$(kubectl get --namespace doudou -o jsonpath="{.data.keystone-admin-password}" secrets openstack-password | base64 --decode)
+    export OS_AUTH_URL=http://keystone.doudou.svc.cluster.local/v3
+```
+
 ## Parameters
 
 ### Global parameters
@@ -13,62 +41,61 @@
 
 ### Common parameters
 
-| Name                                                | Form title     | Description                                                                | Value                             |
-| --------------------------------------------------- | -------------- | -------------------------------------------------------------------------- | --------------------------------- |
-| `replicaCount`                                      |                | Number of keystone replicas to deploy (requires ReadWriteMany PVC support) | `1`                               |
-| `existingSecret`                                    | openstack 密钥名称 | Name of existing secret containing keystone credentials                    | `openstack-password`              |
-| `serviceAccountName`                                |                | ServiceAccount name                                                        | `keystone`                        |
-| `resources.limits`                                  |                | The resources limits for the Controller container                          | `{}`                              |
-| `resources.requests`                                |                | The requested resources for the Controller container                       | `{}`                              |
-| `podSecurityContext.enabled`                        |                | Enabled keystone pods' Security Context                                    | `true`                            |
-| `podSecurityContext.fsGroup`                        |                | Set keystone pod's Security Context fsGroup                                | `42424`                           |
-| `podSecurityContext.runAsUser`                      |                | Set keystone container's Security Context runAsUser                        | `42424`                           |
-| `containerSecurityContext.enabled`                  |                | Enabled keystone containers' Security Context                              | `true`                            |
-| `containerSecurityContext.runAsGroup`               |                | Group ID for the container                                                 | `42424`                           |
-| `containerSecurityContext.allowPrivilegeEscalation` |                | Switch privilegeEscalation possibility on or off                           | `false`                           |
-| `containerSecurityContext.readOnlyRootFilesystem`   |                | mount / (root) as a readonly filesystem                                    | `true`                            |
-| `livenessProbe.enabled`                             |                | Enable livenessProbe                                                       | `true`                            |
-| `livenessProbe.httpGet.path`                        |                | Request path for livenessProbe                                             | `/v3/`                            |
-| `livenessProbe.httpGet.port`                        |                | Port for livenessProbe                                                     | `5000`                            |
-| `livenessProbe.httpGet.scheme`                      |                | Scheme for livenessProbe                                                   | `HTTP`                            |
-| `livenessProbe.initialDelaySeconds`                 |                | Initial delay seconds for livenessProbe                                    | `50`                              |
-| `livenessProbe.periodSeconds`                       |                | Period seconds for livenessProbe                                           | `60`                              |
-| `livenessProbe.timeoutSeconds`                      |                | Timeout seconds for livenessProbe                                          | `15`                              |
-| `livenessProbe.failureThreshold`                    |                | Failure threshold for livenessProbe                                        | `3`                               |
-| `livenessProbe.successThreshold`                    |                | Success threshold for livenessProbe                                        | `1`                               |
-| `readinessProbe.enabled`                            |                | Enable readinessProbe                                                      | `true`                            |
-| `readinessProbe.httpGet.path`                       |                | Request path for readinessProbe                                            | `/v3/`                            |
-| `readinessProbe.httpGet.port`                       |                | Port for readinessProbe                                                    | `5000`                            |
-| `readinessProbe.httpGet.scheme`                     |                | Scheme for readinessProbe                                                  | `HTTP`                            |
-| `readinessProbe.initialDelaySeconds`                |                | Initial delay seconds for readinessProbe                                   | `50`                              |
-| `readinessProbe.periodSeconds`                      |                | Period seconds for readinessProbe                                          | `60`                              |
-| `readinessProbe.timeoutSeconds`                     |                | Timeout seconds for readinessProbe                                         | `15`                              |
-| `readinessProbe.failureThreshold`                   |                | Failure threshold for readinessProbe                                       | `3`                               |
-| `readinessProbe.successThreshold`                   |                | Success threshold for readinessProbe                                       | `1`                               |
-| `customLivenessProbe`                               |                | Override default liveness probe                                            | `{}`                              |
-| `customReadinessProbe`                              |                | Override default readiness probe                                           | `{}`                              |
-| `lifecycle.preStop.exec.command`                    |                | LifecycleHooks to set additional configuration at startup                  | `["/tmp/keystone-api.sh","stop"]` |
+| Name                                                | Form title | Description                                                                | Value                             |
+| --------------------------------------------------- | ---------- | -------------------------------------------------------------------------- | --------------------------------- |
+| `replicaCount`                                      |            | Number of keystone replicas to deploy (requires ReadWriteMany PVC support) | `1`                               |
+| `serviceAccountName`                                |            | ServiceAccount name                                                        | `keystone`                        |
+| `resources.limits`                                  |            | The resources limits for the Controller container                          | `{}`                              |
+| `resources.requests`                                |            | The requested resources for the Controller container                       | `{}`                              |
+| `podSecurityContext.enabled`                        |            | Enabled keystone pods' Security Context                                    | `false`                           |
+| `podSecurityContext.runAsUser`                      |            | Set keystone container's Security Context runAsUser                        | `""`                              |
+| `containerSecurityContext.enabled`                  |            | Enabled keystone containers' Security Context                              | `false`                           |
+| `containerSecurityContext.runAsGroup`               |            | Set keystone container's Security Context runAsGroup                       | `42425`                           |
+| `containerSecurityContext.runAsUser`                |            | Set keystone container's Security Context runAsUser                        | `0`                               |
+| `containerSecurityContext.allowPrivilegeEscalation` |            | Switch privilegeEscalation possibility on or off                           | `false`                           |
+| `containerSecurityContext.readOnlyRootFilesystem`   |            | mount / (root) as a readonly filesystem                                    | `false`                           |
+| `livenessProbe.enabled`                             |            | Enable livenessProbe                                                       | `true`                            |
+| `livenessProbe.httpGet.path`                        |            | Request path for livenessProbe                                             | `/v3/`                            |
+| `livenessProbe.httpGet.port`                        |            | Port for livenessProbe                                                     | `5000`                            |
+| `livenessProbe.httpGet.scheme`                      |            | Scheme for livenessProbe                                                   | `HTTP`                            |
+| `livenessProbe.initialDelaySeconds`                 |            | Initial delay seconds for livenessProbe                                    | `50`                              |
+| `livenessProbe.periodSeconds`                       |            | Period seconds for livenessProbe                                           | `60`                              |
+| `livenessProbe.timeoutSeconds`                      |            | Timeout seconds for livenessProbe                                          | `15`                              |
+| `livenessProbe.failureThreshold`                    |            | Failure threshold for livenessProbe                                        | `3`                               |
+| `livenessProbe.successThreshold`                    |            | Success threshold for livenessProbe                                        | `1`                               |
+| `readinessProbe.enabled`                            |            | Enable readinessProbe                                                      | `true`                            |
+| `readinessProbe.httpGet.path`                       |            | Request path for readinessProbe                                            | `/v3/`                            |
+| `readinessProbe.httpGet.port`                       |            | Port for readinessProbe                                                    | `5000`                            |
+| `readinessProbe.httpGet.scheme`                     |            | Scheme for readinessProbe                                                  | `HTTP`                            |
+| `readinessProbe.initialDelaySeconds`                |            | Initial delay seconds for readinessProbe                                   | `50`                              |
+| `readinessProbe.periodSeconds`                      |            | Period seconds for readinessProbe                                          | `60`                              |
+| `readinessProbe.timeoutSeconds`                     |            | Timeout seconds for readinessProbe                                         | `15`                              |
+| `readinessProbe.failureThreshold`                   |            | Failure threshold for readinessProbe                                       | `3`                               |
+| `readinessProbe.successThreshold`                   |            | Success threshold for readinessProbe                                       | `1`                               |
+| `customLivenessProbe`                               |            | Override default liveness probe                                            | `{}`                              |
+| `customReadinessProbe`                              |            | Override default readiness probe                                           | `{}`                              |
+| `lifecycle.preStop.exec.command`                    |            | LifecycleHooks to set additional configuration at startup                  | `["/tmp/keystone-api.sh","stop"]` |
 
 
 ### Keystone Image parameters
 
-| Name                                | Form title | Description                                       | Value                             |
-| ----------------------------------- | ---------- | ------------------------------------------------- | --------------------------------- |
-| `image.keystoneImage.registry`      |            | Moodle image registry                             | `docker.io`                       |
-| `image.keystoneImage.repository`    |            | Moodle image repository                           | `openstackhelm/keystone`          |
-| `image.keystoneImage.tag`           |            | Moodle image tag (immutable tags are recommended) | `wallaby-ubuntu_focal`            |
-| `image.keystoneImage.pullPolicy`    |            | Moodle image pull policy                          | `IfNotPresent`                    |
-| `image.keystoneImage.pullSecrets`   |            | Specify docker-registry secret names as an array  | `[]`                              |
-| `image.entrypointImage.registry`    |            | Moodle image registry                             | `quay.io`                         |
-| `image.entrypointImage.repository`  |            | Moodle image repository                           | `airshipit/kubernetes-entrypoint` |
-| `image.entrypointImage.tag`         |            | Moodle image tag (immutable tags are recommended) | `v1.0.0`                          |
-| `image.entrypointImage.pullPolicy`  |            | Moodle image pull policy                          | `IfNotPresent`                    |
-| `image.entrypointImage.pullSecrets` |            | Specify docker-registry secret names as an array  | `[]`                              |
-| `image.heatImage.registry`          |            | Moodle image registry                             | `docker.io`                       |
-| `image.heatImage.repository`        |            | Moodle image repository                           | `openstackhelm/heat`              |
-| `image.heatImage.tag`               |            | Moodle image tag (immutable tags are recommended) | `wallaby-ubuntu_focal`            |
-| `image.heatImage.pullPolicy`        |            | Moodle image pull policy                          | `IfNotPresent`                    |
-| `image.heatImage.pullSecrets`       |            | Specify docker-registry secret names as an array  | `[]`                              |
+| Name                                  | Form title | Description                                       | Value                               |
+| ------------------------------------- | ---------- | ------------------------------------------------- | ----------------------------------- |
+| `image.keystoneImage.registry`        |            | Moodle image registry                             | `docker.io`                         |
+| `image.keystoneImage.repository`      |            | Moodle image repository                           | `kolla/ubuntu-source-keystone`      |
+| `image.keystoneImage.tag`             |            | Moodle image tag (immutable tags are recommended) | `xena`                              |
+| `image.keystoneImage.pullPolicy`      |            | Moodle image pull policy                          | `IfNotPresent`                      |
+| `image.keystoneImage.pullSecrets`     |            | Specify docker-registry secret names as an array  | `[]`                                |
+| `image.entrypointImage.registry`      |            | Moodle image registry                             | `quay.io`                           |
+| `image.entrypointImage.repository`    |            | Moodle image repository                           | `airshipit/kubernetes-entrypoint`   |
+| `image.entrypointImage.tag`           |            | Moodle image tag (immutable tags are recommended) | `v1.0.0`                            |
+| `image.entrypointImage.pullPolicy`    |            | Moodle image pull policy                          | `IfNotPresent`                      |
+| `image.entrypointImage.pullSecrets`   |            | Specify docker-registry secret names as an array  | `[]`                                |
+| `image.kollaToolboxImage.registry`    |            | Moodle image registry                             | `docker.io`                         |
+| `image.kollaToolboxImage.repository`  |            | Moodle image repository                           | `kolla/ubuntu-source-kolla-toolbox` |
+| `image.kollaToolboxImage.tag`         |            | Moodle image tag (immutable tags are recommended) | `xena`                              |
+| `image.kollaToolboxImage.pullPolicy`  |            | Moodle image pull policy                          | `IfNotPresent`                      |
+| `image.kollaToolboxImage.pullSecrets` |            | Specify docker-registry secret names as an array  | `[]`                                |
 
 
 ### Traffic Exposure Parameters
@@ -97,60 +124,11 @@
 | `ingress.path`                      |            | Default path for the ingress record                                           | `/`                      |
 
 
-### Database Parameters
+### openstack dependency env
 
-| Name                                       | Form title | Description                                                               | Value                |
-| ------------------------------------------ | ---------- | ------------------------------------------------------------------------- | -------------------- |
-| `mariadb.enabled`                          |            | Deploy a MariaDB server to satisfy the applications database requirements | `true`               |
-| `mariadb.architecture`                     |            | MariaDB architecture. Allowed values: `standalone` or `replication`       | `standalone`         |
-| `mariadb.auth.existingSecret`              |            | Use existing secret for password details                                  | `openstack-password` |
-| `mariadb.primary.persistence.enabled`      |            | Enable persistence on MariaDB using PVC(s)                                | `true`               |
-| `mariadb.primary.persistence.storageClass` |            | Persistent Volume storage class                                           | `""`                 |
-| `mariadb.primary.persistence.accessModes`  |            | [array] Persistent Volume access modes                                    | `["ReadWriteOnce"]`  |
-| `mariadb.primary.persistence.size`         |            | Persistent Volume size                                                    | `8Gi`                |
-| `externalDatabase.host`                    |            | External Database server host                                             | `localhost`          |
-| `externalDatabase.port`                    |            | External Database server port                                             | `3306`               |
-| `externalDatabase.user`                    |            | External Database username                                                | `keystone`           |
-| `externalDatabase.password`                |            | External Database user password                                           | `""`                 |
-| `externalDatabase.database`                |            | External Database database name                                           | `keystone`           |
-| `externalDatabase.existingSecret`          |            | The name of an existing secret with database credentials                  | `""`                 |
-
-
-### RabbitMQ chart parameters
-
-| Name                                      | Form title | Description                                                                     | Value                |
-| ----------------------------------------- | ---------- | ------------------------------------------------------------------------------- | -------------------- |
-| `rabbitmq.enabled`                        |            | Enable/disable RabbitMQ chart installation                                      | `true`               |
-| `rabbitmq.auth.username`                  |            | RabbitMQ username                                                               | `openstack`          |
-| `rabbitmq.auth.existingPasswordSecret`    |            | RabbitMQ password                                                               | `openstack-password` |
-| `rabbitmq.persistence.enabled`            |            | Enable persistence on Rabbitmq using PVC(s)                                     | `true`               |
-| `rabbitmq.persistence.storageClass`       |            | Persistent Volume storage class                                                 | `""`                 |
-| `rabbitmq.persistence.accessModes`        |            | Persistent Volume access modes                                                  | `[]`                 |
-| `rabbitmq.persistence.size`               |            | Persistent Volume size                                                          | `8Gi`                |
-| `externalRabbitmq.enabled`                |            | Enable/disable external RabbitMQ                                                | `false`              |
-| `externalRabbitmq.host`                   |            | Host of the external RabbitMQ                                                   | `localhost`          |
-| `externalRabbitmq.port`                   |            | External RabbitMQ port number                                                   | `5672`               |
-| `externalRabbitmq.username`               |            | External RabbitMQ username                                                      | `guest`              |
-| `externalRabbitmq.password`               |            | External RabbitMQ password. It will be saved in a kubernetes secret             | `guest`              |
-| `externalRabbitmq.vhost`                  |            | External RabbitMQ virtual host. It will be saved in a kubernetes secret         | `""`                 |
-| `externalRabbitmq.existingPasswordSecret` |            | Existing secret with RabbitMQ password. It will be saved in a kubernetes secret | `""`                 |
-
-
-### Memcached chart parameters
-
-| Name                     | Form title | Description                                            | Value       |
-| ------------------------ | ---------- | ------------------------------------------------------ | ----------- |
-| `memcached.enabled`      |            | Deploy a Memcached server for caching database queries | `true`      |
-| `memcached.service.port` |            | Memcached service port                                 | `11211`     |
-| `externalCache.host`     |            | External cache server host                             | `localhost` |
-| `externalCache.port`     |            | External cache server port                             | `11211`     |
-
-
-### nginx-ingress-controller chart parameters
-
-| Name                                             | Form title | Description                                                                      | Value         |
-| ------------------------------------------------ | ---------- | -------------------------------------------------------------------------------- | ------------- |
-| `nginx-ingress-controller.service.type`          |            | controller service type                                                          | `ClusterIP`   |
-| `nginx-ingress-controller.podLabels.app`         |            | for nginx-ingress-controller pod add labels to be compatible with keystone SVC   | `ingress-api` |
-| `nginx-ingress-controller.kind`                  |            | Install as DaemonSet                                                             | `DaemonSet`   |
-| `nginx-ingress-controller.daemonset.useHostPort` |            | If `kind` is `DaemonSet`, this will enable `hostPort` for `TCP/80` and `TCP/443` | `true`        |
+| Name                                     | Form title       | Description                                                     | Value  |
+| ---------------------------------------- | ---------------- | --------------------------------------------------------------- | ------ |
+| `openstack-dep.enabled`                  | 安裝 openstack-dep | 安装openstack依赖环境，有mariadb;rabbitmq;memcached 等...                | `true` |
+| `openstack-dep.openstackEnv.rabbitmqUrl` | rabbitmq url     | rabbitmq url信息，如果安装了openstack-dep包，则无需配置，否则，需手动配置rabbitmq url信息 | `""`   |
+| `openstack-dep.openstackEnv.mariadbUrl`  | mariadb url      | mariadb url信息，如果安装了openstack-dep包，则无需配置，否则，需手动配置mariadb url信息   | `""`   |
+| `openstack-dep.openstackEnv.memcacheUrl` | mamcache url     | memcache url信息，如果安装了openstack-dep包，则无需配置，否则，需手动配置memcache url信息 | `""`   |

@@ -9,14 +9,12 @@ spec:
     spec:
       containers:
         - name: keystone-fernet-setup
-          image: {{ template "keystone.image" . }}
-          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          image: {{ template "kolla.toolbox.image" . }}
+          imagePullPolicy: {{ .Values.image.kollaToolboxImage.pullPolicy }}
           command:
             - /bin/sh
             - -c
-            - |
-              /tmp/keystone.sh
-              python /tmp/fernet-manage.py fernet_setup
+            - python3 /tmp/fernet-manage.py fernet_setup
           env:
             - name: KEYSTONE_USER
               value: keystone
@@ -26,48 +24,14 @@ spec:
               value: {{ .Release.Namespace }}
             - name: KEYSTONE_KEYS_REPOSITORY
               value: /etc/keystone/fernet-keys/
-            - name: KEYSTONE_DATABASE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: keystone-database-password
-                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
-            - name: RABBITMQ_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: rabbitmq-password
-                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
           volumeMounts:
           - mountPath: /tmp
             name: pod-tmp
-          - mountPath: /etc/keystone
-            name: etckeystone
           - mountPath: /etc/keystone/fernet-keys/
             name: fernet-keys
           - mountPath: /tmp/fernet-manage.py
             name: keystone-bin
             subPath: fernet-manage.py
-          - mountPath: /tmp/keystone.sh
-            name: keystone-etc
-            subPath: keystone.sh
-      initContainers:
-        - name: init
-          image: {{ template "entrypoint.image" . }}
-          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
-          command:
-            - kubernetes-entrypoint
-          env:
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.name
-            - name: NAMESPACE
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: metadata.namespace
-            - name: PATH
-              value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
       restartPolicy: OnFailure
       serviceAccount: {{ .Values.serviceAccountName}}
       serviceAccountName: {{ .Values.serviceAccountName}}
@@ -76,13 +40,7 @@ spec:
         name: pod-tmp
       - emptyDir: {}
         name: fernet-keys
-      - emptyDir: {}
-        name: etckeystone
       - configMap:
           defaultMode: 365
           name: keystone-bin
         name: keystone-bin
-      - configMap:
-          defaultMode: 365
-          name: keystone-etc
-        name: keystone-etc

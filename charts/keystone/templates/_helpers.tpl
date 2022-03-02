@@ -15,10 +15,10 @@ Return the proper Kubernetes Entrypoint image name
 {{- end -}}
 
 {{/*
-Return the proper Heat image name
+Return the proper kolla toolbox image name
 */}}
-{{- define "heat.image" -}}
-{{- include "common.images.image" (dict "imageRoot" .Values.image.heatImage "global") -}}
+{{- define "kolla.toolbox.image" -}}
+{{- include "common.images.image" (dict "imageRoot" .Values.image.kollaToolboxImage "global") -}}
 {{- end -}}
 
 {{/*
@@ -33,7 +33,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 Return the MariaDB Hostname
 */}}
 {{- define "keystone.databaseHost" -}}
-{{- if (index .Values "openstack-dep" "mariadb" "enabled") }}
+{{- if (index .Values "openstack-dep" "enabled") }}
     {{- if eq (index .Values "openstack-dep" "mariadb" "architecture") "replication" }}
         {{- printf "%s-primary" (include "keystone.mariadb.fullname" .) | trunc 63 | trimSuffix "-" -}}
     {{- else -}}
@@ -48,7 +48,7 @@ Return the MariaDB Hostname
 Return the MariaDB Database Name
 */}}
 {{- define "keystone.databaseName" -}}
-{{- if (index .Values "openstack-dep" "mariadb" "enabled") }}
+{{- if (index .Values "openstack-dep" "enabled") }}
     {{- printf "%s" .Values.endpoints.oslo_db.database -}}
 {{- else -}}
     {{- printf "%s" .Values.externalDatabase.database -}}
@@ -59,7 +59,7 @@ Return the MariaDB Database Name
 Return the MariaDB User
 */}}
 {{- define "keystone.databaseUser" -}}
-{{- if (index .Values "openstack-dep" "mariadb" "enabled") }}
+{{- if (index .Values "openstack-dep" "enabled") }}
     {{- printf "%s" .Values.endpoints.oslo_db.username -}}
 {{- else -}}
     {{- printf "%s" .Values.externalDatabase.user -}}
@@ -67,91 +67,24 @@ Return the MariaDB User
 {{- end -}}
 
 {{/*
+Return the MariaDB Password
+*/}}
+{{- define "keystone.databasePassword" -}}
+{{- if (index .Values "openstack-dep" "enabled") }}
+    {{- printf "%s" (index .Values "openstack-dep" "gen-password" "passwordEnvs" "keystone-database-password" | b64dec) -}}
+{{- else -}}
+    {{- printf "%s" .Values.endpoints.oslo_db.db_password_placeholder -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Return the MariaDB Port
 */}}
 {{- define "keystone.databasePort" -}}
-{{- if (index .Values "openstack-dep" "mariadb" "enabled") }}
+{{- if (index .Values "openstack-dep" "enabled") }}
     {{- printf "3306" -}}
 {{- else -}}
-    {{- printf "%d" (.Values.externalDatabase.port | int ) -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Create a default fully qualified app name for RabbitMQ subchart
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-*/}}
-{{- define "keystone.rabbitmq.fullname" -}}
-{{- if (index .Values "openstack-dep" "rabbitmq" "fullnameOverride") -}}
-{{- .Values.rabbitmq.fullnameOverride | trunc 63 | trimSuffix "-" -}}
-{{- else -}}
-{{- $name := default "rabbitmq" (index .Values "openstack-dep" "rabbitmq" "nameOverride") -}}
-{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the RabbitMQ host
-*/}}
-{{- define "keystone.rabbitmq.host" -}}
-{{- if (index .Values "openstack-dep" "rabbitmq" "enabled") }}
-    {{- printf "%s" (include "keystone.rabbitmq.fullname" .) -}}
-{{- else -}}
-    {{- printf "%s" .Values.externalRabbitmq.host -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the RabbitMQ Port
-*/}}
-{{- define "keystone.rabbitmq.port" -}}
-{{- if (index .Values "openstack-dep" "rabbitmq" "enabled") }}
-    {{- printf "%d" ((index .Values "openstack-dep" "rabbitmq" "port") | int ) -}}
-{{- else -}}
-    {{- printf "%d" (.Values.externalRabbitmq.port | int ) -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the RabbitMQ username
-*/}}
-{{- define "keystone.rabbitmq.user" -}}
-{{- if (index .Values "openstack-dep" "rabbitmq" "enabled") }}
-    {{- printf "%s" (index .Values "openstack-dep" "rabbitmq" "auth" "username") -}}
-{{- else -}}
-    {{- printf "%s" .Values.externalRabbitmq.username -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Create a default fully qualified app name.
-We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
-*/}}
-{{- define "keystone.memcached.fullname" -}}
-{{- include "common.names.dependency.fullname" (dict "chartName" "memcached" "chartValues" (index .Values "openstack-dep" "memcached") "context" $) -}}
-{{- end -}}
-
-{{/*
-Return the Memcached Hostname
-*/}}
-{{- define "keystone.cacheHost" -}}
-{{- if (index .Values "openstack-dep" "memcached" "enabled") }}
-    {{- $releaseNamespace := .Release.Namespace }}
-    {{- $clusterDomain := .Values.endpoints.cluster_domain_suffix }}
-    {{- printf "%s.%s.svc.%s" (include "keystone.memcached.fullname" .) $releaseNamespace $clusterDomain -}}
-{{- else -}}
-    {{- printf "%s" .Values.externalCache.host -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the Memcached Port
-*/}}
-{{- define "keystone.cachePort" -}}
-{{- if (index .Values "openstack-dep" "memcached" "enabled") }}
-    {{- printf "11211" -}}
-{{- else -}}
-    {{- printf "%d" (.Values.externalCache.port | int ) -}}
+    {{- printf "%d" (.Values.endpoints.oslo_db.port | int ) -}}
 {{- end -}}
 {{- end -}}
 

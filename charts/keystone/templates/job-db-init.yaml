@@ -9,21 +9,13 @@ spec:
     spec:
       containers:
         - name: keystone-db-init
-          image: {{ template "heat.image" . }}
-          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          image: {{ template "kolla.toolbox.image" . }}
+          imagePullPolicy: {{ .Values.image.kollaToolboxImage.pullPolicy }}
           command:
             - /bin/sh
             - -c
-            - |
-              /tmp/keystone.sh
-              /tmp/db-init.py
+            - /tmp/db-init.sh
           env:
-            - name: OPENSTACK_CONFIG_FILE
-              value: /etc/keystone/keystone.conf
-            - name: OPENSTACK_CONFIG_DB_SECTION
-              value: database
-            - name: OPENSTACK_CONFIG_DB_KEY
-              value: connection
             - name: KEYSTONE_DATABASE_HOST
               value: {{ include "keystone.databaseHost" . | quote }}
             - name: KEYSTONE_DATABASE_PORT
@@ -42,26 +34,16 @@ spec:
                 secretKeyRef:
                   key: keystone-database-password
                   name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
-            - name: RABBITMQ_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: rabbitmq-password
-                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
           volumeMounts:
           - mountPath: /tmp
             name: pod-tmp
-          - mountPath: /etc/keystone
-            name: etckeystone
-          - mountPath: /tmp/db-init.py
+          - mountPath: /tmp/db-init.sh
             name: keystone-bin
-            subPath: db-init.py
-          - mountPath: /tmp/keystone.sh
-            name: keystone-etc
-            subPath: keystone.sh
+            subPath: db-init.sh
       initContainers:
         - name: init
           image: {{ template "entrypoint.image" . }}
-          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          imagePullPolicy: {{ .Values.image.entrypointImage.pullPolicy }}
           command:
             - kubernetes-entrypoint
           env:
@@ -85,13 +67,7 @@ spec:
       volumes:
       - emptyDir: {}
         name: pod-tmp
-      - emptyDir: {}
-        name: etckeystone
       - configMap:
           defaultMode: 365
           name: keystone-bin
         name: keystone-bin
-      - configMap:
-          defaultMode: 365
-          name: keystone-etc
-        name: keystone-etc
