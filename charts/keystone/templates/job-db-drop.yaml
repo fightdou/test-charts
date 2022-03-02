@@ -15,14 +15,12 @@ spec:
     spec:
       containers:
         - name: keystone-db-drop
-          image: {{ template "keystone.image" . }}
+          image: {{ template "kolla.toolbox.image" . }}
           imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
           command:
             - /bin/sh
             - -c
-            - |
-              /tmp/keystone.sh
-              python /tmp/db-drop.py
+            - /tmp/db-drop.sh
           env:
             - name: OPENSTACK_CONFIG_FILE
               value: /etc/keystone/keystone.conf
@@ -56,15 +54,10 @@ spec:
           volumeMounts:
           - mountPath: /tmp
             name: pod-tmp
-          - mountPath: /etc/keystone
-            name: etckeystone
-          - mountPath: /tmp/db-drop.py
+          - mountPath: /tmp/db-drop.sh
             name: keystone-bin
             readOnly: true
-            subPath: db-drop.py
-          - mountPath: /tmp/keystone.sh
-            name: keystone-etc
-            subPath: keystone.sh
+            subPath: db-drop.sh
       initContainers:
         - name: init
           image: {{ template "entrypoint.image" . }}
@@ -92,13 +85,8 @@ spec:
       volumes:
       - emptyDir: {}
         name: pod-tmp
-      - emptyDir: {}
-        name: etckeystone
       - configMap:
           defaultMode: 365
           name: keystone-bin
         name: keystone-bin
-      - configMap:
-          defaultMode: 365
-          name: keystone-etc
-        name: keystone-etc
+

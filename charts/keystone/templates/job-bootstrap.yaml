@@ -19,10 +19,7 @@ spec:
             - name: OS_AUTH_URL
               value: {{ include "keystone.public.endpoints" . }}
             - name: OS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: keystone-admin-password
-                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
+              value: {{ include "keystone.admin.password" . }}
             - name: OS_REGION_NAME
               valueFrom:
                 secretKeyRef:
