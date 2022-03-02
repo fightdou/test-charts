@@ -15,7 +15,7 @@ spec:
             - /bin/sh
             - -c
             - |
-              /tmp/keystone.sh
+              touch /var/log/kolla/keystone/keystone.log
               /tmp/db-sync.sh
           env:
             - name: OS_BOOTSTRAP_ADMIN_URL
@@ -35,20 +35,12 @@ spec:
                 secretKeyRef:
                   key: keystone-database-password
                   name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
-            - name: RABBITMQ_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: rabbitmq-password
-                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
             - name: OS_IDENTITY_API_VERSION
               value: {{ .Values.endpoints.auth.admin.version | quote }}
             - name: OS_AUTH_URL
               value: {{ include "keystone.public.endpoints" . }}
             - name: OS_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: keystone-admin-password
-                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
+              value: {{ include "keystone.admin.password" . }}
             - name: OS_REGION_NAME
               valueFrom:
                 secretKeyRef:
@@ -92,9 +84,11 @@ spec:
           volumeMounts:
           - mountPath: /tmp
             name: pod-tmp
-          - mountPath: /tmp/keystone.sh
+          - mountPath: /var/log/kolla/keystone
+            name: keystonelog
+          - mountPath: /etc/keystone/keystone.conf
             name: keystone-etc
-            subPath: keystone.sh
+            subPath: keystone.conf
           - mountPath: /tmp/db-sync.sh
             name: keystone-bin
             subPath: db-sync.sh
@@ -132,8 +126,10 @@ spec:
       volumes:
       - emptyDir: {}
         name: pod-tmp
+      - emptyDir: {}
+        name: keystonelog
       - configMap:
-          defaultMode: 365
+          defaultMode: 493
           name: keystone-etc
         name: keystone-etc
       - configMap:

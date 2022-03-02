@@ -13,18 +13,17 @@
 apiVersion: v2
 description: Openstack keystone service
 name: keystone
-version: 1.0.0
+version: 1.0.1
 home: https://kungze.github.io/charts/
 maintainers:
   - name: Kungze
 dependencies:
   - name: openstack-dep
-    repository: https://fightdou.github.io/test-charts
+    condition: openstack-dep.enabled
+    repository: https://kungze.github.io/charts
     version: 1.x.x
   - name: common
     repository: https://charts.bitnami.com/bitnami
-    tags:
-      - bitnami-common
     version: 1.x.x
 engine: gotpl
 annotations:

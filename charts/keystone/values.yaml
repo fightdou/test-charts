@@ -18,8 +18,6 @@ global:
 
 ## @param replicaCount Number of keystone replicas to deploy (requires ReadWriteMany PVC support)
 replicaCount: 1
-## @param existingSecret [t#openstack 密钥名称] Name of existing secret containing keystone credentials
-existingSecret: openstack-password
 ## @param serviceAccountName ServiceAccount name
 serviceAccountName: keystone
 ## Controller containers' resource requests and limits
@@ -44,23 +42,23 @@ resources:
 ## Configure Pods Security Context
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
 ## @param podSecurityContext.enabled Enabled keystone pods' Security Context
-## @param podSecurityContext.fsGroup Set keystone pod's Security Context fsGroup
 ## @param podSecurityContext.runAsUser Set keystone container's Security Context runAsUser
 podSecurityContext:
-  enabled: true
-  fsGroup: 42424
-  runAsUser: 42424
+  enabled: false
+  runAsUser: ""
 ## Configure Container Security Context (only main container)
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
 ## @param containerSecurityContext.enabled Enabled keystone containers' Security Context
-## @param containerSecurityContext.runAsGroup Group ID for the container
+## @param containerSecurityContext.runAsGroup Set keystone container's Security Context runAsGroup
+## @param containerSecurityContext.runAsUser Set keystone container's Security Context runAsUser
 ## @param containerSecurityContext.allowPrivilegeEscalation Switch privilegeEscalation possibility on or off
 ## @param containerSecurityContext.readOnlyRootFilesystem mount / (root) as a readonly filesystem
 containerSecurityContext:
-  enabled: true
-  runAsGroup: 42424
+  enabled: false
+  runAsGroup: 42425
+  runAsUser: 0
   allowPrivilegeEscalation: false
-  readOnlyRootFilesystem: true
+  readOnlyRootFilesystem: false
 ## Controller containers' liveness probe. Evaluated as a template.
 ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes
 ## @param livenessProbe.enabled Enable livenessProbe
@@ -128,8 +126,8 @@ image:
   ## @param image.keystoneImage.pullSecrets Specify docker-registry secret names as an array
   keystoneImage:
     registry: docker.io
-    repository: openstackhelm/keystone
-    tag: wallaby-ubuntu_focal
+    repository: kolla/ubuntu-source-keystone
+    tag: xena
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -161,15 +159,15 @@ image:
     ## pullSecrets:
     ##   - myRegistryKeySecretName
     pullSecrets: []
-  ## @param image.heatImage.registry Moodle image registry
-  ## @param image.heatImage.repository Moodle image repository
-  ## @param image.heatImage.tag Moodle image tag (immutable tags are recommended)
-  ## @param image.heatImage.pullPolicy Moodle image pull policy
-  ## @param image.heatImage.pullSecrets Specify docker-registry secret names as an array
-  heatImage:
+  ## @param image.kollaToolboxImage.registry Moodle image registry
+  ## @param image.kollaToolboxImage.repository Moodle image repository
+  ## @param image.kollaToolboxImage.tag Moodle image tag (immutable tags are recommended)
+  ## @param image.kollaToolboxImage.pullPolicy Moodle image pull policy
+  ## @param image.kollaToolboxImage.pullSecrets Specify docker-registry secret names as an array
+  kollaToolboxImage:
     registry: docker.io
-    repository: openstackhelm/heat
-    tag: wallaby-ubuntu_focal
+    repository: kolla/ubuntu-source-kolla-toolbox
+    tag: xena
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
     ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -241,15 +239,20 @@ endpoints:
     admin:
       region_name: RegionOne
       username: admin
+      password: password
       project_name: admin
       user_domain_name: default
       project_domain_name: default
       default_domain_id: default
       interface: internal
+      os_internal_url: ""
+      os_auth_url: ""
       version: "3"
   oslo_db:
     username: keystone
     database: keystone
+    password: password
+    port: 3306
 
 ## @skip secrets
 secrets:
@@ -318,26 +321,14 @@ ingress:
   ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
   path: /
 
-## @section Openstack dependency environment parameter
-
-## @param openstack-dep.gen-password.secretName auto generate openstack password secret name
-## @param openstack-dep.mariadb.enabled openstack dependency environment enable mariadb
-## @param openstack-dep.mariadb.architecture openstack dependency environment mariadb architecture support (`standalone` or `replication`)
-## @param openstack-dep.rabbitmq.enabled openstack dependency environment enable rabbitmq
-## @param openstack-dep.rabbitmq.auth.username openstack dependency environment enable rabbitmq service username
-## @param openstack-dep.memcached.enabled openstack dependency environment enable memcached
-## @param openstack-dep.nginx-ingress-controller.enabled openstack dependency environment enable nginx-ingress-controller
+## @section openstack dependency env
+## @param openstack-dep.enabled [t#安裝 openstack-dep] 安装openstack依赖环境，有mariadb;rabbitmq;memcached 等...
 openstack-dep:
-  gen-password:
-    secretName: openstack-password
-  mariadb:
-    enabled: true
-    architecture: standalone
-  rabbitmq:
-    enabled: true
-    auth:
-      username: openstack
-  memcached:
-    enabled: true
-  nginx-ingress-controller:
-    enabled: true
+  enabled: true
+  ## @param openstack-dep.openstackEnv.rabbitmqUrl [t#rabbitmq url] rabbitmq url信息，如果安装了openstack-dep包，则无需配置，否则，需手动配置rabbitmq url信息
+  ## @param openstack-dep.openstackEnv.mariadbUrl [t#mariadb url] mariadb url信息，如果安装了openstack-dep包，则无需配置，否则，需手动配置mariadb url信息
+  ## @param openstack-dep.openstackEnv.memcacheUrl [t#mamcache url] memcache url信息，如果安装了openstack-dep包，则无需配置，否则，需手动配置memcache url信息
+  openstackEnv:
+    rabbitmqUrl: ""
+    mariadbUrl: ""
+    memcacheUrl: ""

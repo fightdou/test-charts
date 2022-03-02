@@ -14,7 +14,7 @@ spec:
         spec:
           containers:
             - name: keystone-fernet-rotate
-              image: {{ template "keystone.image" . }}
+              image: {{ template "kolla.toolbox.image" . }}
               imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
               env:
                 - name: KEYSTONE_USER
@@ -27,31 +27,19 @@ spec:
                   value: /etc/keystone/fernet-keys/
                 - name: KEYSTONE_fernet_MIGRATE_WAIT
                   value: {{ .Values.jobs.fernet_rotate.migrate_wait | quote }}
-                - name: KEYSTONE_DATABASE_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      key: keystone-database-password
-                      name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
-                - name: RABBITMQ_PASSWORD
-                  valueFrom:
-                    secretKeyRef:
-                      key: rabbitmq-password
-                      name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
               command:
                 - /bin/sh
                 - -c
-                - |
-                  /tmp/keystone.sh
-                  python /tmp/fernet-manage.py fernet_rotate
+                - python3 /tmp/fernet-manage.py fernet_rotate
               volumeMounts:
                 - name: pod-tmp
                   mountPath: /tmp
                 - name: etckeystone
                   mountPath: /etc/keystone
-                - name: keystone-etc
-                  mountPath: /tmp/keystone.sh
-                  subPath: keystone.sh
+                - mountPath: /etc/keystone/keystone.conf
+                  name: keystone-etc
                   readOnly: true
+                  subPath: keystone.conf
                 - name: keystone-bin
                   mountPath: /tmp/fernet-manage.py
                   subPath: fernet-manage.py
