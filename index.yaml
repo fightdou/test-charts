@@ -252,6 +252,27 @@ entries:
   - annotations:
       category: Openstack
     apiVersion: v2
+    created: "2022-03-04T09:02:54.160011034Z"
+    dependencies:
+    - condition: openstack-dep.enabled
+      name: openstack-dep
+      repository: https://kungze.github.io/charts
+      version: 1.x.x
+    - name: common
+      repository: https://charts.bitnami.com/bitnami
+      version: 1.x.x
+    description: Openstack keystone service
+    digest: 097d53b5689d2c09e78aa798b955d7b4d4a6760c4ab034ea429ecf6a944efc1c
+    home: https://kungze.github.io/charts/
+    maintainers:
+    - name: Kungze
+    name: keystone
+    urls:
+    - https://github.com/fightdou/test-charts/releases/download/keystone-1.0.2/keystone-1.0.2.tgz
+    version: 1.0.2
+  - annotations:
+      category: Openstack
+    apiVersion: v2
     created: "2022-03-02T06:07:43.408572865Z"
     dependencies:
     - condition: openstack-dep.enabled
@@ -756,4 +777,4 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/openstack-dep-1.0.0/openstack-dep-1.0.0.tgz
     version: 1.0.0
-generated: "2022-03-02T06:07:43.408765667Z"
+generated: "2022-03-04T09:02:54.160107038Z"
