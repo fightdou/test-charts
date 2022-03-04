@@ -10,14 +10,28 @@ spec:
       containers:
         - name: keystone-db-sync
           image: {{ template "keystone.image" . }}
-          {{- if not index .Values "openstack-dep" "enabeld"}}
-          command:
-            - /bin/sh
-            - -c
-            - /tmp/edit-keystone-conf.sh
-          {{- end }}
           imagePullPolicy: {{ .Values.image.keystoneImage.pullPolicy }}
           env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: "COPY_ALWAYS"
+            - name: KOLLA_SERVICE_NAME
+              value: "keystone-db-sync"
+            - name: PATH
+              value: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+            - name: LANG
+              value: "en_US.UTF-8"
+            - name: KOLLA_BASE_DISTRO
+              value: "ubuntu"
+            - name: KOLLA_DISTRO_PYTHON_VERSION
+              value: "3.8"
+            - name: KOLLA_BASE_ARCH
+              value: "x86_64"
+            - name: SETUPTOOLS_USE_DISTUTILS
+              value: "stdlib"
+            - name: PS1
+              value: "$(tput bold)($(printenv KOLLA_SERVICE_NAME))$(tput sgr0)[$(id -un)@$(hostname -s) $(pwd)]$ "
+            - name: DEBIAN_FRONTEND
+              value: "noninteractive"
             - name: OS_BOOTSTRAP_ADMIN_URL
               value: {{ include "keystone.public.endpoints" . }}
             - name: OS_BOOTSTRAP_INTERNAL_URL
@@ -40,8 +54,6 @@ spec:
                 secretKeyRef:
                   key: keystone-admin-password
                   name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
-            - name: OS_IDENTITY_API_VERSION
-              value: {{ .Values.endpoints.auth.admin.version | quote }}
             - name: OS_AUTH_URL
               value: {{ include "keystone.public.endpoints" . }}
             - name: OS_REGION_NAME
@@ -87,9 +99,6 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: pod-tmp
-            - mountPath: /tmp/edit-keystone-conf.sh
-              name: keystone-bin
-              subPath: edit-keystone-conf.sh
             - mountPath: /var/log/kolla/keystone
               name: keystonelog
             - mountPath: /var/lib/kolla/config_files/keystone.conf
@@ -98,7 +107,7 @@ spec:
             - mountPath: /var/lib/kolla/config_files/config.json
               name: keystone-etc
               readOnly: true
-              subPath: keystone-fernet-setup.json
+              subPath: keystone-db-sync.json
             - mountPath: /tmp/db-sync.sh
               name: keystone-bin
               subPath: db-sync.sh
@@ -139,11 +148,11 @@ spec:
       - emptyDir: {}
         name: keystonelog
       - configMap:
-          defaultMode: 493
+          defaultMode: 365
           name: keystone-etc
         name: keystone-etc
       - configMap:
-          defaultMode: 365
+          defaultMode: 493
           name: keystone-bin
         name: keystone-bin
       - name: keystone-fernet-keys

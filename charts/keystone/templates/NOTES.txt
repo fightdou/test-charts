@@ -4,7 +4,7 @@ APP VERSION: {{ .Chart.AppVersion }}
 
 ** 请耐心等待 chart 部署完成 **
 
-{{- $endpointsSecretName := include "keystone.endpoints.secretName" . -}}
+{{- $endpointsSecretName := .Values.secrets.identity.admin -}}
 
 你可以通过 openstack cli 访问 keystone 服务
 
@@ -16,9 +16,5 @@ APP VERSION: {{ .Chart.AppVersion }}
     {{ include "common.utils.secret.getvalue" (dict "secret" $endpointsSecretName "field" "OS_PROJECT_NAME" "context" $) }}
     {{ include "common.utils.secret.getvalue" (dict "secret" $endpointsSecretName "field" "OS_REGION_NAME" "context" $) }}
     {{ include "common.utils.secret.getvalue" (dict "secret" $endpointsSecretName "field" "OS_IDENTITY_API_VERSION" "context" $) }}
-    {{- if index .Values "openstack-dep" "enabled" }}
     export OS_PASSWORD=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.data.keystone-admin-password}" secrets {{ index .Values "openstack-dep" "gen-password" "secretName" }} | base64 --decode)
-    {{- else }}
-    export OS_PASSWORD={{ .Values.endpoints.auth.admin.password }}
-    {{- end }}
     export OS_AUTH_URL={{ include "keystone.public.endpoints" . }}

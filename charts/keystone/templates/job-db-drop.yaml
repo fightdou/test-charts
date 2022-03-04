@@ -24,7 +24,7 @@ spec:
             - name: KEYSTONE_DATABASE_HOST
               value: {{ include "keystone.databaseHost" . | quote }}
             - name: KEYSTONE_DATABASE_NAME
-              value: {{ include "keystone.databaseName" . | quote }}
+              value: {{ .Values.endpoints.oslo_db.database }}
             - name: ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -56,8 +56,10 @@ spec:
                   fieldPath: metadata.namespace
             - name: PATH
               value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
+            {{- if (index .Values "openstack-dep" "enabled")}}
             - name: DEPENDENCY_SERVICE
               value: {{ .Release.Namespace }}:{{ include "keystone.mariadb.fullname" . }}
+            {{- end }}
       restartPolicy: OnFailure
       serviceAccount: {{ .Values.serviceAccountName}}
       serviceAccountName: {{ .Values.serviceAccountName}}
@@ -65,7 +67,7 @@ spec:
       - emptyDir: {}
         name: pod-tmp
       - configMap:
-          defaultMode: 365
+          defaultMode: 493
           name: keystone-bin
         name: keystone-bin
 

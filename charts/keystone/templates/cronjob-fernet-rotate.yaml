@@ -59,7 +59,6 @@ spec:
                 value: eth0
               - name: PATH
                 value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
-              - name: DEPENDENCY_SERVICE
               - name: DEPENDENCY_JOBS
                 value: {{ include "joinListWithComma" .Values.dependencies.fernet_rotate.jobs }}
               - name: DEPENDENCY_DAEMONSET

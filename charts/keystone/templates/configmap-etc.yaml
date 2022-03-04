@@ -15,7 +15,7 @@ data:
     enable_proxy_headers_parsing = True
 
     [database]
-    connection = mysql+pymysql://{{ include "keystone.databaseUser" . }}:{{ include "keystone.databasePassword" . }}@{{ index .Values "openstack-dep" "openstackEnv" "mariadbUrl" }}/{{ include "keystone.databaseName" . }}
+    connection = mysql+pymysql://{{ .Values.endpoints.oslo_db.username }}:{{ include "keystone.databasePassword" . }}@{{ index .Values "openstack-dep" "openstackEnv" "mariadbUrl" }}/{{ .Values.endpoints.oslo_db.database }}
     connection_recycle_time = 10
     max_pool_size = 1
     max_retries = -1
@@ -38,6 +38,56 @@ data:
     transport_url = {{ index .Values "openstack-dep" "openstackEnv" "rabbitmqUrl" }} 
     driver = messagingv2
     topics = barbican_notifications
+  wsgi-keystone.conf: |-
+    Listen 0.0.0.0:5000
+    Listen 0.0.0.0:35357
+
+    ServerSignature Off
+    ServerTokens Prod
+    TraceEnable off
+
+    ErrorLog "/var/log/kolla/keystone/apache-error.log"
+    <IfModule log_config_module>
+        CustomLog "/var/log/kolla/keystone/apache-access.log" common
+    </IfModule>
+
+    <Directory "/usr/bin/">
+        <FilesMatch "^keystone-wsgi-(public|admin)$">
+            AllowOverride None
+            Options None
+            Require all granted
+        </FilesMatch>
+    </Directory>
+
+    <VirtualHost *:5000>
+        WSGIDaemonProcess keystone-public processes=5 threads=1 user=keystone group=keystone display-name=%{GROUP} python-path=/usr/lib/python3/dist-packages
+        WSGIProcessGroup keystone-public
+        WSGIScriptAlias / /usr/bin/keystone-wsgi-public
+        WSGIApplicationGroup %{GLOBAL}
+        WSGIPassAuthorization On
+        <IfVersion >= 2.4>
+          ErrorLogFormat "%{cu}t %M"
+        </IfVersion>
+        ErrorLog "/var/log/kolla/keystone/keystone-apache-public-error.log"
+        LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" logformat
+        CustomLog "/var/log/kolla/keystone/keystone-apache-public-access.log" logformat
+
+    </VirtualHost>
+
+    <VirtualHost *:35357>
+        WSGIDaemonProcess keystone-admin processes=5 threads=1 user=keystone group=keystone display-name=%{GROUP} python-path=/usr/lib/python3/dist-packages
+        WSGIProcessGroup keystone-admin
+        WSGIScriptAlias / /usr/bin/keystone-wsgi-admin
+        WSGIApplicationGroup %{GLOBAL}
+        WSGIPassAuthorization On
+        <IfVersion >= 2.4>
+          ErrorLogFormat "%{cu}t %M"
+        </IfVersion>
+        ErrorLog "/var/log/kolla/keystone/keystone-apache-admin-error.log"
+        LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" logformat
+        CustomLog "/var/log/kolla/keystone/keystone-apache-admin-access.log" logformat
+
+    </VirtualHost>
   keystone-api.json: |-
     {
       "command": "/usr/bin/keystone-startup.sh",
@@ -72,79 +122,6 @@ data:
           }
       ]
     }
-  keystone-startup.sh: |-
-    #!/bin/bash -x
-    set -o errexit
-    set -o pipefail
-
-    FERNET_KEY_DIR="/etc/keystone/fernet-keys"
-
-    # Ensure Fernet keys are populated, check for 0 (staging) key
-    n=0
-    while [ ! -f "${FERNET_KEY_DIR}/0" ]; do
-        if [ $n -lt 36 ]; then
-            n=$(( n + 1 ))
-            echo "ERROR: Fernet keys have not been populated, rechecking in 5 seconds"
-            echo "DEBUG: ${FERNET_KEY_DIR} contents:"
-            ls -l ${FERNET_KEY_DIR}
-            sleep 5
-        else
-            echo "CRITICAL: Waited for 3 minutes - failing"
-            exit 1
-        fi
-    done
-
-    exec /usr/sbin/apache2 $@
-  wsgi-keystone.conf: |-
-    Listen 0.0.0.0:5000
-    Listen 0.0.0.0:35357
-
-    ServerSignature Off
-    ServerTokens Prod
-    TraceEnable off
-
-    ErrorLog "/var/log/kolla/keystone/apache-error.log"
-    <IfModule log_config_module>
-        CustomLog "/var/log/kolla/keystone/apache-access.log" common
-    </IfModule>
-
-    <Directory "/var/lib/kolla/venv/bin/">
-        <FilesMatch "^keystone-wsgi-(public|admin)$">
-            AllowOverride None
-            Options None
-            Require all granted
-        </FilesMatch>
-    </Directory>
-
-    <VirtualHost *:5000>
-        WSGIDaemonProcess keystone-public processes=5 threads=1 user=keystone group=keystone display-name=%{GROUP} python-path=/var/lib/kolla/venv/lib/python3.8/site-packages
-        WSGIProcessGroup keystone-public
-        WSGIScriptAlias / /var/lib/kolla/venv/bin/keystone-wsgi-public
-        WSGIApplicationGroup %{GLOBAL}
-        WSGIPassAuthorization On
-        <IfVersion >= 2.4>
-          ErrorLogFormat "%{cu}t %M"
-        </IfVersion>
-        ErrorLog "/var/log/kolla/keystone/keystone-apache-public-error.log"
-        LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" logformat
-        CustomLog "/var/log/kolla/keystone/keystone-apache-public-access.log" logformat
-
-    </VirtualHost>
-
-    <VirtualHost *:35357>
-        WSGIDaemonProcess keystone-admin processes=5 threads=1 user=keystone group=keystone display-name=%{GROUP} python-path=/var/lib/kolla/venv/lib/python3.8/site-packages
-        WSGIProcessGroup keystone-admin
-        WSGIScriptAlias / /var/lib/kolla/venv/bin/keystone-wsgi-admin
-        WSGIApplicationGroup %{GLOBAL}
-        WSGIPassAuthorization On
-        <IfVersion >= 2.4>
-          ErrorLogFormat "%{cu}t %M"
-        </IfVersion>
-        ErrorLog "/var/log/kolla/keystone/keystone-apache-admin-error.log"
-        LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" logformat
-        CustomLog "/var/log/kolla/keystone/keystone-apache-admin-access.log" logformat
-
-    </VirtualHost>
   keystone-db-sync.json: |-
     {
       "command": "/tmp/db-sync.sh",
@@ -156,6 +133,34 @@ data:
               "perm": "0600"
           }
       ],
+      "permissions": [
+          {
+              "path": "/var/log/kolla",
+              "owner": "keystone:kolla"
+          },
+          {
+              "path": "/var/log/kolla/keystone/keystone.log",
+              "owner": "keystone:keystone"
+          }
+      ]
+    }
+  keystone-fernet-setup.json: |-
+    {
+      "command": "python3 /tmp/fernet-manage.py fernet_setup",
+      "permissions": [
+          {
+              "path": "/var/log/kolla",
+              "owner": "keystone:kolla"
+          },
+          {
+              "path": "/var/log/kolla/keystone/keystone.log",
+              "owner": "keystone:keystone"
+          }
+      ]
+    }
+  keystone-credential-setup.json: |-
+    {
+      "command": "python3 /tmp/fernet-manage.py credential_setup",
       "permissions": [
           {
               "path": "/var/log/kolla",

@@ -4,11 +4,6 @@ metadata:
   name: keystone-bin
   namespace: {{ .Release.Namespace | quote }}
 data:
-  edit-keystone-conf.sh: |-
-    #!/bin/bash
-    set -ex
-    connection="mysql+pymysql://{{ include "keystone.databaseUser" . }}:${KEYSTONE_DATABASE_PASSWORD}@{{ index .Values "openstack-dep" "openstackEnv" "mariadbUrl" }}/{{ include "keystone.databaseName" . }}"
-    sed -i "s#^connection = .*#connection = $connection#g" /etc/keystone/keystone.conf
   bootstrap.sh: |
     #!/bin/bash
     set -ex
@@ -17,6 +12,29 @@ data:
           --user="${OS_USERNAME}" \
           --domain="${OS_DEFAULT_DOMAIN}" \
           "admin"
+  keystone-startup.sh: |-
+    #!/bin/bash -x
+    set -o errexit
+    set -o pipefail
+    connection="mysql+pymysql://{{ .Values.endpoints.oslo_db.username }}:${KEYSTONE_DATABASE_PASSWORD}@{{ index .Values "openstack-dep" "openstackEnv" "mariadbUrl" }}/{{ .Values.endpoints.oslo_db.database }}"
+    sed -i "s#^connection = .*#connection = $connection#g" /etc/keystone/keystone.conf
+    FERNET_KEY_DIR="/etc/keystone/fernet-keys"
+
+    # Ensure Fernet keys are populated, check for 0 (staging) key
+    n=0
+    while [ ! -f "${FERNET_KEY_DIR}/0" ]; do
+        if [ $n -lt 36 ]; then
+            n=$(( n + 1 ))
+            echo "ERROR: Fernet keys have not been populated, rechecking in 5 seconds"
+            echo "DEBUG: ${FERNET_KEY_DIR} contents:"
+            ls -l ${FERNET_KEY_DIR}
+            sleep 5
+        else
+            echo "CRITICAL: Waited for 3 minutes - failing"
+            exit 1
+        fi
+    done
+    exec /usr/sbin/apache2 $@
   db-drop.sh: |
     #!/bin/bash
     set -ex
@@ -32,6 +50,8 @@ data:
   db-sync.sh: |
     #!/bin/bash
     set -ex
+    connection="mysql+pymysql://{{ .Values.endpoints.oslo_db.username }}:${KEYSTONE_DATABASE_PASSWORD}@{{ index .Values "openstack-dep" "openstackEnv" "mariadbUrl" }}/{{ .Values.endpoints.oslo_db.database }}"
+    sed -i "s#^connection = .*#connection = $connection#g" /etc/keystone/keystone.conf
     keystone-manage --config-file=/etc/keystone/keystone.conf db_sync
     keystone-manage --config-file=/etc/keystone/keystone.conf bootstrap \
         --bootstrap-username ${OS_USERNAME} \

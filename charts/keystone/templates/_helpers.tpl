@@ -15,7 +15,7 @@ Return the proper Kubernetes Entrypoint image name
 {{- end -}}
 
 {{/*
-Return the proper kolla toolbox image name
+Return the proper Kolla toolbox image name
 */}}
 {{- define "kolla.toolbox.image" -}}
 {{- include "common.images.image" (dict "imageRoot" .Values.image.kollaToolboxImage "global") -}}
@@ -34,35 +34,11 @@ Return the MariaDB Hostname
 */}}
 {{- define "keystone.databaseHost" -}}
 {{- if (index .Values "openstack-dep" "enabled") }}
-    {{- if eq (index .Values "openstack-dep" "mariadb" "architecture") "replication" }}
-        {{- printf "%s-primary" (include "keystone.mariadb.fullname" .) | trunc 63 | trimSuffix "-" -}}
-    {{- else -}}
-        {{- printf "%s" (include "keystone.mariadb.fullname" .) -}}
-    {{- end -}}
+    {{- printf "%s" (include "keystone.mariadb.fullname" .) -}}
 {{- else -}}
-    {{- printf "%s" .Values.externalDatabase.host -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the MariaDB Database Name
-*/}}
-{{- define "keystone.databaseName" -}}
-{{- if (index .Values "openstack-dep" "enabled") }}
-    {{- printf "%s" .Values.endpoints.oslo_db.database -}}
-{{- else -}}
-    {{- printf "%s" .Values.externalDatabase.database -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the MariaDB User
-*/}}
-{{- define "keystone.databaseUser" -}}
-{{- if (index .Values "openstack-dep" "enabled") }}
-    {{- printf "%s" .Values.endpoints.oslo_db.username -}}
-{{- else -}}
-    {{- printf "%s" .Values.externalDatabase.user -}}
+    {{- $url := regexSplit ":" (index .Values "openstack-dep" "openstackEnv" "mariadbUrl") -1 }}
+    {{- $host := index $url 0 }}
+    {{- printf $host }}
 {{- end -}}
 {{- end -}}
 
@@ -74,17 +50,6 @@ Return the MariaDB Password
     {{- printf "%s" (index .Values "openstack-dep" "gen-password" "passwordEnvs" "keystone-database-password" | b64dec) -}}
 {{- else -}}
     {{- printf "%s" .Values.endpoints.oslo_db.db_password_placeholder -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return the MariaDB Port
-*/}}
-{{- define "keystone.databasePort" -}}
-{{- if (index .Values "openstack-dep" "enabled") }}
-    {{- printf "3306" -}}
-{{- else -}}
-    {{- printf "%d" (.Values.endpoints.oslo_db.port | int ) -}}
 {{- end -}}
 {{- end -}}
 
@@ -128,15 +93,4 @@ return: |
 {{- define "joinListWithComma" -}}
 {{- $local := dict "first" true -}}
 {{- range $k, $v := . -}}{{- if not $local.first -}},{{- end -}}{{- $v -}}{{- $_ := set $local "first" false -}}{{- end -}}
-{{- end -}}
-
-{{/*
-Get the keystone endpoints secret name
-*/}}
-{{- define "keystone.endpoints.secretName" -}}
-{{- if not (empty .Values.secrets.identity.admin) -}}
-  {{- printf "%s" .Values.secrets.identity.admin -}}
-{{- else -}}
-  {{- printf "%s" (include "common.names.fullname" .) -}}
-{{- end -}}
 {{- end -}}

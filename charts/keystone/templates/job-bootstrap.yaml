@@ -97,6 +97,6 @@ spec:
       - emptyDir: {}
         name: pod-tmp
       - configMap:
-          defaultMode: 365
+          defaultMode: 493
           name: keystone-bin
         name: keystone-bin
