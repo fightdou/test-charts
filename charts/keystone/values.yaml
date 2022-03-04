@@ -126,7 +126,7 @@ image:
   ## @param image.keystoneImage.pullSecrets Specify docker-registry secret names as an array
   keystoneImage:
     registry: docker.io
-    repository: kolla/ubuntu-source-keystone
+    repository: kolla/ubuntu-binary-keystone
     tag: xena
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -166,7 +166,7 @@ image:
   ## @param image.kollaToolboxImage.pullSecrets Specify docker-registry secret names as an array
   kollaToolboxImage:
     registry: docker.io
-    repository: kolla/ubuntu-source-kolla-toolbox
+    repository: kolla/ubuntu-binary-kolla-toolbox
     tag: xena
     ## Specify a imagePullPolicy
     ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
@@ -239,7 +239,6 @@ endpoints:
     admin:
       region_name: RegionOne
       username: admin
-      password: password
       project_name: admin
       user_domain_name: default
       project_domain_name: default
@@ -251,7 +250,7 @@ endpoints:
   oslo_db:
     username: keystone
     database: keystone
-    password: password
+    db_password_placeholder: ""
     port: 3306
 
 ## @skip secrets
@@ -325,10 +324,16 @@ ingress:
 ## @param openstack-dep.enabled [t#安裝 openstack-dep] 安装openstack依赖环境，有mariadb;rabbitmq;memcached 等...
 openstack-dep:
   enabled: true
-  ## @param openstack-dep.openstackEnv.rabbitmqUrl [t#rabbitmq url] rabbitmq url信息，如果安装了openstack-dep包，则无需配置，否则，需手动配置rabbitmq url信息
-  ## @param openstack-dep.openstackEnv.mariadbUrl [t#mariadb url] mariadb url信息，如果安装了openstack-dep包，则无需配置，否则，需手动配置mariadb url信息
-  ## @param openstack-dep.openstackEnv.memcacheUrl [t#mamcache url] memcache url信息，如果安装了openstack-dep包，则无需配置，否则，需手动配置memcache url信息
+  ## @param openstack-dep.openstackEnv.rabbitmqUrl [t#rabbitmq url] rabbitmq url信息，如果openstack-dep设置为true，则无需配置，
+  ## 如果openstack-dep环境已经提前安装，需手动配置rabbitmq url信息，可从openstack-dep charts生成的secrets中读取
+  ## @param openstack-dep.openstackEnv.mariadbUrl [t#mariadb url] mariadb url信息，如果openstack-dep设置为true，则无需配置，
+  ## 如果openstack-dep环境已经提前安装，需手动配置mariadb url信息，可从openstack-dep charts生成的secrets中读取
+  ## @param openstack-dep.openstackEnv.memcacheUrl [t#mamcache url] memcache url信息，如果openstack-dep设置为true，则无需配置，
+  ## 如果openstack-dep环境已经提前安装，需手动配置memcache url信息，可从openstack-dep charts生成的secrets中读取
+  ## @param openstack-dep.gen-password.secretName [t#secret Name] openstack 依赖环境中自动生成服务相关密码得 secret 名称
   openstackEnv:
     rabbitmqUrl: ""
     mariadbUrl: ""
     memcacheUrl: ""
+  gen-password:
+    secretName: openstack-password

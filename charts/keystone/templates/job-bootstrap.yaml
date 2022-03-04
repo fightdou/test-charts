@@ -10,7 +10,7 @@ spec:
       containers:
         - name: bootstrap
           image: {{ template "keystone.image" . }}
-          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          imagePullPolicy: {{ .Values.image.keystoneImage.pullPolicy }}
           command:
             - /tmp/bootstrap.sh
           env:
@@ -19,7 +19,10 @@ spec:
             - name: OS_AUTH_URL
               value: {{ include "keystone.public.endpoints" . }}
             - name: OS_PASSWORD
-              value: {{ include "keystone.admin.password" . }}
+              valueFrom:
+                secretKeyRef:
+                  key: keystone-admin-password
+                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
             - name: OS_REGION_NAME
               valueFrom:
                 secretKeyRef:
@@ -69,7 +72,7 @@ spec:
       initContainers:
         - name: init
           image: {{ template "entrypoint.image" . }}
-          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          imagePullPolicy: {{ .Values.image.entrypointImage.pullPolicy }}
           command:
             - kubernetes-entrypoint
           env:
@@ -94,6 +97,6 @@ spec:
       - emptyDir: {}
         name: pod-tmp
       - configMap:
-          defaultMode: 365
+          defaultMode: 493
           name: keystone-bin
         name: keystone-bin

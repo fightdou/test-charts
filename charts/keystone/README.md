@@ -1,8 +1,8 @@
 # keystone
 
 keystone charts 安装 openstack keystone service.  
-keystone charts 依赖 [openstack-dep charts](https://github.com/kungze/charts/tree/main/charts/openstack-dep).
-如果配置不安装 openstack-dep charts，则需手动配置 rabbitmq、mariadb、memcached 的 URL 信息。
+keystone charts 依赖 [openstack-dep charts](https://github.com/kungze/charts/tree/main/charts/openstack-dep).  
+如果 openstack-dep charts 在 k8s 环境中已经安装，可从 openstack-dep 生成的 secrets 中读取 rabbitmq、mariadb、memcached 的 URL 信息，配置到values.yaml中。
 
 ## 快速部署
 
@@ -16,7 +16,7 @@ helm install keystone kungze/keystone
 ```
 ** 请耐心等待 chart 部署完成 **你可以通过 openstack cli 访问 keystone 服务
 
-设置环境变量
+设置环境变量(示例如下)
 
     export OS_USERNAME=$(kubectl get secret --namespace "doudou" keystone-keystone-admin -o jsonpath="{.data.OS_USERNAME}" | base64 --decode)
     export OS_PROJECT_DOMAIN_NAME=$(kubectl get secret --namespace "doudou" keystone-keystone-admin -o jsonpath="{.data.OS_PROJECT_DOMAIN_NAME}" | base64 --decode)
@@ -24,7 +24,7 @@ helm install keystone kungze/keystone
     export OS_PROJECT_NAME=$(kubectl get secret --namespace "doudou" keystone-keystone-admin -o jsonpath="{.data.OS_PROJECT_NAME}" | base64 --decode)
     export OS_REGION_NAME=$(kubectl get secret --namespace "doudou" keystone-keystone-admin -o jsonpath="{.data.OS_REGION_NAME}" | base64 --decode)
     export OS_IDENTITY_API_VERSION=$(kubectl get secret --namespace "doudou" keystone-keystone-admin -o jsonpath="{.data.OS_IDENTITY_API_VERSION}" | base64 --decode)
-    export OS_PASSWORD=$(kubectl get --namespace doudou -o jsonpath="{.data.keystone-admin-password}" secrets openstack-password | base64 --decode)
+    export OS_PASSWORD=$(kubectl get --namespace doudou -o jsonpath="{.data.keystone-admin-password}" secrets openstack*** base64 --decode)
     export OS_AUTH_URL=http://keystone.doudou.svc.cluster.local/v3
 ```
 
@@ -82,7 +82,7 @@ helm install keystone kungze/keystone
 | Name                                  | Form title | Description                                       | Value                               |
 | ------------------------------------- | ---------- | ------------------------------------------------- | ----------------------------------- |
 | `image.keystoneImage.registry`        |            | Moodle image registry                             | `docker.io`                         |
-| `image.keystoneImage.repository`      |            | Moodle image repository                           | `kolla/ubuntu-source-keystone`      |
+| `image.keystoneImage.repository`      |            | Moodle image repository                           | `kolla/ubuntu-binary-keystone`      |
 | `image.keystoneImage.tag`             |            | Moodle image tag (immutable tags are recommended) | `xena`                              |
 | `image.keystoneImage.pullPolicy`      |            | Moodle image pull policy                          | `IfNotPresent`                      |
 | `image.keystoneImage.pullSecrets`     |            | Specify docker-registry secret names as an array  | `[]`                                |
@@ -92,7 +92,7 @@ helm install keystone kungze/keystone
 | `image.entrypointImage.pullPolicy`    |            | Moodle image pull policy                          | `IfNotPresent`                      |
 | `image.entrypointImage.pullSecrets`   |            | Specify docker-registry secret names as an array  | `[]`                                |
 | `image.kollaToolboxImage.registry`    |            | Moodle image registry                             | `docker.io`                         |
-| `image.kollaToolboxImage.repository`  |            | Moodle image repository                           | `kolla/ubuntu-source-kolla-toolbox` |
+| `image.kollaToolboxImage.repository`  |            | Moodle image repository                           | `kolla/ubuntu-binary-kolla-toolbox` |
 | `image.kollaToolboxImage.tag`         |            | Moodle image tag (immutable tags are recommended) | `xena`                              |
 | `image.kollaToolboxImage.pullPolicy`  |            | Moodle image pull policy                          | `IfNotPresent`                      |
 | `image.kollaToolboxImage.pullSecrets` |            | Specify docker-registry secret names as an array  | `[]`                                |
@@ -126,9 +126,11 @@ helm install keystone kungze/keystone
 
 ### openstack dependency env
 
-| Name                                     | Form title       | Description                                                     | Value  |
-| ---------------------------------------- | ---------------- | --------------------------------------------------------------- | ------ |
-| `openstack-dep.enabled`                  | 安裝 openstack-dep | 安装openstack依赖环境，有mariadb;rabbitmq;memcached 等...                | `true` |
-| `openstack-dep.openstackEnv.rabbitmqUrl` | rabbitmq url     | rabbitmq url信息，如果安装了openstack-dep包，则无需配置，否则，需手动配置rabbitmq url信息 | `""`   |
-| `openstack-dep.openstackEnv.mariadbUrl`  | mariadb url      | mariadb url信息，如果安装了openstack-dep包，则无需配置，否则，需手动配置mariadb url信息   | `""`   |
+| Name                                     | Form title       | Description                                      | Value                |
+| ---------------------------------------- | ---------------- | ------------------------------------------------ | -------------------- |
+| `openstack-dep.enabled`                  | 安裝 openstack-dep | 安装openstack依赖环境，有mariadb;rabbitmq;memcached 等... | `true`               |
+| `openstack-dep.openstackEnv.rabbitmqUrl` | rabbitmq url     | rabbitmq url信息，如果openstack-dep设置为true，则无需配置，     | `""`                 |
+| `openstack-dep.openstackEnv.mariadbUrl`  | mariadb url      | mariadb url信息，如果openstack-dep设置为true，则无需配置，      | `""`                 |
+| `openstack-dep.openstackEnv.memcacheUrl` | mamcache url     | memcache url信息，如果openstack-dep设置为true，则无需配置，     | `""`                 |
+| `openstack-dep.gen-password.secretName`  | secret Name      | openstack 依赖环境中自动生成服务相关密码得 secret 名称             | `openstack-password` |
 | `openstack-dep.openstackEnv.memcacheUrl` | mamcache url     | memcache url信息，如果安装了openstack-dep包，则无需配置，否则，需手动配置memcache url信息 | `""`   |
