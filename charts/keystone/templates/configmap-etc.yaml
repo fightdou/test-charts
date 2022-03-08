@@ -95,7 +95,7 @@ data:
           {
               "source": "/var/lib/kolla/config_files/keystone-startup.sh",
               "dest": "/usr/bin/keystone-startup.sh",
-              "owner": "root",
+              "owner": "keystone",
               "perm": "0755"
           },
           {

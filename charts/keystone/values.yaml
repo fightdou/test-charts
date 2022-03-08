@@ -44,21 +44,15 @@ resources:
 ## @param podSecurityContext.enabled Enabled keystone pods' Security Context
 ## @param podSecurityContext.runAsUser Set keystone container's Security Context runAsUser
 podSecurityContext:
-  enabled: false
-  runAsUser: ""
+  enabled: true
+  runAsUser: 0
 ## Configure Container Security Context (only main container)
 ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
 ## @param containerSecurityContext.enabled Enabled keystone containers' Security Context
-## @param containerSecurityContext.runAsGroup Set keystone container's Security Context runAsGroup
 ## @param containerSecurityContext.runAsUser Set keystone container's Security Context runAsUser
-## @param containerSecurityContext.allowPrivilegeEscalation Switch privilegeEscalation possibility on or off
-## @param containerSecurityContext.readOnlyRootFilesystem mount / (root) as a readonly filesystem
 containerSecurityContext:
-  enabled: false
-  runAsGroup: 42425
+  enabled: true
   runAsUser: 0
-  allowPrivilegeEscalation: false
-  readOnlyRootFilesystem: false
 ## Controller containers' liveness probe. Evaluated as a template.
 ## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes
 ## @param livenessProbe.enabled Enable livenessProbe
@@ -107,13 +101,8 @@ readinessProbe:
 customLivenessProbe: {}
 ## @param customReadinessProbe Override default readiness probe
 customReadinessProbe: {}
-## @param lifecycle.preStop.exec.command LifecycleHooks to set additional configuration at startup
-lifecycle:
-  preStop:
-    exec:
-      command:
-        - /tmp/keystone-api.sh
-        - stop
+## @param lifecycle LifecycleHooks to set additional configuration at startup
+lifecycle: ""
 
 ## @section Keystone Image parameters
 
@@ -324,11 +313,11 @@ ingress:
 ## @param openstack-dep.enabled [t#安裝 openstack-dep] 安装openstack依赖环境，有mariadb;rabbitmq;memcached 等...
 openstack-dep:
   enabled: true
-  ## @param openstack-dep.openstackEnv.rabbitmqUrl [t#rabbitmq url] rabbitmq url信息，如果openstack-dep设置为true，则无需配置，
+  ## @param openstack-dep.openstackEnv.rabbitmqUrl [t#rabbitmq url] rabbitmq url信息，如果openstack-dep设置为true，则无需配置
   ## 如果openstack-dep环境已经提前安装，需手动配置rabbitmq url信息，可从openstack-dep charts生成的secrets中读取
-  ## @param openstack-dep.openstackEnv.mariadbUrl [t#mariadb url] mariadb url信息，如果openstack-dep设置为true，则无需配置，
+  ## @param openstack-dep.openstackEnv.mariadbUrl [t#mariadb url] mariadb url信息，如果openstack-dep设置为true，则无需配置
   ## 如果openstack-dep环境已经提前安装，需手动配置mariadb url信息，可从openstack-dep charts生成的secrets中读取
-  ## @param openstack-dep.openstackEnv.memcacheUrl [t#mamcache url] memcache url信息，如果openstack-dep设置为true，则无需配置，
+  ## @param openstack-dep.openstackEnv.memcacheUrl [t#mamcache url] memcache url信息，如果openstack-dep设置为true，则无需配置
   ## 如果openstack-dep环境已经提前安装，需手动配置memcache url信息，可从openstack-dep charts生成的secrets中读取
   ## @param openstack-dep.gen-password.secretName [t#secret Name] openstack 依赖环境中自动生成服务相关密码得 secret 名称
   openstackEnv:
