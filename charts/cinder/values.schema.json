@@ -1,0 +1,99 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "type": "object",
+    "properties": {
+        "keystone": {
+            "type": "object",
+            "form": true,
+            "title": "Keystone Details",
+            "properties": {
+                "enabled": {
+                    "form": true,
+                    "type": "boolean",
+                    "description": "是否部署keystone",
+                    "title": "部署 keystone",
+                    "default": true
+                },
+                "endpoints": {
+                    "type": "object",
+                    "properties": {
+                        "auth": {
+                            "type": "object",
+                            "properties": {
+                                "admin": {
+                                    "type": "object",
+                                    "properties": {
+                                        "os_auth_url": {
+                                            "form": true,
+                                            "type": "string",
+                                            "description": "访问keystone的public endpoints",
+                                            "title": "keystone publicUrl",
+                                            "default": ""
+                                        },
+                                        "os_internal_url": {
+                                            "form": true,
+                                            "type": "string",
+                                            "description": "访问keystone的internal endpoints",
+                                            "title": "keystone internalUrl",
+                                            "default": ""
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "openstack-dep": {
+                    "type": "object",
+                    "properties": {
+                        "enabled": {
+                            "form": true,
+                            "type": "boolean",
+                            "description": "是否部署 openstack 依赖环境",
+                            "title": "部署 openstack 依赖环境",
+                            "default": true
+                        },
+                        "gen-password": {
+                            "type": "object",
+                            "properties": {
+                                "secretName": {
+                                    "form": true,
+                                    "type": "string",
+                                    "description": "openstack 环境密码的 secret 名称",
+                                    "title": "Secret Name",
+                                    "default": "openstack-password"
+                                }
+                            }
+                        },
+                        "openstackEnv": {
+                            "type": "object",
+                            "properties": {
+                                "rabbitmqUrl": {
+                                    "form": true,
+                                    "type": "string",
+                                    "description": "访问rabbitmq的Url，格式：rabbitmq",
+                                    "title": "部署 openstack 依赖环境",
+                                    "default": ""
+                                },
+                                "mariadbUrl": {
+                                    "form": true,
+                                    "type": "string",
+                                    "description": "是否部署 openstack 依赖环境",
+                                    "title": "部署 openstack 依赖环境",
+                                    "default": ""
+                                },
+                                "memcacheUrl": {
+                                    "form": true,
+                                    "type": "string",
+                                    "description": "是否部署 openstack 依赖环境",
+                                    "title": "部署 openstack 依赖环境",
+                                    "default": ""
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

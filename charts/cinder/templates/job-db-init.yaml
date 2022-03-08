@@ -1,0 +1,103 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cinder-db-init
+  namespace: {{ .Release.Namespace | quote }}
+  labels: {{- include "common.labels.standard" . | nindent 4 }}
+spec:
+  template:
+    spec:
+      containers:
+        - name: cinder-db-init
+          image: {{ template "kolla.toolbox.image" . }}
+          imagePullPolicy: {{ .Values.image.kollaToolboxImage.pullPolicy }}
+          {{- if (index .Values "keystone" "openstack-dep" "enabled") }}
+          command:
+            - /bin/sh
+            - -c
+            - /tmp/db-init.sh
+          {{- else }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              python3 /tmp/edit-cinder-etc.py
+              /tmp/db-init.sh
+          {{- end }}
+          env:
+            - name: KUBERNETES_NAMESPACE
+              value: {{ .Release.Namespace }}
+            - name: CONFIG_MAP_NAME
+              value: cinder-etc
+            - name: CINDER_DATABASE_HOST
+              value: {{ include "cinder.databaseHost" . | quote }}
+            - name: CINDER_DATABASE_PORT
+              value: {{ .Values.endpoints.oslo_db.port | quote }}
+            - name: CINDER_DATABASE_NAME
+              value: {{ .Values.endpoints.oslo_db.database | quote }}
+            - name: CINDER_DATABASE_USER
+              value: {{ .Values.endpoints.oslo_db.username | quote }}
+            - name: CINDER_DATABASE_URL
+              value: {{ index .Values "keystone" "openstack-dep" "openstackEnv" "mariadbUrl" | quote }}
+            - name: ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: mariadb-root-password
+                  name: {{ index .Values "keystone" "openstack-dep" "gen-password" "secretName" }}
+            - name: CINDER_DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: cinder-database-password
+                  name: {{ index .Values "keystone" "openstack-dep" "gen-password" "secretName" }}
+            - name: CINDER_KEYSTONE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: cinder-keystone-password
+                  name: {{ index .Values "keystone" "openstack-dep" "gen-password" "secretName" }}
+            - name: OS_INTERNAL_URL
+              valueFrom:
+                secretKeyRef:
+                  key: OS_INTERNAL_URL
+                  name: {{ .Values.keystone.secrets.identity.admin }}
+          volumeMounts:
+          - mountPath: /tmp
+            name: pod-tmp
+          - mountPath: /tmp/db-init.sh
+            name: cinder-bin
+            subPath: db-init.sh
+          - mountPath: /tmp/edit-cinder-etc.py
+            name: cinder-bin
+            subPath: edit-cinder-etc.py
+      initContainers:
+        - name: init
+          image: {{ template "entrypoint.image" . }}
+          imagePullPolicy: {{ .Values.image.entrypointImage.pullPolicy }}
+          command:
+            - kubernetes-entrypoint
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: PATH
+              value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
+            {{- if (index .Values "keystone" "openstack-dep" "enabled") }}
+            - name: DEPENDENCY_SERVICE
+              value: {{ .Release.Namespace }}:{{ include "cinder.mariadb.fullname" . }}
+            {{- end }}
+      restartPolicy: OnFailure
+      serviceAccount: {{ .Values.serviceAccountName}}
+      serviceAccountName: {{ .Values.serviceAccountName}}
+      volumes:
+      - emptyDir: {}
+        name: pod-tmp
+      - configMap:
+          defaultMode: 493
+          name: cinder-bin
+        name: cinder-bin

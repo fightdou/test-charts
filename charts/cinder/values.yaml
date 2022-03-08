@@ -1,0 +1,409 @@
+## @section Global parameters
+## Global Docker image parameters
+## Please, note that this will override the image parameters, including dependencies, configured to use the global value
+## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
+
+## @param global.imageRegistry Global Docker registry secret names as an array
+## @param global.imagePullSecrets Global Docker image pullPolicy
+## @param global.storageClass Global StorageClass for Persistent Volume(s)
+global:
+  imageRegistry: ""
+  ## E.g.
+  ## imagePullSecrets:
+  ##   - myRegistryKeySecretName
+  imagePullSecrets: []
+  storageClass: ""
+
+## @section Common parameters
+
+## @param replicaCount Number of cinder replicas to deploy (requires ReadWriteMany PVC support)
+replicaCount: 1
+## @param existingSecret [t#openstack 密钥名称] Name of existing secret containing cinder credentials
+existingSecret: openstack-password
+## @param serviceAccountName ServiceAccount name
+serviceAccountName: cinder
+## Controller containers' resource requests and limits
+## ref: https://kubernetes.io/docs/user-guide/compute-resources
+## We usually recommend not to specify default resources and to leave this as a conscious
+## choice for the user. This also increases chances charts run on environments with little
+## resources, such as Minikube. If you do want to specify resources, uncomment the following
+## lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+## @param resources.limits The resources limits for the Controller container
+## @param resources.requests The requested resources for the Controller container
+resources:
+  ## Example:
+  ## limits:
+  ##    cpu: 250m
+  ##    memory: 256Mi
+  limits: {}
+  ## Examples:
+  ## requests:
+  ##    cpu: 250m
+  ##    memory: 256Mi
+  requests: {}
+## Configure Pods Security Context
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
+## @param podSecurityContext.enabled Enabled cinder pods' Security Context
+## @param podSecurityContext.runAsUser Set cinder pods' Security Context runAsUser
+podSecurityContext:
+  enabled: true
+  runAsUser: 0
+## Configure Container Security Context (only main container)
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+## @param containerSecurityContext.enabled Enabled cinder containers' Security Context
+## @param containerSecurityContext.runAsUser Set cinder containers' Security Context runAsUser
+containerSecurityContext:
+  enabled: true
+  runAsUser: 0
+## Configure Container Security Context (only main container)
+## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-container
+## @param lvmcontainerSecurityContext.enabled Enabled cinder lvm containers' Security Context
+## @param lvmcontainerSecurityContext.privileged Switch cinder lvm containers' privilege possibility on or off
+## @param lvmcontainerSecurityContext.runAsUser Set cinder lvm containers' Security Context runAsUser
+## @param lvmcontainerSecurityContext.allowPrivilegeEscalation Switch cinder lvm containers' privilegeEscalation possibility on or off
+lvmcontainerSecurityContext:
+  enabled: true
+  privileged: true
+  runAsUser: 0
+  allowPrivilegeEscalation: true
+## Controller containers' liveness probe. Evaluated as a template.
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes
+## @param livenessProbe.enabled Enable livenessProbe
+## @param livenessProbe.tcpSocket.port Port for livenessProbe
+## @param livenessProbe.initialDelaySeconds Initial delay seconds for livenessProbe
+## @param livenessProbe.periodSeconds Period seconds for livenessProbe
+## @param livenessProbe.timeoutSeconds Timeout seconds for livenessProbe
+## @param livenessProbe.failureThreshold Failure threshold for livenessProbe
+## @param livenessProbe.successThreshold Success threshold for livenessProbe
+livenessProbe:
+  enabled: true
+  tcpSocket:
+    port: 8776
+  failureThreshold: 3
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 1
+## Controller containers' readiness probe. Evaluated as a template.
+## ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-probes
+## @param readinessProbe.enabled Enable readinessProbe
+## @param readinessProbe.tcpSocket.port Port for readinessProbe
+## @param readinessProbe.periodSeconds Period seconds for readinessProbe
+## @param readinessProbe.timeoutSeconds Timeout seconds for readinessProbe
+## @param readinessProbe.failureThreshold Failure threshold for readinessProbe
+## @param readinessProbe.successThreshold Success threshold for readinessProbe
+readinessProbe:
+  enabled: true
+  tcpSocket:
+    port: 8776
+  failureThreshold: 3
+  periodSeconds: 10
+  successThreshold: 1
+  timeoutSeconds: 1
+## @param customLivenessProbe Override default liveness probe
+customLivenessProbe: {}
+## @param customReadinessProbe Override default readiness probe
+customReadinessProbe: {}
+## @param lifecycle LifecycleHooks to set additional configuration at startup
+lifecycle: ""
+
+## @section cinder Image parameters
+
+## openstack cinder image
+image:
+  ## @param image.cinderApiImage.registry Moodle image registry
+  ## @param image.cinderApiImage.repository Moodle image repository
+  ## @param image.cinderApiImage.tag Moodle image tag (immutable tags are recommended)
+  ## @param image.cinderApiImage.pullPolicy Moodle image pull policy
+  ## @param image.cinderApiImage.pullSecrets Specify docker-registry secret names as an array
+  cinderApiImage:
+    registry: docker.io
+    repository: kolla/ubuntu-binary-cinder-api
+    tag: xena
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    pullSecrets: []
+  ## @param image.cinderVolumeImage.registry Moodle image registry
+  ## @param image.cinderVolumeImage.repository Moodle image repository
+  ## @param image.cinderVolumeImage.tag Moodle image tag (immutable tags are recommended)
+  ## @param image.cinderVolumeImage.pullPolicy Moodle image pull policy
+  ## @param image.cinderVolumeImage.pullSecrets Specify docker-registry secret names as an array
+  cinderVolumeImage:
+    registry: docker.io
+    repository: kolla/ubuntu-binary-cinder-volume
+    tag: xena
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    pullSecrets: []
+  ## @param image.cinderSchedulerImage.registry Moodle image registry
+  ## @param image.cinderSchedulerImage.repository Moodle image repository
+  ## @param image.cinderSchedulerImage.tag Moodle image tag (immutable tags are recommended)
+  ## @param image.cinderSchedulerImage.pullPolicy Moodle image pull policy
+  ## @param image.cinderSchedulerImage.pullSecrets Specify docker-registry secret names as an array
+  cinderSchedulerImage:
+    registry: docker.io
+    repository: kolla/ubuntu-binary-cinder-scheduler
+    tag: xena
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    pullSecrets: []
+  ## @param image.cinderBackupImage.registry Moodle image registry
+  ## @param image.cinderBackupImage.repository Moodle image repository
+  ## @param image.cinderBackupImage.tag Moodle image tag (immutable tags are recommended)
+  ## @param image.cinderBackupImage.pullPolicy Moodle image pull policy
+  ## @param image.cinderBackupImage.pullSecrets Specify docker-registry secret names as an array
+  cinderBackupImage:
+    registry: docker.io
+    repository: kolla/ubuntu-binary-cinder-backup
+    tag: xena
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    pullSecrets: []
+  ## @param image.entrypointImage.registry Moodle image registry
+  ## @param image.entrypointImage.repository Moodle image repository
+  ## @param image.entrypointImage.tag Moodle image tag (immutable tags are recommended)
+  ## @param image.entrypointImage.pullPolicy Moodle image pull policy
+  ## @param image.entrypointImage.pullSecrets Specify docker-registry secret names as an array
+  entrypointImage:
+    registry: quay.io
+    repository: airshipit/kubernetes-entrypoint
+    tag: v1.0.0
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    pullSecrets: []
+  ## @param image.cinderLoopImage.registry Moodle image registry
+  ## @param image.cinderLoopImage.repository Moodle image repository
+  ## @param image.cinderLoopImage.tag Moodle image tag (immutable tags are recommended)
+  ## @param image.cinderLoopImage.pullPolicy Moodle image pull policy
+  ## @param image.cinderLoopImage.pullSecrets Specify docker-registry secret names as an array
+  cinderLoopImage:
+    registry: docker.io
+    repository: docker/loop
+    tag: latest
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    pullSecrets: []
+  ## @param image.kollaToolboxImage.registry Moodle image registry
+  ## @param image.kollaToolboxImage.repository Moodle image repository
+  ## @param image.kollaToolboxImage.tag Moodle image tag (immutable tags are recommended)
+  ## @param image.kollaToolboxImage.pullPolicy Moodle image pull policy
+  ## @param image.kollaToolboxImage.pullSecrets Specify docker-registry secret names as an array
+  kollaToolboxImage:
+    registry: docker.io
+    repository: kolla/ubuntu-binary-kolla-toolbox
+    tag: xena
+    ## Specify a imagePullPolicy
+    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
+    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+    pullPolicy: IfNotPresent
+    ## Optionally specify an array of imagePullSecrets.
+    ## Secrets must be manually created in the namespace.
+    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+    ## e.g:
+    ## pullSecrets:
+    ##   - myRegistryKeySecretName
+    pullSecrets: []
+
+## @skip dependencies
+dependencies:
+  cinder_api:
+    jobs:
+      - cinder-db-sync
+      - cinder-ks-create
+  cinder_scheduler:
+    service:
+      - cinder-api
+    jobs:
+      - cinder-db-sync
+      - cinder-ks-create
+  cinder_volume:
+    service:
+      - cinder-api
+    jobs:
+      - cinder-db-sync
+      - cinder-ks-create
+  db_init:
+    service:
+      - mariadb
+  db_sync:
+    jobs:
+      - cinder-db-init
+  ks_create:
+    jobs:
+      - keystone-bootstrap
+  bootstrap:
+    service:
+      - cinder-api
+
+## @skip endpoints
+endpoints:
+  auth:
+    admin:
+      os_internal_url: ""
+    cinder:
+      role: admin
+      region_name: RegionOne
+      project_name: service
+      user_domain_name: service
+      project_domain_name: service
+      username: cinder
+      db_password_placeholder: ""
+  oslo_db:
+    username: cinder
+    database: cinder
+    db_password_placeholder: ""
+    port: 3306
+
+## @section Cinder config file
+## @param conf.create_loop_device [t#创建loop设备] 是否创建loop设备
+## @param conf.loop_name [t#loop 设备名称] cinder 后端存储创建的 loop 设备名称
+## @param conf.dd_lvm_bs [t#loop 设备bs] cinder 后端存储创建的 loop 设备 bs 大小 默认为1M
+## @param conf.dd_lvm_count [t#loop 设备count] cinder 后端存储创建的 loop 设备 count 次数 默认为2048
+## @param conf.kolla_log_dir [t#kolla 日志目录] 存放 kolla 日志文件的目录
+## @param conf.volume_type [t#cinder 卷类型] cinder 后端存储的卷类型，默认为lvm
+## @param conf.vg_name [t#vg 名称] cinder 后端存储所创建的卷组名
+## @param conf.volume_driver [t#cinder 卷驱动] cinder 后端存储驱动，默认为lvm
+conf:
+  create_loop_device: true
+  loop_name: /dev/loop0
+  dd_lvm_bs: 1M
+  dd_lvm_count: 2048
+  kolla_log_dir: /var/log/kolla/cinder
+  volume_type: lvm1
+  vg_name: cinder-volumes
+  volume_driver: cinder.volume.drivers.lvm.LVMVolumeDriver
+
+## @section Traffic Exposure Parameters
+
+## cinder service parameters
+service:
+  ## @param service.cluster_domain_suffix Kubernetes Service suffix
+  cluster_domain_suffix: cluster.local
+  ## @param service.type Kubernetes Service type
+  type: ClusterIP
+  ## @param service.publicService.name cinder public svc name
+  ## @param service.publicService.port cinder public svc port
+  ## @param service.publicService.portname cinder public svc port name
+  publicService:
+    name: cinder-api
+    port: 8776
+    portname: ks-pub
+  ## @param service.internalService.name cinder internal svc name
+  ## @param service.internalService.httpPort cinder internal svc http port
+  ## @param service.internalService.httpName cinder internal svc http port name
+  ## @param service.internalService.httpsPort cinder internal svc https port
+  ## @param service.internalService.httpsName cinder internal svc https port name
+  internalService:
+    name: cinder
+    httpPort: 80
+    httpName: http
+    httpsPort: 443
+    httpsName: https
+  ## Node ports to expose
+  ## @param service.nodePorts.http Node port for HTTP
+  ## @param service.nodePorts.https Node port for HTTPS
+  ## NOTE: choose port between <30000-32767>
+  nodePorts:
+    http: ""
+    https: ""
+  ## @param service.clusterIP Cluster internal IP of the service
+  ## This is the internal IP address of the service and is usually assigned randomly.
+  ## ref: https://kubernetes.io/docs/reference/kubernetes-api/service-resources/service-v1/#ServiceSpec
+  clusterIP: ""
+  ## @param service.loadBalancerIP cinder service Load Balancer IP
+  ## ref: https://kubernetes.io/docs/concepts/services-networking/service/#type-loadbalancer
+  loadBalancerIP: ""
+  ## @param service.externalTrafficPolicy cinder service external traffic policy
+  ## ref https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+  externalTrafficPolicy: Cluster
+## Configure the ingress resource that allows you to access the cinder installation
+## ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
+ingress:
+  ## @param ingress.enabled Enable ingress record generation for cinder
+  enabled: true
+  ## @param ingress.pathType Ingress path type
+  pathType: ImplementationSpecific
+  ## @param ingress.apiVersion Force Ingress API version (automatically detected if not set)
+  apiVersion: ""
+  ## @param ingress.ingressClassName IngressClass that will be be used to implement the Ingress (Kubernetes 1.18+)
+  ## This is supported in Kubernetes 1.18+ and required if you have more than one IngressClass marked as the default for your cluster .
+  ## ref: https://kubernetes.io/blog/2020/04/02/improvements-to-the-ingress-api-in-kubernetes-1.18/
+  ingressClassName: "nginx"
+  ## @param ingress.hostname Default host for the ingress record
+  hostname: cinder
+  ## @param ingress.path Default path for the ingress record
+  ## NOTE: You may need to set this to '/*' in order to use this with ALB ingress controllers
+  path: /
+
+## @section Keystone Details
+## @param keystone.enabled [t#部署 keystone] 是否部署keystone
+## @param keystone.endpoints.auth.admin.os_auth_url [t#keystone publicUrl] 访问keystone的public endpoints
+## @param keystone.endpoints.auth.admin.os_internal_url [t#keystone internalUrl] 访问keystone的internal endpoints
+## @param keystone.openstack-dep.enabled [t#部署 openstack 依赖环境] 是否部署 openstack 依赖环境
+## @param keystone.openstack-dep.gen-password.secretName [t#Secret Name] openstack 环境密码的 secret 名称
+## @param keystone.openstack-dep.openstackEnv.rabbitmqUrl [t#部署 openstack 依赖环境] 访问rabbitmq的Url，格式：rabbitmq
+## @param keystone.openstack-dep.openstackEnv.mariadbUrl [t#部署 openstack 依赖环境] 是否部署 openstack 依赖环境
+## @param keystone.openstack-dep.openstackEnv.memcacheUrl [t#部署 openstack 依赖环境] 是否部署 openstack 依赖环境
+keystone:
+  enabled: true
+  endpoints:
+    auth:
+      admin:
+        os_auth_url: ""
+        os_internal_url: ""
+  openstack-dep:
+    enabled: true
+    gen-password:
+      secretName: openstack-password
+    openstackEnv:
+      rabbitmqUrl: ""
+      mariadbUrl: ""
+      memcacheUrl: ""
