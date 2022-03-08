@@ -41,40 +41,37 @@ helm install keystone kungze/keystone
 
 ### Common parameters
 
-| Name                                                | Form title | Description                                                                | Value                             |
-| --------------------------------------------------- | ---------- | -------------------------------------------------------------------------- | --------------------------------- |
-| `replicaCount`                                      |            | Number of keystone replicas to deploy (requires ReadWriteMany PVC support) | `1`                               |
-| `serviceAccountName`                                |            | ServiceAccount name                                                        | `keystone`                        |
-| `resources.limits`                                  |            | The resources limits for the Controller container                          | `{}`                              |
-| `resources.requests`                                |            | The requested resources for the Controller container                       | `{}`                              |
-| `podSecurityContext.enabled`                        |            | Enabled keystone pods' Security Context                                    | `false`                           |
-| `podSecurityContext.runAsUser`                      |            | Set keystone container's Security Context runAsUser                        | `""`                              |
-| `containerSecurityContext.enabled`                  |            | Enabled keystone containers' Security Context                              | `false`                           |
-| `containerSecurityContext.runAsGroup`               |            | Set keystone container's Security Context runAsGroup                       | `42425`                           |
-| `containerSecurityContext.runAsUser`                |            | Set keystone container's Security Context runAsUser                        | `0`                               |
-| `containerSecurityContext.allowPrivilegeEscalation` |            | Switch privilegeEscalation possibility on or off                           | `false`                           |
-| `containerSecurityContext.readOnlyRootFilesystem`   |            | mount / (root) as a readonly filesystem                                    | `false`                           |
-| `livenessProbe.enabled`                             |            | Enable livenessProbe                                                       | `true`                            |
-| `livenessProbe.httpGet.path`                        |            | Request path for livenessProbe                                             | `/v3/`                            |
-| `livenessProbe.httpGet.port`                        |            | Port for livenessProbe                                                     | `5000`                            |
-| `livenessProbe.httpGet.scheme`                      |            | Scheme for livenessProbe                                                   | `HTTP`                            |
-| `livenessProbe.initialDelaySeconds`                 |            | Initial delay seconds for livenessProbe                                    | `50`                              |
-| `livenessProbe.periodSeconds`                       |            | Period seconds for livenessProbe                                           | `60`                              |
-| `livenessProbe.timeoutSeconds`                      |            | Timeout seconds for livenessProbe                                          | `15`                              |
-| `livenessProbe.failureThreshold`                    |            | Failure threshold for livenessProbe                                        | `3`                               |
-| `livenessProbe.successThreshold`                    |            | Success threshold for livenessProbe                                        | `1`                               |
-| `readinessProbe.enabled`                            |            | Enable readinessProbe                                                      | `true`                            |
-| `readinessProbe.httpGet.path`                       |            | Request path for readinessProbe                                            | `/v3/`                            |
-| `readinessProbe.httpGet.port`                       |            | Port for readinessProbe                                                    | `5000`                            |
-| `readinessProbe.httpGet.scheme`                     |            | Scheme for readinessProbe                                                  | `HTTP`                            |
-| `readinessProbe.initialDelaySeconds`                |            | Initial delay seconds for readinessProbe                                   | `50`                              |
-| `readinessProbe.periodSeconds`                      |            | Period seconds for readinessProbe                                          | `60`                              |
-| `readinessProbe.timeoutSeconds`                     |            | Timeout seconds for readinessProbe                                         | `15`                              |
-| `readinessProbe.failureThreshold`                   |            | Failure threshold for readinessProbe                                       | `3`                               |
-| `readinessProbe.successThreshold`                   |            | Success threshold for readinessProbe                                       | `1`                               |
-| `customLivenessProbe`                               |            | Override default liveness probe                                            | `{}`                              |
-| `customReadinessProbe`                              |            | Override default readiness probe                                           | `{}`                              |
-| `lifecycle.preStop.exec.command`                    |            | LifecycleHooks to set additional configuration at startup                  | `["/tmp/keystone-api.sh","stop"]` |
+| Name                                                | Form title | Description                                                                | Value      |
+| --------------------------------------------------- | ---------- | -------------------------------------------------------------------------- | ---------- |
+| `replicaCount`                                      |            | Number of keystone replicas to deploy (requires ReadWriteMany PVC support) | `1`        |
+| `serviceAccountName`                                |            | ServiceAccount name                                                        | `keystone` |
+| `resources.limits`                                  |            | The resources limits for the Controller container                          | `{}`       |
+| `resources.requests`                                |            | The requested resources for the Controller container                       | `{}`       |
+| `podSecurityContext.enabled`                        |            | Enabled keystone pods' Security Context                                    | `false`    |
+| `podSecurityContext.runAsUser`                      |            | Set keystone container's Security Context runAsUser                        | `""`       |
+| `containerSecurityContext.enabled`                  |            | Enabled keystone containers' Security Context                              | `false`    |
+| `containerSecurityContext.runAsUser`                |            | Set keystone container's Security Context runAsUser                        | `0`        |
+| `livenessProbe.enabled`                             |            | Enable livenessProbe                                                       | `true`     |
+| `livenessProbe.httpGet.path`                        |            | Request path for livenessProbe                                             | `/v3/`     |
+| `livenessProbe.httpGet.port`                        |            | Port for livenessProbe                                                     | `5000`     |
+| `livenessProbe.httpGet.scheme`                      |            | Scheme for livenessProbe                                                   | `HTTP`     |
+| `livenessProbe.initialDelaySeconds`                 |            | Initial delay seconds for livenessProbe                                    | `50`       |
+| `livenessProbe.periodSeconds`                       |            | Period seconds for livenessProbe                                           | `60`       |
+| `livenessProbe.timeoutSeconds`                      |            | Timeout seconds for livenessProbe                                          | `15`       |
+| `livenessProbe.failureThreshold`                    |            | Failure threshold for livenessProbe                                        | `3`        |
+| `livenessProbe.successThreshold`                    |            | Success threshold for livenessProbe                                        | `1`        |
+| `readinessProbe.enabled`                            |            | Enable readinessProbe                                                      | `true`     |
+| `readinessProbe.httpGet.path`                       |            | Request path for readinessProbe                                            | `/v3/`     |
+| `readinessProbe.httpGet.port`                       |            | Port for readinessProbe                                                    | `5000`     |
+| `readinessProbe.httpGet.scheme`                     |            | Scheme for readinessProbe                                                  | `HTTP`     |
+| `readinessProbe.initialDelaySeconds`                |            | Initial delay seconds for readinessProbe                                   | `50`       |
+| `readinessProbe.periodSeconds`                      |            | Period seconds for readinessProbe                                          | `60`       |
+| `readinessProbe.timeoutSeconds`                     |            | Timeout seconds for readinessProbe                                         | `15`       |
+| `readinessProbe.failureThreshold`                   |            | Failure threshold for readinessProbe                                       | `3`        |
+| `readinessProbe.successThreshold`                   |            | Success threshold for readinessProbe                                       | `1`        |
+| `customLivenessProbe`                               |            | Override default liveness probe                                            | `{}`       |
+| `customReadinessProbe`                              |            | Override default readiness probe                                           | `{}`       |
+| `lifecycle`                                         |            | LifecycleHooks to set additional configuration at startup                  | `""`       |
 
 
 ### Keystone Image parameters
@@ -129,8 +126,7 @@ helm install keystone kungze/keystone
 | Name                                     | Form title       | Description                                      | Value                |
 | ---------------------------------------- | ---------------- | ------------------------------------------------ | -------------------- |
 | `openstack-dep.enabled`                  | 安裝 openstack-dep | 安装openstack依赖环境，有mariadb;rabbitmq;memcached 等... | `true`               |
-| `openstack-dep.openstackEnv.rabbitmqUrl` | rabbitmq url     | rabbitmq url信息，如果openstack-dep设置为true，则无需配置，     | `""`                 |
-| `openstack-dep.openstackEnv.mariadbUrl`  | mariadb url      | mariadb url信息，如果openstack-dep设置为true，则无需配置，      | `""`                 |
-| `openstack-dep.openstackEnv.memcacheUrl` | mamcache url     | memcache url信息，如果openstack-dep设置为true，则无需配置，     | `""`                 |
+| `openstack-dep.openstackEnv.rabbitmqUrl` | rabbitmq url     | rabbitmq url信息，如果openstack-dep设置为true，则无需配置      | `""`                 |
+| `openstack-dep.openstackEnv.mariadbUrl`  | mariadb url      | mariadb url信息，如果openstack-dep设置为true，则无需配置       | `""`                 |
+| `openstack-dep.openstackEnv.memcacheUrl` | mamcache url     | memcache url信息，如果openstack-dep设置为true，则无需配置      | `""`                 |
 | `openstack-dep.gen-password.secretName`  | secret Name      | openstack 依赖环境中自动生成服务相关密码得 secret 名称             | `openstack-password` |
-| `openstack-dep.openstackEnv.memcacheUrl` | mamcache url     | memcache url信息，如果安装了openstack-dep包，则无需配置，否则，需手动配置memcache url信息 | `""`   |

@@ -40,9 +40,6 @@ spec:
         - name: keystone-api
           image: {{ template "keystone.image" . }}
           imagePullPolicy: {{ .Values.image.keystoneImage.pullPolicy }}
-          {{- if .Values.lifecycle }}
-          lifecycle: {{- toYaml .Values.lifecycle | nindent 12 }}
-          {{- end }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.livenessProbe "enabled") "context" $) | nindent 12 }}
           {{- else if .Values.customLivenessProbe }}
@@ -94,12 +91,14 @@ spec:
           volumeMounts:
           - mountPath: /tmp
             name: pod-tmp
-          - mountPath: /var/lib/kolla/config_files/keystone.conf
-            name: keystone-etc
-            subPath: keystone.conf
+          - mountPath: /var/log/kolla/keystone
+            name: kollalog
           - mountPath: /var/lib/kolla/config_files/keystone-startup.sh
             name: keystone-bin
             subPath: keystone-startup.sh
+          - mountPath: /var/lib/kolla/config_files/keystone.conf
+            name: keystone-etc
+            subPath: keystone.conf
           - mountPath: /var/lib/kolla/config_files/config.json
             name: keystone-etc
             subPath: keystone-api.json
@@ -118,6 +117,10 @@ spec:
       volumes:
       - emptyDir: {}
         name: pod-tmp
+      - hostPath:
+          path: /var/log/kolla/keystone
+          type: DirectoryOrCreate
+        name: kollalog
       - configMap:
           defaultMode: 365
           name: keystone-etc
