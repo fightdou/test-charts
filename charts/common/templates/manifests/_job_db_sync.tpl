@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: {{ printf "%s-%s" $serviceNamePretty "db-sync" | quote }}
-          image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.dbSync $envAll.Values.global) | quote }}
+          image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.dbSync "global" $envAll.Values.global) | quote }}
           imagePullPolicy: IfNotPresent
           env:
             - name: KOLLA_CONFIG_STRATEGY
