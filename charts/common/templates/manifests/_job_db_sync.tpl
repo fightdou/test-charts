@@ -41,7 +41,7 @@ spec:
               value: "noninteractive"
           volumeMounts:
             {{- if $podVolMounts }}
-            {{ $podVolMounts | toYaml | indent 12 }}
+            {{ $podVolMounts | toYaml | indent 14 }}
             {{- end }}
             - mountPath: /tmp
               name: pod-tmp
