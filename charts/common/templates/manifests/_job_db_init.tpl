@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: {{ printf "%s-%s" $serviceNamePretty "db-init" | quote }}
-          image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.kollaToolbox $envAll.Values.global) | quote }}
+          image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.kollaToolbox "global" $envAll.Values.global) | quote }}
           imagePullPolicy: IfNotPresent
           command:
             - /bin/sh
