@@ -3,7 +3,7 @@
 Expand the name of the chart.
 */}}
 {{- define "common.names.name" -}}
-{{- default .Chart.Name | trunc 63 | trimSuffix "-" -}}
+{{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -19,7 +19,7 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 If release name contains chart name it will be used as a full name.
 */}}
 {{- define "common.names.fullname" -}}
-{{- $name := default .Chart.Name -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
 {{- if contains $name .Release.Name -}}
 {{- .Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -35,7 +35,7 @@ Usage:
 {{ include "common.names.dependency.fullname" (dict "chartName" "dependency-chart-name" "chartValues" .Values.dependency-chart "context" $) }}
 */}}
 {{- define "common.names.dependency.fullname" -}}
-{{- $name := default .chartName -}}
+{{- $name := default .chartName .chartValues.nameOverride -}}
 {{- if contains $name .context.Release.Name -}}
 {{- .context.Release.Name | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
