@@ -4,18 +4,17 @@
 {{- $dbUserPasswordName := index . "dbUserPasswordName" -}}
 {{- $configMapBin := index . "configMapBin" | default (printf "%s-%s" $serviceName "bin" ) -}}
 {{- $configMapEtc := index . "configMapEtc" | default (printf "%s-%s" $serviceName "etc" ) -}}
-{{- $serviceNamePretty := $serviceName | replace "_" "-" -}}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ printf "%s-%s" $serviceNamePretty "db-init" | quote }}
+  name: {{ printf "%s-%s" $serviceName "db-init" | quote }}
   namespace: {{ $envAll.Release.Namespace | quote }}
 spec:
   template:
     spec:
       containers:
-        - name: {{ printf "%s-%s" $serviceNamePretty "db-init" | quote }}
+        - name: {{ printf "%s-%s" $serviceName "db-init" | quote }}
           image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.kollaToolbox "global" $envAll.Values.global) | quote }}
           imagePullPolicy: IfNotPresent
           command:

@@ -3,19 +3,18 @@
 {{- $serviceName := index . "serviceName" -}}
 {{- $configMapBin := index . "configMapBin" | default (printf "%s-%s" $serviceName "bin" ) -}}
 {{- $configMapEtc := index . "configMapEtc" | default (printf "%s-%s" $serviceName "etc" ) -}}
-{{- $serviceNamePretty := $serviceName | replace "_" "-" -}}
 {{- $podVolMounts := index . "podVolMounts" | default false -}}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ printf "%s-%s" $serviceNamePretty "db-sync" | quote }}
+  name: {{ printf "%s-%s" $serviceName "db-sync" | quote }}
   namespace: {{  $envAll.Release.Namespace | quote }}
 spec:
   template:
     spec:
       containers:
-        - name: {{ printf "%s-%s" $serviceNamePretty "db-sync" | quote }}
+        - name: {{ printf "%s-%s" $serviceName "db-sync" | quote }}
           image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.dbSync "global" $envAll.Values.global) | quote }}
           imagePullPolicy: IfNotPresent
           env:
@@ -40,9 +39,6 @@ spec:
             - name: DEBIAN_FRONTEND
               value: "noninteractive"
           volumeMounts:
-            {{- if $podVolMounts }}
-            {{ $podVolMounts | toYaml | indent 14 }}
-            {{- end }}
             - mountPath: /tmp
               name: pod-tmp
             - mountPath: /var/log/kolla/keystone
@@ -53,6 +49,9 @@ spec:
             - mountPath: /tmp/db-sync.sh
               name: {{ $configMapBin | quote }}
               subPath: db-sync.sh
+{{- if $podVolMounts }}
+{{ $podVolMounts | toYaml | indent 12 }}
+{{- end }}
       initContainers:
         - name: init
           image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.entrypoint "global" $envAll.Values.global) | quote }}
@@ -90,4 +89,4 @@ spec:
           defaultMode: 365
           name: {{ $configMapEtc | quote }}
         name: {{ $configMapEtc | quote }}
-{{- end -}}
+{{- end }}
