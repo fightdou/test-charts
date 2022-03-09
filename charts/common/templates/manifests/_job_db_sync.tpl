@@ -53,8 +53,8 @@ spec:
               subPath: db-sync.sh
       initContainers:
         - name: init
-          image: {{ template "entrypoint.image" . }}
-          imagePullPolicy: {{ .Values.image.entrypointImage.pullPolicy }}
+          image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.entrypoint "global" $envAll.Values.global) | quote }}
+          imagePullPolicy: IfNotPresent
           command:
             - kubernetes-entrypoint
           env:
