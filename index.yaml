@@ -139,6 +139,20 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/cinder-csi-plugin-1.0.0/cinder-csi-plugin-1.0.0.tgz
     version: 1.0.0
+  common:
+  - annotations:
+      category: Openstack
+    apiVersion: v2
+    created: "2022-03-09T12:13:24.738015686Z"
+    description: Openstack kolla helm common library
+    digest: f5adda9e27c4bee45c5f61a1d6f7d9bf0a80222a29cdcb58b0974c05322c52e9
+    home: https://kungze.github.io/charts/
+    maintainers:
+    - name: Kungze
+    name: common
+    urls:
+    - https://github.com/fightdou/test-charts/releases/download/common-1.0.0/common-1.0.0.tgz
+    version: 1.0.0
   gen-password:
   - annotations:
       category: Openstack
@@ -860,4 +874,4 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/openstack-dep-1.0.0/openstack-dep-1.0.0.tgz
     version: 1.0.0
-generated: "2022-03-09T07:58:03.658653911Z"
+generated: "2022-03-09T12:13:24.738109587Z"
