@@ -7,7 +7,7 @@ Return the proper image name
 {{- $repositoryName := .imageRoot.repository -}}
 {{- $registryName := .global.imageRegistry -}}
 {{- $tag := .global.imageTag | toString -}}
-{{- if .imageRoot.registryName }}
+{{- if .imageRoot.registry }}
     {{- $registryName = .imageRoot.registry -}}
 {{- end }}
 {{- if .imageRoot.tag }}
