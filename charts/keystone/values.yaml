@@ -4,15 +4,14 @@
 ## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
 
 ## @param global.imageRegistry Global Docker image registry
-## @param global.imagePullSecrets Global Docker registry secret names as an array
 ## @param global.storageClass Global StorageClass for Persistent Volume(s)
+## @param global.imageTag Global docker image tag
+## @param global.pullPolicy Global image pull policy
 global:
-  imageRegistry: ""
-  ## E.g.
-  ## imagePullSecrets:
-  ##   - myRegistryKeySecretName
-  imagePullSecrets: []
+  imageRegistry: docker.io
   storageClass: ""
+  imageTag: xena
+  pullPolicy: IfNotPresent
 
 ## @section Common parameters
 
@@ -108,86 +107,44 @@ lifecycle: ""
 
 ## openstack Keystone image
 image:
-  ## @param image.keystoneImage.registry Moodle image registry
-  ## @param image.keystoneImage.repository Moodle image repository
-  ## @param image.keystoneImage.tag Moodle image tag (immutable tags are recommended)
-  ## @param image.keystoneImage.pullPolicy Moodle image pull policy
-  ## @param image.keystoneImage.pullSecrets Specify docker-registry secret names as an array
-  keystoneImage:
-    registry: docker.io
+  ## @param image.keystoneAPI.repository Moodle image repository
+  keystoneAPI:
     repository: kolla/ubuntu-binary-keystone
-    tag: xena
-    ## Specify a imagePullPolicy
-    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-    pullPolicy: IfNotPresent
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ## e.g:
-    ## pullSecrets:
-    ##   - myRegistryKeySecretName
-    pullSecrets: []
-  ## @param image.entrypointImage.registry Moodle image registry
-  ## @param image.entrypointImage.repository Moodle image repository
-  ## @param image.entrypointImage.tag Moodle image tag (immutable tags are recommended)
-  ## @param image.entrypointImage.pullPolicy Moodle image pull policy
-  ## @param image.entrypointImage.pullSecrets Specify docker-registry secret names as an array
-  entrypointImage:
+  ## @param image.dbSync.repository Moodle image repository
+  dbSync:
+    repository: kolla/ubuntu-binary-keystone
+  ## @param image.kollaToolbox.repository Moodle image repository
+  kollaToolbox:
+    repository: kolla/ubuntu-binary-kolla-toolbox
+  ## @param image.entrypoint.registry Moodle image registry
+  ## @param image.entrypoint.repository Moodle image repository
+  ## @param image.entrypoint.tag Moodle image tag (immutable tags are recommended)
+  entrypoint:
     registry: quay.io
     repository: airshipit/kubernetes-entrypoint
     tag: v1.0.0
-    ## Specify a imagePullPolicy
-    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-    pullPolicy: IfNotPresent
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ## e.g:
-    ## pullSecrets:
-    ##   - myRegistryKeySecretName
-    pullSecrets: []
-  ## @param image.kollaToolboxImage.registry Moodle image registry
-  ## @param image.kollaToolboxImage.repository Moodle image repository
-  ## @param image.kollaToolboxImage.tag Moodle image tag (immutable tags are recommended)
-  ## @param image.kollaToolboxImage.pullPolicy Moodle image pull policy
-  ## @param image.kollaToolboxImage.pullSecrets Specify docker-registry secret names as an array
-  kollaToolboxImage:
-    registry: docker.io
-    repository: kolla/ubuntu-binary-kolla-toolbox
-    tag: xena
-    ## Specify a imagePullPolicy
-    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-    pullPolicy: IfNotPresent
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ## e.g:
-    ## pullSecrets:
-    ##   - myRegistryKeySecretName
-    pullSecrets: []
 
 ## @skip dependencies
 dependencies:
   keystone_api:
     jobs:
+      - keystone-cm-render
       - keystone-db-sync
-      - keystone-credential-setup
       - keystone-fernet-setup
+      - keystone-bootstrap
   db_init:
-    service:
-      - mariadb
+    jobs:
+      - keystone-cm-render
   db_sync:
     jobs:
+      - keystone-cm-render
       - keystone-db-init
   bootstrap:
+    jobs:
+      - keystone-db-sync
+  register:
     service:
       - keystone-api
-  credential_rotate:
-    jobs:
-      - keystone-credential-setup
   fernet_rotate:
     jobs:
       - keystone-fernet-setup
@@ -208,23 +165,12 @@ jobs:
     history:
       success: 3
       failed: 1
-  credential_setup:
-    user: keystone
-    group: keystone
-  credential_rotate:
-    # monthly
-    cron: "0 0 1 * *"
-    migrate_wait: 120
-    user: keystone
-    group: keystone
-    history:
-      success: 3
-      failed: 1
 
 ## @skip endpoints
 endpoints:
   cluster_domain_suffix: cluster.local
   auth:
+    secretName: keystone-admin-secret
     admin:
       region_name: RegionOne
       username: admin
@@ -236,18 +182,12 @@ endpoints:
       os_internal_url: ""
       os_auth_url: ""
       version: "3"
-  oslo_db:
-    username: keystone
-    database: keystone
-    db_password_placeholder: ""
-    port: 3306
-
-## @skip secrets
-secrets:
-  identity:
-    admin: keystone-keystone-admin
-  cerdentialKey: keystone-credential-keys
-  fernetKey: keystone-fernet-keys
+## @skip database
+database:
+  username: keystone
+  database: keystone
+  db_password_placeholder: ""
+  port: 3306
 
 ## @section Traffic Exposure Parameters
 
@@ -310,19 +250,11 @@ ingress:
   path: /
 
 ## @section openstack dependency env
-## @param openstack-dep.enabled [t#安裝 openstack-dep] 安装openstack依赖环境，有mariadb;rabbitmq;memcached 等...
+## @param openstack-dep.enabled [t#安裝 openstack-dep] 安装openstack依赖环境，包含mariadb;rabbitmq;memcached 等...
 openstack-dep:
   enabled: true
-  ## @param openstack-dep.openstackEnv.rabbitmqUrl [t#rabbitmq url] rabbitmq url信息，如果openstack-dep设置为true，则无需配置
-  ## 如果openstack-dep环境已经提前安装，需手动配置rabbitmq url信息，可从openstack-dep charts生成的secrets中读取
-  ## @param openstack-dep.openstackEnv.mariadbUrl [t#mariadb url] mariadb url信息，如果openstack-dep设置为true，则无需配置
-  ## 如果openstack-dep环境已经提前安装，需手动配置mariadb url信息，可从openstack-dep charts生成的secrets中读取
-  ## @param openstack-dep.openstackEnv.memcacheUrl [t#mamcache url] memcache url信息，如果openstack-dep设置为true，则无需配置
-  ## 如果openstack-dep环境已经提前安装，需手动配置memcache url信息，可从openstack-dep charts生成的secrets中读取
-  ## @param openstack-dep.gen-password.secretName [t#secret Name] openstack 依赖环境中自动生成服务相关密码得 secret 名称
-  openstackEnv:
-    rabbitmqUrl: ""
-    mariadbUrl: ""
-    memcacheUrl: ""
+  ## @param openstack-dep.connInfoSecret [t#ConnInfo secret name] openstack 依赖环境中生成服务URL得 secret 名称
+  ## @param openstack-dep.gen-password.secretName [t#Password secret name] openstack 依赖环境中自动生成服务相关密码得 secret 名称
+  connInfoSecret: openstack-conn-info
   gen-password:
     secretName: openstack-password

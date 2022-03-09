@@ -1,174 +1,24 @@
+{{- $envAll := . }}
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: keystone-etc
   namespace: {{ .Release.Namespace | quote }}
 data:
-  keystone.conf: |-
-    [DEFAULT]
-    debug = False
-    transport_url = {{ index .Values "openstack-dep" "openstackEnv" "rabbitmqUrl" }}
-    log_file = /var/log/kolla/keystone/keystone.log
-    use_stderr = True
-
-    [oslo_middleware]
-    enable_proxy_headers_parsing = True
-
-    [database]
-    connection = mysql+pymysql://{{ .Values.endpoints.oslo_db.username }}:{{ include "keystone.databasePassword" . }}@{{ index .Values "openstack-dep" "openstackEnv" "mariadbUrl" }}/{{ .Values.endpoints.oslo_db.database }}
-    connection_recycle_time = 10
-    max_pool_size = 1
-    max_retries = -1
-
-    [token]
-    revoke_by_id = False
-    provider = fernet
-    expiration = 86400
-    allow_expired_window = 172800
-
-    [fernet_tokens]
-    max_active_keys = 3
-
-    [cache]
-    backend = oslo_cache.memcache_pool
-    enabled = True
-    memcache_servers = {{ index .Values "openstack-dep" "openstackEnv" "memcacheUrl" }}
-
-    [oslo_messaging_notifications]
-    transport_url = {{ index .Values "openstack-dep" "openstackEnv" "rabbitmqUrl" }} 
-    driver = messagingv2
-    topics = barbican_notifications
-  wsgi-keystone.conf: |-
-    Listen 0.0.0.0:5000
-    Listen 0.0.0.0:35357
-
-    ServerSignature Off
-    ServerTokens Prod
-    TraceEnable off
-
-    ErrorLog "/var/log/kolla/keystone/apache-error.log"
-    <IfModule log_config_module>
-        CustomLog "/var/log/kolla/keystone/apache-access.log" common
-    </IfModule>
-
-    <Directory "/usr/bin/">
-        <FilesMatch "^keystone-wsgi-(public|admin)$">
-            AllowOverride None
-            Options None
-            Require all granted
-        </FilesMatch>
-    </Directory>
-
-    <VirtualHost *:5000>
-        WSGIDaemonProcess keystone-public processes=5 threads=1 user=keystone group=keystone display-name=%{GROUP} python-path=/usr/lib/python3/dist-packages
-        WSGIProcessGroup keystone-public
-        WSGIScriptAlias / /usr/bin/keystone-wsgi-public
-        WSGIApplicationGroup %{GLOBAL}
-        WSGIPassAuthorization On
-        <IfVersion >= 2.4>
-          ErrorLogFormat "%{cu}t %M"
-        </IfVersion>
-        ErrorLog "/var/log/kolla/keystone/keystone-apache-public-error.log"
-        LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" logformat
-        CustomLog "/var/log/kolla/keystone/keystone-apache-public-access.log" logformat
-
-    </VirtualHost>
-
-    <VirtualHost *:35357>
-        WSGIDaemonProcess keystone-admin processes=5 threads=1 user=keystone group=keystone display-name=%{GROUP} python-path=/usr/lib/python3/dist-packages
-        WSGIProcessGroup keystone-admin
-        WSGIScriptAlias / /usr/bin/keystone-wsgi-admin
-        WSGIApplicationGroup %{GLOBAL}
-        WSGIPassAuthorization On
-        <IfVersion >= 2.4>
-          ErrorLogFormat "%{cu}t %M"
-        </IfVersion>
-        ErrorLog "/var/log/kolla/keystone/keystone-apache-admin-error.log"
-        LogFormat "%{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %D \"%{Referer}i\" \"%{User-Agent}i\"" logformat
-        CustomLog "/var/log/kolla/keystone/keystone-apache-admin-access.log" logformat
-
-    </VirtualHost>
-  keystone-api.json: |-
-    {
-      "command": "/usr/bin/keystone-startup.sh",
-      "config_files": [
-          {
-              "source": "/var/lib/kolla/config_files/keystone-startup.sh",
-              "dest": "/usr/bin/keystone-startup.sh",
-              "owner": "keystone",
-              "perm": "0755"
-          },
-          {
-              "source": "/var/lib/kolla/config_files/keystone.conf",
-              "dest": "/etc/keystone/keystone.conf",
-              "owner": "keystone",
-              "perm": "0600"
-          },
-          {
-              "source": "/var/lib/kolla/config_files/wsgi-keystone.conf",
-              "dest": "/etc/apache2/conf-enabled/wsgi-keystone.conf",
-              "owner": "keystone",
-              "perm": "0600"
-          }
-      ],
-      "permissions": [
-          {
-              "path": "/var/log/kolla",
-              "owner": "keystone:kolla"
-          },
-          {
-              "path": "/var/log/kolla/keystone/keystone.log",
-              "owner": "keystone:keystone"
-          }
-      ]
-    }
-  keystone-db-sync.json: |-
-    {
-      "command": "/tmp/db-sync.sh",
-      "config_files": [
-          {
-              "source": "/var/lib/kolla/config_files/keystone.conf",
-              "dest": "/etc/keystone/keystone.conf",
-              "owner": "keystone",
-              "perm": "0600"
-          }
-      ],
-      "permissions": [
-          {
-              "path": "/var/log/kolla",
-              "owner": "keystone:kolla"
-          },
-          {
-              "path": "/var/log/kolla/keystone/keystone.log",
-              "owner": "keystone:keystone"
-          }
-      ]
-    }
-  keystone-fernet-setup.json: |-
-    {
-      "command": "python3 /tmp/fernet-manage.py fernet_setup",
-      "permissions": [
-          {
-              "path": "/var/log/kolla",
-              "owner": "keystone:kolla"
-          },
-          {
-              "path": "/var/log/kolla/keystone/keystone.log",
-              "owner": "keystone:keystone"
-          }
-      ]
-    }
-  keystone-credential-setup.json: |-
-    {
-      "command": "python3 /tmp/fernet-manage.py credential_setup",
-      "permissions": [
-          {
-              "path": "/var/log/kolla",
-              "owner": "keystone:kolla"
-          },
-          {
-              "path": "/var/log/kolla/keystone/keystone.log",
-              "owner": "keystone:keystone"
-          }
-      ]
-    }
+  kolla-toolbox-sudoer: |
+    ansible ALL=(ALL) NOPASSWD: ALL
+  keystone.conf: |
+{{ tuple "conf/_keystone.conf.tpl" . | include "common.utils.template" | indent 4 }}
+  wsgi-keystone.conf: |
+{{ tuple "conf/_wsgi_keystone.conf.tpl" . | include "common.utils.template" | indent 4 }}
+  keystone-api.json: |
+{{ tuple "conf/_keystone.json.tpl" . | include "common.utils.template" | indent 4 }}
+  db-sync.json: |
+{{ tuple "conf/_keystone_db_sync.json.tpl" . | include "common.utils.template" | indent 4 }}
+  bootstrap.json: |
+{{ tuple "conf/_keystone_bootstrap.json.tpl" . | include "common.utils.template" | indent 4 }}
+  keystone-fernet-setup.json: |
+{{ tuple "conf/_keystone_fernet_setup.json.tpl" . | include "common.utils.template" | indent 4 }}
+  keystone-bootstrap.json: |
+{{ tuple "conf/_keystone_bootstrap.json.tpl" . | include "common.utils.template" | indent 4 }}

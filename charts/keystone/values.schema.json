@@ -4,39 +4,30 @@
     "properties": {
         "openstack-dep": {
             "type": "object",
-            "form": true,
-            "title": "openstack-dep 配置",
             "properties": {
                 "enabled": {
                     "form": true,
                     "type": "boolean",
-                    "description": "安装openstack依赖环境，有mariadb;rabbitmq;memcached 等...",
+                    "description": "安装openstack依赖环境,包含mariadb;rabbitmq;memcached 等...",
                     "title": "安裝 openstack-dep",
                     "default": true
                 },
-                "openstackEnv": {
+                "connInfoSecret": {
+                    "form": true,
+                    "type": "string",
+                    "description": "openstack 依赖环境中生成服务URL得 secret 名称",
+                    "title": "ConnInfo secret name",
+                    "default": "openstack-conn-info"
+                },
+                "gen-password": {
                     "type": "object",
                     "properties": {
-                        "rabbitmqUrl": {
+                        "secretName": {
                             "form": true,
                             "type": "string",
-                            "description": "rabbitmq url信息，如果安装了openstack-dep包，则无需配置，否则，需手动配置rabbitmq url信息",
-                            "title": "rabbitmq url",
-                            "default": ""
-                        },
-                        "mariadbUrl": {
-                            "form": true,
-                            "type": "string",
-                            "description": "mariadb url信息，如果安装了openstack-dep包，则无需配置，否则，需手动配置mariadb url信息",
-                            "title": "mariadb url",
-                            "default": ""
-                        },
-                        "memcacheUrl": {
-                            "form": true,
-                            "type": "string",
-                            "description": "memcache url信息，如果安装了openstack-dep包，则无需配置，否则，需手动配置memcache url信息",
-                            "title": "mamcache url",
-                            "default": ""
+                            "description": "openstack 依赖环境中自动生成服务相关密码得 secret 名称",
+                            "title": "Password secret name",
+                            "default": "openstack-password"
                         }
                     }
                 }

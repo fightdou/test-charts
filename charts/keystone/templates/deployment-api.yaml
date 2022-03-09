@@ -18,7 +18,7 @@ spec:
           - kubernetes-entrypoint
           name: init
           image: {{ template "entrypoint.image" . }}
-          imagePullPolicy: {{ .Values.image.entrypointImage.pullPolicy }}
+          imagePullPolicy: {{ .Values.global.pullPolicy }}
           env:
           - name: POD_NAME
             valueFrom:
@@ -35,11 +35,11 @@ spec:
           - name: PATH
             value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
           - name: DEPENDENCY_JOBS
-            value: {{ include "joinListWithComma" .Values.dependencies.keystone_api.jobs }}
+            value: {{ include "common.utils.joinListWithComma" .Values.dependencies.keystone_api.jobs }}
       containers:
         - name: keystone-api
           image: {{ template "keystone.image" . }}
-          imagePullPolicy: {{ .Values.image.keystoneImage.pullPolicy }}
+          imagePullPolicy: {{ .Values.global.pullPolicy }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.livenessProbe "enabled") "context" $) | nindent 12 }}
           {{- else if .Values.customLivenessProbe }}
@@ -91,6 +91,8 @@ spec:
           volumeMounts:
           - mountPath: /tmp
             name: pod-tmp
+          - mountPath: /var/lib/kolla/config_files/
+            name: configdir
           - mountPath: /var/log/kolla/keystone
             name: kollalog
           - mountPath: /var/lib/kolla/config_files/keystone-startup.sh
@@ -107,8 +109,6 @@ spec:
             subPath: wsgi-keystone.conf
           - mountPath: /etc/keystone/fernet-keys/
             name: keystone-fernet-keys
-          - mountPath: /etc/keystone/credential-keys/
-            name: keystone-credential-keys
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -117,12 +117,14 @@ spec:
       volumes:
       - emptyDir: {}
         name: pod-tmp
+      - emptyDir: {}
+        name: configdir
       - hostPath:
           path: /var/log/kolla/keystone
           type: DirectoryOrCreate
         name: kollalog
       - configMap:
-          defaultMode: 365
+          defaultMode: 420
           name: keystone-etc
         name: keystone-etc
       - configMap:
@@ -131,9 +133,5 @@ spec:
         name: keystone-bin
       - name: keystone-fernet-keys
         secret:
-          defaultMode: 502
+          defaultMode: 420
           secretName: keystone-fernet-keys
-      - name: keystone-credential-keys
-        secret:
-          defaultMode: 502
-          secretName: keystone-credential-keys
