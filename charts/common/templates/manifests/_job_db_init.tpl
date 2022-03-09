@@ -53,17 +53,17 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: MARIADB_HOST
-                  name: {{ index "$envAll" "Values" "openstack-dep" "connInfoSecret" }}
+                  name: {{ index $envAll.Values "openstack-dep" "connInfoSecret" | quote }}
             - name: DB_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: mariadb-root-password
-                  name: {{ index "$envAll" "Values" "openstack-dep" "gen-password" "secretName" }}
+                  name: {{ index $envAll.Values "openstack-dep" "gen-password" "secretName" | quote }}
             - name: DB_USER_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: {{ $dbUserPasswordName | quote }}
-                  name: {{ index "$envAll" "Values" "openstack-dep" "gen-password" "secretName" }}
+                  name: {{ index $envAll..Values "openstack-dep" "gen-password" "secretName" | quote }}
           volumeMounts:
             - mountPath: /tmp
               name: pod-tmp
