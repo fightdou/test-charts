@@ -63,7 +63,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: {{ $dbUserPasswordName | quote }}
-                  name: {{ index $envAll..Values "openstack-dep" "gen-password" "secretName" | quote }}
+                  name: {{ index $envAll.Values "openstack-dep" "gen-password" "secretName" | quote }}
           volumeMounts:
             - mountPath: /tmp
               name: pod-tmp
