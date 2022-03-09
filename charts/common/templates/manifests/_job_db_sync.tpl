@@ -45,6 +45,8 @@ spec:
             {{- end }}
             - mountPath: /tmp
               name: pod-tmp
+            - mountPath: /var/log/kolla/keystone
+              name: keystonelog
             - mountPath: /var/lib/kolla/config_files/config.json
               name: {{ $configMapEtc | quote }}
               subPath: db-sync.json
@@ -78,6 +80,8 @@ spec:
       volumes:
       - emptyDir: {}
         name: pod-tmp
+      - emptyDir: {}
+        name: keystonelog
       - configMap:
           defaultMode: 493
           name: {{ $configMapBin | quote }}
