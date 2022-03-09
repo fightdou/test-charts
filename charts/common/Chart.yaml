@@ -13,7 +13,7 @@
 apiVersion: v2
 description: Openstack kolla helm common library
 name: common
-version: 1.0.10
+version: 1.0.11
 home: https://kungze.github.io/charts/
 maintainers:
   - name: Kungze

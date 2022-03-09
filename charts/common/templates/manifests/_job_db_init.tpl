@@ -92,7 +92,7 @@ spec:
             - name: PATH
               value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
             - name: DEPENDENCY_SERVICE
-              value: {{ $envAll.Release.Namespace }}:{{ $envAll.Release.Namespace }}-mariadb
+              value: {{ $envAll.Release.Namespace }}:{{ $envAll.Release.Name }}-mariadb
       restartPolicy: OnFailure
       serviceAccount: {{ $envAll.Values.serviceAccountName }}
       serviceAccountName: {{ $envAll.Values.serviceAccountName }}
