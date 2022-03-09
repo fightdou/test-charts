@@ -143,6 +143,19 @@ entries:
   - annotations:
       category: Openstack
     apiVersion: v2
+    created: "2022-03-09T15:13:33.369548973Z"
+    description: Openstack kolla helm common library
+    digest: 3f9517549befc4f69dec6a12c100253097f452f732470b3ed6f5a11badc04308
+    home: https://kungze.github.io/charts/
+    maintainers:
+    - name: Kungze
+    name: common
+    urls:
+    - https://github.com/fightdou/test-charts/releases/download/common-1.0.10/common-1.0.10.tgz
+    version: 1.0.10
+  - annotations:
+      category: Openstack
+    apiVersion: v2
     created: "2022-03-09T15:03:51.856542673Z"
     description: Openstack kolla helm common library
     digest: c16af401675aa339a1988c3eff91e5b96d583088ba9a06710f056ae47d765f43
@@ -991,4 +1004,4 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/openstack-dep-1.0.0/openstack-dep-1.0.0.tgz
     version: 1.0.0
-generated: "2022-03-09T15:03:51.85674078Z"
+generated: "2022-03-09T15:13:33.369881175Z"
