@@ -1,0 +1,5 @@
+## bitnami/common
+## It is required by CI/CD tools and processes.
+## @section Example
+## @param exampleValue This is a example
+exampleValue: common-chart
