@@ -11,7 +11,6 @@ kind: Job
 metadata:
   name: {{ printf "%s-%s" $serviceNamePretty "db-sync" | quote }}
   namespace: {{  $envAll.Release.Namespace | quote }}
-  labels: {{- include "common.labels.standard" . | nindent 4 }}
 spec:
   template:
     spec:

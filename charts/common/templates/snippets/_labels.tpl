@@ -12,7 +12,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Labels to use on deploy.spec.selector.matchLabels and svc.spec.selector
 */}}
-{{- define "common.snippets.matchLabels" -}}
+{{- define "common.labels.matchLabels" -}}
 app.kubernetes.io/name: {{ include "common.names.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
