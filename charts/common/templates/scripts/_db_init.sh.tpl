@@ -1,4 +1,4 @@
-{{- define "common.scripts.db_init" }}
+{{- define "common.scripts.db_init" -}}
 #!/bin/bash
 set -ex
 sudo /opt/ansible/bin/ansible localhost -m mysql_db \
