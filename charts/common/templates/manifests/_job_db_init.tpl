@@ -10,7 +10,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ printf "%s-%s" $serviceNamePretty "db-init" | quote }}
-  namespace: {{  $envAll.Release.Namespace | quote }}
+  namespace: {{ $envAll.Release.Namespace | quote }}
 spec:
   template:
     spec:
@@ -93,7 +93,7 @@ spec:
             - name: PATH
               value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
             - name: DEPENDENCY_SERVICE
-              value: {{ include "mariadb.fullname" . }}
+              value: {{ $envAll.Release.Namespace }}:{{ $envAll.Release.Namespace }}-mariadb
       restartPolicy: OnFailure
       serviceAccount: {{ $envAll.Values.serviceAccountName }}
       serviceAccountName: {{ $envAll.Values.serviceAccountName }}
