@@ -48,6 +48,16 @@ spec:
               value: "stdlib"
             - name: PS1 
               value: "$(tput bold)($(printenv KOLLA_SERVICE_NAME))$(tput sgr0)[$(id -un)@$(hostname -s) $(pwd)]$ "
+            - name: OS_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: OS_USERNAME
+                  name: {{ $envAll.Values.endpoints.auth.secretName }}
+            - name: OS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: OS_PASSWORD
+                  name: {{ $envAll.Values.endpoints.auth.secretName }}
             - name: OS_BOOTSTRAP_ADMIN_URL
               valueFrom:
                 secretKeyRef:
@@ -87,11 +97,6 @@ spec:
               valueFrom:
                 secretKeyRef:
                   key: OS_USER_DOMAIN_NAME
-                  name: {{ $envAll.Values.endpoints.auth.secretName }}
-            - name: OS_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  key: OS_USERNAME
                   name: {{ $envAll.Values.endpoints.auth.secretName }}
             - name: OS_DEFAULT_DOMAIN
               valueFrom:
