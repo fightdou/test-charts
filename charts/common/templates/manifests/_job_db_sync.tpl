@@ -1,6 +1,7 @@
 {{- define "common.manifests.job_db_sync" -}}
 {{- $envAll := index . "envAll" -}}
 {{- $serviceName := index . "serviceName" -}}
+{{- $jobAnnotations := index . "jobAnnotations" -}}
 {{- $configMapBin := index . "configMapBin" | default (printf "%s-%s" $serviceName "bin" ) -}}
 {{- $configMapEtc := index . "configMapEtc" | default (printf "%s-%s" $serviceName "etc" ) -}}
 {{- $podVolMounts := index . "podVolMounts" | default false -}}
@@ -10,18 +11,22 @@ kind: Job
 metadata:
   name: {{ printf "%s-%s" $serviceName "db-sync" | quote }}
   namespace: {{  $envAll.Release.Namespace | quote }}
+  annotations:
+{{- if $jobAnnotations }}
+{{ toYaml $jobAnnotations | indent 4 }}
+{{- end }}
 spec:
   template:
     spec:
       containers:
         - name: {{ printf "%s-%s" $serviceName "db-sync" | quote }}
           image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.dbSync "global" $envAll.Values.global) | quote }}
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: {{ $envAll.global.pullPolicy }}
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: "COPY_ALWAYS"
             - name: KOLLA_SERVICE_NAME
-              value: "keystone-db-sync"
+              value: "db-sync"
             - name: KOLLA_BOOTSTRAP
               value: ""
             - name: PATH
@@ -43,8 +48,8 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: pod-tmp
-            - mountPath: /var/log/kolla/keystone
-              name: keystonelog
+            - mountPath: {{ printf "%s-%s" "/var/log/kolla/" $serviceName | quote }}
+              name: logdir
             - mountPath: /var/lib/kolla/config_files/config.json
               name: {{ $configMapEtc | quote }}
               subPath: db-sync.json
@@ -57,7 +62,7 @@ spec:
       initContainers:
         - name: init
           image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.entrypoint "global" $envAll.Values.global) | quote }}
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: {{ $envAll.global.pullPolicy }}
           command:
             - kubernetes-entrypoint
           env:
@@ -82,7 +87,7 @@ spec:
       - emptyDir: {}
         name: pod-tmp
       - emptyDir: {}
-        name: keystonelog
+        name: logdir
       - configMap:
           defaultMode: 493
           name: {{ $configMapBin | quote }}

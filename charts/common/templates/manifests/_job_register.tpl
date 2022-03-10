@@ -1,16 +1,15 @@
-{{- define "common.manifests.job_db_init" -}}
+{{- define "common.manifests.job_register" -}}
 {{- $envAll := index . "envAll" -}}
 {{- $serviceName := index . "serviceName" -}}
 {{- $jobAnnotations := index . "jobAnnotations" -}}
-{{- $dbUserPasswordName := index . "dbUserPasswordName" -}}
 {{- $configMapBin := index . "configMapBin" | default (printf "%s-%s" $serviceName "bin" ) -}}
 {{- $configMapEtc := index . "configMapEtc" | default (printf "%s-%s" $serviceName "etc" ) -}}
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ printf "%s-%s" $serviceName "db-init" | quote }}
-  namespace: {{ $envAll.Release.Namespace | quote }}
+  name: {{ printf "%s-%s" $serviceName "register" | quote }}
+  namespace: {{  $envAll.Release.Namespace | quote }}
   annotations:
 {{- if $jobAnnotations }}
 {{ toYaml $jobAnnotations | indent 4 }}
@@ -19,13 +18,13 @@ spec:
   template:
     spec:
       containers:
-        - name: {{ printf "%s-%s" $serviceName "db-init" | quote }}
+        - name: {{ printf "%s-%s" $serviceName "register" | quote }}
           image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.kollaToolbox "global" $envAll.Values.global) | quote }}
           imagePullPolicy: {{ $envAll.global.pullPolicy }}
           command:
             - /bin/sh
             - -c
-            - /tmp/db-init.sh
+            - /tmp/register.sh
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: "COPY_ALWAYS"
@@ -47,33 +46,62 @@ spec:
               value: "stdlib"
             - name: PS1 
               value: "$(tput bold)($(printenv KOLLA_SERVICE_NAME))$(tput sgr0)[$(id -un)@$(hostname -s) $(pwd)]$ "
-            - name: DB_PORT
-              value: {{ $envAll.Values.endpoints.oslo_db.port | quote }}
-            - name: DB_NAME
-              value: {{ $envAll.Values.endpoints.oslo_db.database | quote }}
-            - name: DB_USER
-              value: {{ $envAll.Values.endpoints.oslo_db.username | quote }}
-            - name: DB_HOST_NAME
+            - name: OS_BOOTSTRAP_ADMIN_URL
               valueFrom:
                 secretKeyRef:
-                  key: MARIADB_HOST
-                  name: {{ index $envAll.Values "openstack-dep" "connInfoSecret" | quote }}
-            - name: DB_ROOT_PASSWORD
+                  key: OS_AUTH_URL
+                  name: {{ $envAll.Values.endpoints.auth.secretName }}
+            - name: OS_AUTH_URL
               valueFrom:
                 secretKeyRef:
-                  key: mariadb-root-password
-                  name: {{ index $envAll.Values "openstack-dep" "gen-password" "secretName" | quote }}
-            - name: DB_USER_PASSWORD
+                  key: OS_INTERNAL_URL
+                  name: {{ $envAll.Values.endpoints.auth.secretName }}
+            - name: OS_REGION_NAME
               valueFrom:
                 secretKeyRef:
-                  key: {{ $dbUserPasswordName | quote }}
-                  name: {{ index $envAll.Values "openstack-dep" "gen-password" "secretName" | quote }}
+                  key: OS_REGION_NAME
+                  name: {{ $envAll.Values.endpoints.auth.secretName }}
+            - name: OS_INTERFACE
+              valueFrom:
+                secretKeyRef:
+                  key: OS_INTERFACE
+                  name: {{ $envAll.Values.endpoints.auth.secretName }}
+            - name: OS_ENDPOINT_TYPE
+              valueFrom:
+                secretKeyRef:
+                  key: OS_INTERFACE
+                  name: {{ $envAll.Values.endpoints.auth.secretName }}
+            - name: OS_PROJECT_DOMAIN_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: OS_PROJECT_DOMAIN_NAME
+                  name: {{ $envAll.Values.endpoints.auth.secretName }}
+            - name: OS_PROJECT_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: OS_PROJECT_NAME
+                  name: {{ $envAll.Values.endpoints.auth.secretName }}
+            - name: OS_USER_DOMAIN_NAME
+              valueFrom:
+                secretKeyRef:
+                  key: OS_USER_DOMAIN_NAME
+                  name: {{ $envAll.Values.endpoints.auth.secretName }}
+            - name: OS_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: OS_USERNAME
+                  name: {{ $envAll.Values.endpoints.auth.secretName }}
+            - name: OS_DEFAULT_DOMAIN
+              valueFrom:
+                secretKeyRef:
+                  key: OS_DEFAULT_DOMAIN
+                  name: {{ $envAll.Values.endpoints.auth.secretName }}
           volumeMounts:
             - mountPath: /tmp
               name: pod-tmp
-            - mountPath: /tmp/db-init.sh
+            - mountPath: /tmp/register.sh
               name: {{ $configMapBin | quote }}
-              subPath: db-init.sh
+              subPath: register.sh
             - mountPath: /etc/sudoers.d/kolla_ansible_sudoers
               name: {{ $configMapEtc | quote }}
               subPath: kolla-toolbox-sudoer
@@ -96,8 +124,8 @@ spec:
                   fieldPath: metadata.namespace
             - name: PATH
               value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
-            - name: DEPENDENCY_JOBS
-              value: {{ include "common.utils.joinListWithComma" $envAll.Values.dependencies.db_init.jobs }}
+            - name: DEPENDENCY_SERVICE
+              value: {{ $envAll.Release.Namespace }}{{ include "common.utils.joinListWithComma" $envAll.Values.dependencies.register.service }}
       restartPolicy: OnFailure
       serviceAccount: {{ $envAll.Values.serviceAccountName }}
       serviceAccountName: {{ $envAll.Values.serviceAccountName }}
@@ -112,4 +140,4 @@ spec:
           defaultMode: 365
           name: {{ $configMapEtc | quote }}
         name: {{ $configMapEtc | quote }}
-{{- end -}}
+{{- end }}
