@@ -21,6 +21,8 @@ spec:
         - name: {{ printf "%s-%s" $serviceName "register" | quote }}
           image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.kollaToolbox "global" $envAll.Values.global) | quote }}
           imagePullPolicy: {{ $envAll.Values.global.pullPolicy }}
+          securityContext:
+            runAsUser: 0
           command:
             - /bin/sh
             - -c
