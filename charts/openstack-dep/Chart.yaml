@@ -13,13 +13,13 @@
 apiVersion: v2
 description: Openstack dependency service
 name: openstack-dep
-version: 1.0.9
+version: 1.0.10
 home: https://kungze.github.io/charts/
 maintainers:
-  - name: Openstack
+  - name: Kungze
 dependencies:
   - name: gen-password
-    repository: https://fightdou.github.io/test-charts
+    repository: https://kungze.github.io/charts
     version: 1.x.x
   - condition: mariadb.enabled
     name: mariadb
@@ -39,8 +39,6 @@ dependencies:
     version: 9.x.x
   - name: common
     repository: https://charts.bitnami.com/bitnami
-    tags:
-      - bitnami-common
     version: 1.x.x
 engine: gotpl
 annotations:
