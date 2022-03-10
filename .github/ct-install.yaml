@@ -3,5 +3,7 @@ chart-dirs:
 chart-repos:
   - fightdou=https://fightdou.github.io/test-charts
 debug: true
+excluded-charts:
+  - common
 remote: origin
 target-branch: main

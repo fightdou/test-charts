@@ -48,15 +48,15 @@ spec:
             - name: PS1 
               value: "$(tput bold)($(printenv KOLLA_SERVICE_NAME))$(tput sgr0)[$(id -un)@$(hostname -s) $(pwd)]$ "
             - name: DB_PORT
-              value: {{ $envAll.Values.endpoints.oslo_db.port | quote }}
+              value: {{ $envAll.Values.database.port | quote }}
             - name: DB_NAME
-              value: {{ $envAll.Values.endpoints.oslo_db.database | quote }}
+              value: {{ $envAll.Values.database.database | quote }}
             - name: DB_USER
-              value: {{ $envAll.Values.endpoints.oslo_db.username | quote }}
+              value: {{ $envAll.Values.database.username | quote }}
             - name: DB_HOST_NAME
               valueFrom:
                 secretKeyRef:
-                  key: MARIADB_HOST
+                  key: DATABASE_HOST
                   name: {{ index $envAll.Values "openstack-dep" "connInfoSecret" | quote }}
             - name: DB_ROOT_PASSWORD
               valueFrom:
@@ -109,7 +109,7 @@ spec:
           name: {{ $configMapBin | quote }}
         name: {{ $configMapBin | quote }}
       - configMap:
-          defaultMode: 365
+          defaultMode: 420
           name: {{ $configMapEtc | quote }}
         name: {{ $configMapEtc | quote }}
 {{- end -}}

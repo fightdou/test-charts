@@ -144,7 +144,7 @@ spec:
           name: {{ $configMapBin | quote }}
         name: {{ $configMapBin | quote }}
       - configMap:
-          defaultMode: 365
+          defaultMode: 420
           name: {{ $configMapEtc | quote }}
         name: {{ $configMapEtc | quote }}
 {{- end }}

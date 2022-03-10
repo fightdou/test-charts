@@ -33,18 +33,18 @@ spec:
             - name: CONFIG_MAP_NAME
               value: {{ printf "%s-%s" $serviceName "etc" | quote }}
             - name: DB_NAME
-              value: {{ $envAll.Values.endpoints.oslo_db.database | quote }}
+              value: {{ $envAll.Values.database.database | quote }}
             - name: DB_USERNAME
-              value: {{ $envAll.Values.endpoints.oslo_db.username | quote }}
+              value: {{ $envAll.Values.database.username | quote }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: {{ $dbUserPasswordName | quote }}
                   name: {{ index $envAll.Values "openstack-dep" "gen-password" "secretName" }}
-            - name: MARIADB_URL
+            - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  key: MARIADB_URL
+                  key: DATABASE_URL
                   name: {{ index $envAll.Values "openstack-dep" "connInfoSecret" }}
             - name: RABBITMQ_URL
               valueFrom:
@@ -100,7 +100,7 @@ spec:
           name: {{ $configMapBin | quote }}
         name: {{ $configMapBin | quote }}
       - configMap:
-          defaultMode: 365
+          defaultMode: 420
           name: {{ $configMapEtc | quote }}
         name: {{ $configMapEtc | quote }}
 {{- end }}
