@@ -125,7 +125,7 @@ spec:
             - name: PATH
               value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
             - name: DEPENDENCY_SERVICE
-              value: {{ $envAll.Release.Namespace }}{{ include "common.utils.joinListWithComma" $envAll.Values.dependencies.register.service }}
+              value: {{ $envAll.Release.Namespace }}:{{ include "common.utils.joinListWithComma" $envAll.Values.dependencies.register.service }}
       restartPolicy: OnFailure
       serviceAccount: {{ $envAll.Values.serviceAccountName }}
       serviceAccountName: {{ $envAll.Values.serviceAccountName }}
