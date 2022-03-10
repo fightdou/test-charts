@@ -10,7 +10,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ printf "%s-%s" $serviceName "db-sync" | quote }}
-  namespace: {{  $envAll.Release.Namespace | quote }}
+  namespace: {{ $envAll.Release.Namespace | quote }}
   annotations:
 {{- if $jobAnnotations }}
 {{ toYaml $jobAnnotations | indent 4 }}
@@ -21,7 +21,7 @@ spec:
       containers:
         - name: {{ printf "%s-%s" $serviceName "db-sync" | quote }}
           image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.dbSync "global" $envAll.Values.global) | quote }}
-          imagePullPolicy: {{ $envAll.global.pullPolicy }}
+          imagePullPolicy: {{ $envAll.Values.global.pullPolicy }}
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: "COPY_ALWAYS"
@@ -62,7 +62,7 @@ spec:
       initContainers:
         - name: init
           image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.entrypoint "global" $envAll.Values.global) | quote }}
-          imagePullPolicy: {{ $envAll.global.pullPolicy }}
+          imagePullPolicy: {{ $envAll.Values.global.pullPolicy }}
           command:
             - kubernetes-entrypoint
           env:

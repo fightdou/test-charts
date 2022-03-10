@@ -9,7 +9,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ printf "%s-%s" $serviceName "register" | quote }}
-  namespace: {{  $envAll.Release.Namespace | quote }}
+  namespace: {{ $envAll.Release.Namespace | quote }}
   annotations:
 {{- if $jobAnnotations }}
 {{ toYaml $jobAnnotations | indent 4 }}
@@ -20,7 +20,7 @@ spec:
       containers:
         - name: {{ printf "%s-%s" $serviceName "register" | quote }}
           image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.kollaToolbox "global" $envAll.Values.global) | quote }}
-          imagePullPolicy: {{ $envAll.global.pullPolicy }}
+          imagePullPolicy: {{ $envAll.Values.global.pullPolicy }}
           command:
             - /bin/sh
             - -c
@@ -108,7 +108,7 @@ spec:
       initContainers:
         - name: init
           image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.entrypoint "global" $envAll.Values.global) | quote }}
-          imagePullPolicy: {{ $envAll.global.pullPolicy }}
+          imagePullPolicy: {{ $envAll.Values.global.pullPolicy }}
           command:
             - kubernetes-entrypoint
           env:
