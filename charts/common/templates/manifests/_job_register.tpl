@@ -56,8 +56,8 @@ spec:
             - name: OS_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  key: OS_PASSWORD
-                  name: {{ $envAll.Values.endpoints.auth.secretName }}
+                  key: keystone-admin-password
+                  name: {{ index $envAll.Values "openstack-dep" "gen-password" "secretName" | quote }}
             - name: OS_BOOTSTRAP_ADMIN_URL
               valueFrom:
                 secretKeyRef:
