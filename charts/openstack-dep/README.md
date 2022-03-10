@@ -1,17 +1,24 @@
 # openstack-dep
 
+openstack-dep 用于安装openstack依赖环境，其中包括：mariadb、rabbitmq、memcached、nginx-ingress-controller、gen-password。  
+安装成功后会生成一个包含 mariadb、rabbitmq、memcached 连接信息的 secrets。
+
 ## Parameters
 
 ### Global parameters
 
-| Name                      | Form title | Description                                             | Value                 |
-| ------------------------- | ---------- | ------------------------------------------------------- | --------------------- |
-| `global.imageRegistry`    |            | Global Docker image registry                            | `""`                  |
-| `global.imagePullSecrets` |            | Global Docker registry secret names as an array         | `[]`                  |
-| `global.storageClass`     |            | Global StorageClass for Persistent Volume(s)            | `""`                  |
-| `connInfoSecret`          |            | openstack dependency env generate conn info secret name | `openstack-conn-info` |
-| `clusterDomainSuffix`     |            | openstack dependency env generate conn info secret name | `cluster.local`       |
-| `gen-password.secretName` | 自动生成密钥名称   | 自动生成openstack密钥名称                                       | `openstack-password`  |
+| Name                        | Form title      | Description                                             | Value                 |
+| --------------------------  | ------------    | ------------------------------------------------------- | --------------------- |
+| `global.imageRegistry`      |                 | Global Docker image registry                            | `""`                  |
+| `global.imagePullSecrets`   |                 | Global Docker registry secret names as an array         | `[]`                  |
+| `global.storageClass`       |                 | Global StorageClass for Persistent Volume(s)            | `""`                  |
+| `connInfoSecret`            |                 | openstack dependency env generate conn info secret name | `openstack-conn-info` |
+| `clusterDomainSuffix`       |                 | openstack dependency env generate conn info secret name | `cluster.local`       |
+| `gen-password.secretName`   | 自动生成密钥名称  | 自动生成openstack密钥名称                                | `openstack-password`  |
+| `openstackEnv.rabbitmqUrl`  | rabbitmq url    | 生成rabbitmq url信息                                     | `""`                  |
+| `openstackEnv.databaseUrl`  | database url    | 生成database url信息                                     | `""`                  |
+| `openstackEnv.databaseHost` | database host   | 生成database host信息                                    | `""`                  |
+| `openstackEnv.memcacheUrl`  | mamcache url    | 生成memcache url信息                                     | `""`                  |
 
 
 ### Database Parameters

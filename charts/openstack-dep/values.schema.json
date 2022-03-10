@@ -2,13 +2,13 @@
     "$schema": "http://json-schema.org/schema#",
     "type": "object",
     "properties": {
-	    "gen-password": {
+        "gen-password": {
             "type": "object",
             "title": "Gen-password Details",
             "form": true,
             "properties": {
                 "secretName": {
-		            "title": "自动生成密钥名称",
+		            "title": "secret 名称",
                     "form": true,
                     "type": "string",
                     "description": "Auto generate openstack password secret name",
@@ -23,7 +23,7 @@
             "properties": {
                 "enabled": {
                     "type": "boolean",
-                    "title": "开启mariadb",
+                    "title": "部署 mariadb",
                     "form": true,
                     "description": "Whether to deploy a mariadb server to satisfy the applications database requirements. To use an external database switch this off and configure the external database details"
                 },
@@ -31,13 +31,17 @@
                     "form": true,
                     "type": "string",
                     "description": "MariaDB architecture. Allowed values: `standalone` or `replication`",
-                    "title": "MariaDB架构",
+                    "title": "MariaDB 架构",
+                    "hidden": {
+                        "value": false,
+                        "path": "mariadb/enabled"
+                    },
                     "default": "standalone",
                     "enum": ["standalone", "replication"]
                 },
                 "auth": {
                     "type": "object",
-                    "title": "Mariadb auth",
+                    "title": "Mariadb Auth",
                     "form": true,
                     "properties": {
                         "existingSecret": {
@@ -62,8 +66,8 @@
                 "enabled": {
                     "form": true,
                     "type": "boolean",
-                    "description": "Enable/disable RabbitMQ chart installation",
-                    "title": "开启rabbitmq",
+                    "description": "Enable/disable rabbitmq chart installation",
+                    "title": "部署 Rabbitmq",
                     "default": true
                 },
                 "auth": {
@@ -72,15 +76,15 @@
                         "username": {
                             "form": true,
                             "type": "string",
-                            "description": "RabbitMQ username",
-                            "title": "RabbitMQ用户名",
+                            "description": "Rabbitmq username",
+                            "title": "Rabbitmq 用户名",
                             "default": "openstack"
                         },
                         "password": {
                             "form": true,
                             "type": "string",
-                            "description": "RabbitMQ password",
-                            "title": "RabbitMQ密码",
+                            "description": "Rabbitmq password",
+                            "title": "Rabbitmq 密码",
                             "default": "openstack"
                         }
                     }
@@ -94,9 +98,10 @@
             "properties": {
                 "enabled": {
                     "type": "boolean",
-                    "title": "开启memcached",
+                    "title": "部署 memcached",
                     "form": true,
-                    "description": "Whether to deploy a Memcached server."
+                    "description": "Enable/disable memcached chart installation.",
+                    "default": true
                 }
             }
         },
@@ -106,9 +111,9 @@
             "form": true,
             "properties": {
                 "enabled": {
-                    "form": true,
-                    "title": "开启nginx-ingress-controller",
                     "type": "boolean",
+                    "form": true,
+                    "title": "部署 nginx-ingress-controller",
                     "description": "Deploy a ingress controller server",
                     "default": true
                 }
