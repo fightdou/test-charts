@@ -48,6 +48,8 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: pod-tmp
+            - mountPath: /var/lib/kolla/config_files
+              name: configdir
             - mountPath: {{ printf "%s-%s" "/var/log/kolla/" $serviceName | quote }}
               name: logdir
             - mountPath: /var/lib/kolla/config_files/config.json
@@ -86,6 +88,8 @@ spec:
       volumes:
       - emptyDir: {}
         name: pod-tmp
+      - emptyDir: {}
+        name: configdir
       - emptyDir: {}
         name: logdir
       - configMap:
