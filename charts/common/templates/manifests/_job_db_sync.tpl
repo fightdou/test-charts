@@ -22,6 +22,8 @@ spec:
               value: "COPY_ALWAYS"
             - name: KOLLA_SERVICE_NAME
               value: "keystone-db-sync"
+            - name: KOLLA_BOOTSTRAP
+              value: ""
             - name: PATH
               value: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
             - name: LANG
