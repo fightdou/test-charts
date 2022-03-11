@@ -128,8 +128,6 @@ image:
 dependencies:
   keystone_api:
     jobs:
-      - keystone-cm-render
-      - keystone-db-sync
       - keystone-fernet-setup
       - keystone-bootstrap
   db_init:
@@ -137,7 +135,6 @@ dependencies:
       - keystone-cm-render
   db_sync:
     jobs:
-      - keystone-cm-render
       - keystone-db-init
   bootstrap:
     jobs:

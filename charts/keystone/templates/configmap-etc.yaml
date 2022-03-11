@@ -16,8 +16,6 @@ data:
 {{ tuple "conf/_keystone.json.tpl" . | include "common.utils.template" | indent 4 }}
   db-sync.json: |
 {{ tuple "conf/_keystone_db_sync.json.tpl" . | include "common.utils.template" | indent 4 }}
-  bootstrap.json: |
-{{ tuple "conf/_keystone_bootstrap.json.tpl" . | include "common.utils.template" | indent 4 }}
   keystone-fernet-setup.json: |
 {{ tuple "conf/_keystone_fernet_setup.json.tpl" . | include "common.utils.template" | indent 4 }}
   keystone-bootstrap.json: |
