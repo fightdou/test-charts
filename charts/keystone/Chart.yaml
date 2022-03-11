@@ -13,7 +13,7 @@
 apiVersion: v2
 description: Openstack keystone service
 name: keystone
-version: 1.0.4
+version: 1.0.5
 home: https://kungze.github.io/charts/
 maintainers:
   - name: Kungze
