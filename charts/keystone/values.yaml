@@ -168,6 +168,7 @@ jobs:
 
 ## @skip endpoints
 endpoints:
+  secret: keystone-endpoint
   cluster_domain_suffix: cluster.local
   auth:
     secretName: keystone-admin-secret
