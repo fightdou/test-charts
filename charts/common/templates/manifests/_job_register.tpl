@@ -1,7 +1,9 @@
 {{- define "common.manifests.job_register" -}}
 {{- $envAll := index . "envAll" -}}
 {{- $serviceName := index . "serviceName" -}}
-{{- $jobAnnotations := index . "jobAnnotations" -}}
+{{- $podCommands := index . "podCommands" | default false -}}
+{{- $podEnvVars := index . "podEnvVars" | default false -}}
+{{- $podVolMounts := index . "podVolMounts" | default false -}}
 {{- $configMapBin := index . "configMapBin" | default (printf "%s-%s" $serviceName "bin" ) -}}
 {{- $configMapEtc := index . "configMapEtc" | default (printf "%s-%s" $serviceName "etc" ) -}}
 ---
@@ -10,10 +12,6 @@ kind: Job
 metadata:
   name: {{ printf "%s-%s" $serviceName "register" | quote }}
   namespace: {{ $envAll.Release.Namespace | quote }}
-  annotations:
-{{- if $jobAnnotations }}
-{{ toYaml $jobAnnotations | indent 4 }}
-{{- end }}
 spec:
   template:
     spec:
@@ -24,9 +22,9 @@ spec:
           securityContext:
             runAsUser: 0
           command:
-            - /bin/sh
-            - -c
-            - /tmp/register.sh
+{{- if $podCommands }}
+{{ $podCommands | toYaml | indent 12 }}
+{{- end }}
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: "COPY_ALWAYS"
@@ -58,11 +56,6 @@ spec:
                 secretKeyRef:
                   key: keystone-admin-password
                   name: {{ index $envAll.Values "openstack-dep" "gen-password" "secretName" | quote }}
-            - name: OS_BOOTSTRAP_ADMIN_URL
-              valueFrom:
-                secretKeyRef:
-                  key: OS_AUTH_URL
-                  name: {{ $envAll.Values.endpoints.auth.secretName }}
             - name: OS_AUTH_URL
               valueFrom:
                 secretKeyRef:
@@ -103,15 +96,18 @@ spec:
                 secretKeyRef:
                   key: OS_DEFAULT_DOMAIN
                   name: {{ $envAll.Values.endpoints.auth.secretName }}
+{{- if $podEnvVars }}
+{{ $podEnvVars | toYaml | indent 12 }}
+{{- end }}
           volumeMounts:
             - mountPath: /tmp
               name: pod-tmp
-            - mountPath: /tmp/register.sh
-              name: {{ $configMapBin | quote }}
-              subPath: register.sh
             - mountPath: /etc/sudoers.d/kolla_ansible_sudoers
               name: {{ $configMapEtc | quote }}
               subPath: kolla-toolbox-sudoer
+{{- if $podVolMounts }}
+{{ $podVolMounts | toYaml | indent 12 }}
+{{- end }}
       initContainers:
         - name: init
           image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.entrypoint "global" $envAll.Values.global) | quote }}
@@ -140,11 +136,11 @@ spec:
       - emptyDir: {}
         name: pod-tmp
       - configMap:
-          defaultMode: 493
+          defaultMode: 0755
           name: {{ $configMapBin | quote }}
         name: {{ $configMapBin | quote }}
       - configMap:
-          defaultMode: 420
+          defaultMode: 0644
           name: {{ $configMapEtc | quote }}
         name: {{ $configMapEtc | quote }}
 {{- end }}
