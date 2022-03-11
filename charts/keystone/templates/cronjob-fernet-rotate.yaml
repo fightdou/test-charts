@@ -15,7 +15,7 @@ spec:
           containers:
             - name: keystone-fernet-rotate
               image: {{ template "kolla.toolbox.image" . }}
-              imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+              imagePullPolicy: {{ .Values.global.pullPolicy | quote }}
               env:
                 - name: KEYSTONE_USER
                   value: {{ .Values.jobs.fernet_rotate.user | quote }}
@@ -60,7 +60,7 @@ spec:
               - name: PATH
                 value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
               - name: DEPENDENCY_JOBS
-                value: {{ include "joinListWithComma" .Values.dependencies.fernet_rotate.jobs }}
+                value: {{ include "common.utils.joinListWithComma" .Values.dependencies.fernet_rotate.jobs }}
               - name: DEPENDENCY_DAEMONSET
               - name: DEPENDENCY_CONTAINER
               - name: DEPENDENCY_POD_JSON

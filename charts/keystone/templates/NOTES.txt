@@ -4,7 +4,7 @@ APP VERSION: {{ .Chart.AppVersion }}
 
 ** 请耐心等待 chart 部署完成 **
 
-{{- $endpointsSecretName := .Values.secrets.identity.admin -}}
+{{- $endpointsSecretName := .Values.endpoints.auth.secretName -}}
 
 你可以通过 openstack cli 访问 keystone 服务
 

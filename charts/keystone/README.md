@@ -18,81 +18,73 @@ helm install keystone kungze/keystone
 
 设置环境变量(示例如下)
 
-    export OS_USERNAME=$(kubectl get secret --namespace "doudou" keystone-keystone-admin -o jsonpath="{.data.OS_USERNAME}" | base64 --decode)
-    export OS_PROJECT_DOMAIN_NAME=$(kubectl get secret --namespace "doudou" keystone-keystone-admin -o jsonpath="{.data.OS_PROJECT_DOMAIN_NAME}" | base64 --decode)
-    export OS_USER_DOMAIN_NAME=$(kubectl get secret --namespace "doudou" keystone-keystone-admin -o jsonpath="{.data.OS_USER_DOMAIN_NAME}" | base64 --decode)
-    export OS_PROJECT_NAME=$(kubectl get secret --namespace "doudou" keystone-keystone-admin -o jsonpath="{.data.OS_PROJECT_NAME}" | base64 --decode)
-    export OS_REGION_NAME=$(kubectl get secret --namespace "doudou" keystone-keystone-admin -o jsonpath="{.data.OS_REGION_NAME}" | base64 --decode)
-    export OS_IDENTITY_API_VERSION=$(kubectl get secret --namespace "doudou" keystone-keystone-admin -o jsonpath="{.data.OS_IDENTITY_API_VERSION}" | base64 --decode)
-    export OS_PASSWORD=$(kubectl get --namespace doudou -o jsonpath="{.data.keystone-admin-password}" secrets openstack*** base64 --decode)
-    export OS_AUTH_URL=http://keystone.doudou.svc.cluster.local/v3
+    export OS_USERNAME=$(kubectl get secret --namespace "cinder" keystone-admin-secret -o jsonpath="{.data.OS_USERNAME}" | base64 --decode)
+    export OS_PROJECT_DOMAIN_NAME=$(kubectl get secret --namespace "cinder" keystone-admin-secret -o jsonpath="{.data.OS_PROJECT_DOMAIN_NAME}" | base64 --decode)
+    export OS_USER_DOMAIN_NAME=$(kubectl get secret --namespace "cinder" keystone-admin-secret -o jsonpath="{.data.OS_USER_DOMAIN_NAME}" | base64 --decode)
+    export OS_PROJECT_NAME=$(kubectl get secret --namespace "cinder" keystone-admin-secret -o jsonpath="{.data.OS_PROJECT_NAME}" | base64 --decode)
+    export OS_REGION_NAME=$(kubectl get secret --namespace "cinder" keystone-admin-secret -o jsonpath="{.data.OS_REGION_NAME}" | base64 --decode)
+    export OS_IDENTITY_API_VERSION=$(kubectl get secret --namespace "cinder" keystone-admin-secret -o jsonpath="{.data.OS_IDENTITY_API_VERSION}" | base64 --decode)
+    export OS_PASSWORD=$(kubectl get --namespace cinder -o jsonpath="{.data.keystone-admin-password}" secrets openstack-password | base64 --decode)
+    export OS_AUTH_URL=http://keystone.cinder.svc.cluster.local/v3
 ```
 
 ## Parameters
 
 ### Global parameters
 
-| Name                      | Form title | Description                                     | Value |
-| ------------------------- | ---------- | ----------------------------------------------- | ----- |
-| `global.imageRegistry`    |            | Global Docker image registry                    | `""`  |
-| `global.imagePullSecrets` |            | Global Docker registry secret names as an array | `[]`  |
-| `global.storageClass`     |            | Global StorageClass for Persistent Volume(s)    | `""`  |
+| Name                   | Form title | Description                                  | Value          |
+| ---------------------- | ---------- | -------------------------------------------- | -------------- |
+| `global.imageRegistry` |            | Global Docker image registry                 | `docker.io`    |
+| `global.storageClass`  |            | Global StorageClass for Persistent Volume(s) | `""`           |
+| `global.imageTag`      |            | Global docker image tag                      | `xena`         |
+| `global.pullPolicy`    |            | Global image pull policy                     | `IfNotPresent` |
 
 
 ### Common parameters
 
-| Name                                                | Form title | Description                                                                | Value      |
-| --------------------------------------------------- | ---------- | -------------------------------------------------------------------------- | ---------- |
-| `replicaCount`                                      |            | Number of keystone replicas to deploy (requires ReadWriteMany PVC support) | `1`        |
-| `serviceAccountName`                                |            | ServiceAccount name                                                        | `keystone` |
-| `resources.limits`                                  |            | The resources limits for the Controller container                          | `{}`       |
-| `resources.requests`                                |            | The requested resources for the Controller container                       | `{}`       |
-| `podSecurityContext.enabled`                        |            | Enabled keystone pods' Security Context                                    | `false`    |
-| `podSecurityContext.runAsUser`                      |            | Set keystone container's Security Context runAsUser                        | `""`       |
-| `containerSecurityContext.enabled`                  |            | Enabled keystone containers' Security Context                              | `false`    |
-| `containerSecurityContext.runAsUser`                |            | Set keystone container's Security Context runAsUser                        | `0`        |
-| `livenessProbe.enabled`                             |            | Enable livenessProbe                                                       | `true`     |
-| `livenessProbe.httpGet.path`                        |            | Request path for livenessProbe                                             | `/v3/`     |
-| `livenessProbe.httpGet.port`                        |            | Port for livenessProbe                                                     | `5000`     |
-| `livenessProbe.httpGet.scheme`                      |            | Scheme for livenessProbe                                                   | `HTTP`     |
-| `livenessProbe.initialDelaySeconds`                 |            | Initial delay seconds for livenessProbe                                    | `50`       |
-| `livenessProbe.periodSeconds`                       |            | Period seconds for livenessProbe                                           | `60`       |
-| `livenessProbe.timeoutSeconds`                      |            | Timeout seconds for livenessProbe                                          | `15`       |
-| `livenessProbe.failureThreshold`                    |            | Failure threshold for livenessProbe                                        | `3`        |
-| `livenessProbe.successThreshold`                    |            | Success threshold for livenessProbe                                        | `1`        |
-| `readinessProbe.enabled`                            |            | Enable readinessProbe                                                      | `true`     |
-| `readinessProbe.httpGet.path`                       |            | Request path for readinessProbe                                            | `/v3/`     |
-| `readinessProbe.httpGet.port`                       |            | Port for readinessProbe                                                    | `5000`     |
-| `readinessProbe.httpGet.scheme`                     |            | Scheme for readinessProbe                                                  | `HTTP`     |
-| `readinessProbe.initialDelaySeconds`                |            | Initial delay seconds for readinessProbe                                   | `50`       |
-| `readinessProbe.periodSeconds`                      |            | Period seconds for readinessProbe                                          | `60`       |
-| `readinessProbe.timeoutSeconds`                     |            | Timeout seconds for readinessProbe                                         | `15`       |
-| `readinessProbe.failureThreshold`                   |            | Failure threshold for readinessProbe                                       | `3`        |
-| `readinessProbe.successThreshold`                   |            | Success threshold for readinessProbe                                       | `1`        |
-| `customLivenessProbe`                               |            | Override default liveness probe                                            | `{}`       |
-| `customReadinessProbe`                              |            | Override default readiness probe                                           | `{}`       |
-| `lifecycle`                                         |            | LifecycleHooks to set additional configuration at startup                  | `""`       |
+| Name                                 | Form title | Description                                                                | Value      |
+| ------------------------------------ | ---------- | -------------------------------------------------------------------------- | ---------- |
+| `replicaCount`                       |            | Number of keystone replicas to deploy (requires ReadWriteMany PVC support) | `1`        |
+| `serviceAccountName`                 |            | ServiceAccount name                                                        | `keystone` |
+| `resources.limits`                   |            | The resources limits for the Controller container                          | `{}`       |
+| `resources.requests`                 |            | The requested resources for the Controller container                       | `{}`       |
+| `podSecurityContext.enabled`         |            | Enabled keystone pods' Security Context                                    | `true`     |
+| `podSecurityContext.runAsUser`       |            | Set keystone container's Security Context runAsUser                        | `0`        |
+| `containerSecurityContext.enabled`   |            | Enabled keystone containers' Security Context                              | `true`     |
+| `containerSecurityContext.runAsUser` |            | Set keystone container's Security Context runAsUser                        | `0`        |
+| `livenessProbe.enabled`              |            | Enable livenessProbe                                                       | `true`     |
+| `livenessProbe.httpGet.path`         |            | Request path for livenessProbe                                             | `/v3/`     |
+| `livenessProbe.httpGet.port`         |            | Port for livenessProbe                                                     | `5000`     |
+| `livenessProbe.httpGet.scheme`       |            | Scheme for livenessProbe                                                   | `HTTP`     |
+| `livenessProbe.initialDelaySeconds`  |            | Initial delay seconds for livenessProbe                                    | `50`       |
+| `livenessProbe.periodSeconds`        |            | Period seconds for livenessProbe                                           | `60`       |
+| `livenessProbe.timeoutSeconds`       |            | Timeout seconds for livenessProbe                                          | `15`       |
+| `livenessProbe.failureThreshold`     |            | Failure threshold for livenessProbe                                        | `3`        |
+| `livenessProbe.successThreshold`     |            | Success threshold for livenessProbe                                        | `1`        |
+| `readinessProbe.enabled`             |            | Enable readinessProbe                                                      | `true`     |
+| `readinessProbe.httpGet.path`        |            | Request path for readinessProbe                                            | `/v3/`     |
+| `readinessProbe.httpGet.port`        |            | Port for readinessProbe                                                    | `5000`     |
+| `readinessProbe.httpGet.scheme`      |            | Scheme for readinessProbe                                                  | `HTTP`     |
+| `readinessProbe.initialDelaySeconds` |            | Initial delay seconds for readinessProbe                                   | `50`       |
+| `readinessProbe.periodSeconds`       |            | Period seconds for readinessProbe                                          | `60`       |
+| `readinessProbe.timeoutSeconds`      |            | Timeout seconds for readinessProbe                                         | `15`       |
+| `readinessProbe.failureThreshold`    |            | Failure threshold for readinessProbe                                       | `3`        |
+| `readinessProbe.successThreshold`    |            | Success threshold for readinessProbe                                       | `1`        |
+| `customLivenessProbe`                |            | Override default liveness probe                                            | `{}`       |
+| `customReadinessProbe`               |            | Override default readiness probe                                           | `{}`       |
+| `lifecycle`                          |            | LifecycleHooks to set additional configuration at startup                  | `""`       |
 
 
 ### Keystone Image parameters
 
-| Name                                  | Form title | Description                                       | Value                               |
-| ------------------------------------- | ---------- | ------------------------------------------------- | ----------------------------------- |
-| `image.keystoneImage.registry`        |            | Moodle image registry                             | `docker.io`                         |
-| `image.keystoneImage.repository`      |            | Moodle image repository                           | `kolla/ubuntu-binary-keystone`      |
-| `image.keystoneImage.tag`             |            | Moodle image tag (immutable tags are recommended) | `xena`                              |
-| `image.keystoneImage.pullPolicy`      |            | Moodle image pull policy                          | `IfNotPresent`                      |
-| `image.keystoneImage.pullSecrets`     |            | Specify docker-registry secret names as an array  | `[]`                                |
-| `image.entrypointImage.registry`      |            | Moodle image registry                             | `quay.io`                           |
-| `image.entrypointImage.repository`    |            | Moodle image repository                           | `airshipit/kubernetes-entrypoint`   |
-| `image.entrypointImage.tag`           |            | Moodle image tag (immutable tags are recommended) | `v1.0.0`                            |
-| `image.entrypointImage.pullPolicy`    |            | Moodle image pull policy                          | `IfNotPresent`                      |
-| `image.entrypointImage.pullSecrets`   |            | Specify docker-registry secret names as an array  | `[]`                                |
-| `image.kollaToolboxImage.registry`    |            | Moodle image registry                             | `docker.io`                         |
-| `image.kollaToolboxImage.repository`  |            | Moodle image repository                           | `kolla/ubuntu-binary-kolla-toolbox` |
-| `image.kollaToolboxImage.tag`         |            | Moodle image tag (immutable tags are recommended) | `xena`                              |
-| `image.kollaToolboxImage.pullPolicy`  |            | Moodle image pull policy                          | `IfNotPresent`                      |
-| `image.kollaToolboxImage.pullSecrets` |            | Specify docker-registry secret names as an array  | `[]`                                |
+| Name                            | Form title | Description                                       | Value                               |
+| ------------------------------- | ---------- | ------------------------------------------------- | ----------------------------------- |
+| `image.keystoneAPI.repository`  |            | Moodle image repository                           | `kolla/ubuntu-binary-keystone`      |
+| `image.dbSync.repository`       |            | Moodle image repository                           | `kolla/ubuntu-binary-keystone`      |
+| `image.kollaToolbox.repository` |            | Moodle image repository                           | `kolla/ubuntu-binary-kolla-toolbox` |
+| `image.entrypoint.registry`     |            | Moodle image registry                             | `quay.io`                           |
+| `image.entrypoint.repository`   |            | Moodle image repository                           | `airshipit/kubernetes-entrypoint`   |
+| `image.entrypoint.tag`          |            | Moodle image tag (immutable tags are recommended) | `v1.0.0`                            |
 
 
 ### Traffic Exposure Parameters
@@ -123,10 +115,8 @@ helm install keystone kungze/keystone
 
 ### openstack dependency env
 
-| Name                                     | Form title       | Description                                      | Value                |
-| ---------------------------------------- | ---------------- | ------------------------------------------------ | -------------------- |
-| `openstack-dep.enabled`                  | 安裝 openstack-dep | 安装openstack依赖环境，有mariadb;rabbitmq;memcached 等... | `true`               |
-| `openstack-dep.openstackEnv.rabbitmqUrl` | rabbitmq url     | rabbitmq url信息，如果openstack-dep设置为true，则无需配置      | `""`                 |
-| `openstack-dep.openstackEnv.mariadbUrl`  | mariadb url      | mariadb url信息，如果openstack-dep设置为true，则无需配置       | `""`                 |
-| `openstack-dep.openstackEnv.memcacheUrl` | mamcache url     | memcache url信息，如果openstack-dep设置为true，则无需配置      | `""`                 |
-| `openstack-dep.gen-password.secretName`  | secret Name      | openstack 依赖环境中自动生成服务相关密码得 secret 名称             | `openstack-password` |
+| Name                                    | Form title           | Description                                       | Value                 |
+| --------------------------------------- | -------------------- | ------------------------------------------------- | --------------------- |
+| `openstack-dep.enabled`                 | 安裝 openstack-dep     | 安装openstack依赖环境，包含mariadb;rabbitmq;memcached 等... | `true`                |
+| `openstack-dep.connInfoSecret`          | ConnInfo secret name | openstack 依赖环境中生成服务URL得 secret 名称                 | `openstack-conn-info` |
+| `openstack-dep.gen-password.secretName` | Password secret name | openstack 依赖环境中自动生成服务相关密码得 secret 名称              | `openstack-password`  |

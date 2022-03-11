@@ -1,0 +1,6 @@
+{{- define "metadata.annotations.job.register" }}
+{{- end }}
+
+{{- $envAll := index . -}}
+{{- $registerJob := dict "envAll" . "serviceName" "keystone" -}}
+{{ $registerJob | include "common.manifests.job_register" }}
