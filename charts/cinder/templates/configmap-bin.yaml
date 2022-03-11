@@ -1,147 +1,24 @@
+{{- $envAll := . }}
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: cinder-bin
   namespace: {{ .Release.Namespace | quote }}
 data:
-  db-init.sh: |-
-    #!/bin/bash
-    set -ex
-    mysql -uroot -p${ROOT_PASSWORD} -h ${CINDER_DATABASE_HOST} -e "CREATE DATABASE ${CINDER_DATABASE_NAME}"
-    mysql -uroot -p${ROOT_PASSWORD} -h ${CINDER_DATABASE_HOST} -e "GRANT ALL PRIVILEGES ON ${CINDER_DATABASE_USER}.* TO '${CINDER_DATABASE_USER}'@'localhost' IDENTIFIED BY '${CINDER_DATABASE_PASSWORD}';"
-    mysql -uroot -p${ROOT_PASSWORD} -h ${CINDER_DATABASE_HOST} -e "GRANT ALL PRIVILEGES ON ${CINDER_DATABASE_USER}.* TO '${CINDER_DATABASE_USER}'@'%' IDENTIFIED BY '${CINDER_DATABASE_PASSWORD}';" 
-  db-sync.sh: |-
-    #!/bin/bash
-    set -ex
-    exec cinder-manage db sync
-  db-drop.sh: |-
-    #!/bin/bash
-    set -ex
-    mysql -uroot -p${ROOT_PASSWORD} -h ${CINDER_DATABASE_HOST} -e "DROP DATABASE ${CINDER_DATABASE_NAME}"
-  ks-create.sh: |-
-    #!/bin/bash
-    set -ex
-    openstack project create --domain ${OS_PROJECT_DOMAIN_NAME} --description "Service Project" service
-    openstack user create --domain ${OS_PROJECT_DOMAIN_NAME} --password ${CINDER_KEYSTONE_PASSWORD} {{ .Values.endpoints.auth.cinder.username }}
-    openstack role add --project {{ .Values.endpoints.auth.cinder.project_name }} --user {{ .Values.endpoints.auth.cinder.username }} {{ .Values.endpoints.auth.cinder.role }}
-    openstack service create --name cinderv3 --description "OpenStack Block Storage" volumev3
-    openstack endpoint create --region RegionOne volumev3 public {{ include "cinder.public.endpoints" . }}/%\(tenant_id\)s
-    openstack endpoint create --region RegionOne volumev3 internal {{ include "cinder.internal.endpoints" . }}/%\(tenant_id\)s
-    openstack endpoint create --region RegionOne volumev3 admin {{ include "cinder.public.endpoints" . }}/%\(tenant_id\)s
-  bootstrap.sh: |-
-    #!/bin/bash
-    set -ex
-    openstack volume type create {{ .Values.conf.volume_type }}
-  cinder-lvm.sh: |-
-    #!/bin/bash
-    set -ex
-    pvcreate {{ .Values.conf.loop_name }}
-    vgcreate {{ .Values.conf.vg_name }} {{ .Values.conf.loop_name }}
-  lvm-clean.sh: |-
-    #!/bin/bash
-    set -ex
-    vgremove -y {{ .Values.conf.vg_name }}
-    pvremove {{ .Values.conf.loop_name }}
-    {{- if .Values.conf.create_loop_device }}
-    losetup -d {{ .Values.conf.loop_name }}
-    {{- end }}
-  edit-cinder-etc.py: |
-    #!/usr/bin/env python
-    import logging
-    import os
-    import requests
-    import sys
-    import tempfile
-
-    try:
-        import ConfigParser
-        PARSER_OPTS = {}
-    except ImportError:
-        import configparser as ConfigParser
-        PARSER_OPTS = {"strict": False}
-
-    NAMESPACE = os.environ['KUBERNETES_NAMESPACE']
-    KUBE_HOST = None
-    KUBE_CERT = '/var/run/secrets/kubernetes.io/serviceaccount/ca.crt'
-    KUBE_TOKEN = None
-    CONFIG_MAP_NAME = os.environ['CONFIG_MAP_NAME']
-    CINDER_DATABASE_USER = os.environ['CINDER_DATABASE_USER']
-    CINDER_DATABASE_PASSWORD = os.environ['CINDER_DATABASE_PASSWORD']
-    CINDER_DATABASE_URL = os.environ['CINDER_DATABASE_URL']
-    CINDER_DATABASE_NAME = os.environ['CINDER_DATABASE_NAME']
-    CINDER_KEYSTONE_PASSWORD = os.environ['CINDER_KEYSTONE_PASSWORD']
-    OS_INTERNAL_URL = os.environ['OS_INTERNAL_URL']
-
-    LOG_DATEFMT = "%Y-%m-%d %H:%M:%S"
-    LOG_FORMAT = "%(asctime)s.%(msecs)03d - %(levelname)s - %(message)s"
-    logging.basicConfig(format=LOG_FORMAT, datefmt=LOG_DATEFMT)
-    LOG = logging.getLogger(__name__)
-    LOG.setLevel(logging.INFO)
-
-
-    def read_kube_config():
-        global KUBE_HOST, KUBE_TOKEN
-        KUBE_HOST = "https://%s:%s" % ('kubernetes.default',
-                                        os.environ['KUBERNETES_SERVICE_PORT'])
-        with open('/var/run/secrets/kubernetes.io/serviceaccount/token', 'r') as f:
-            KUBE_TOKEN = f.read()
-
-
-    def get_configmap_definition(name):
-        url = '%s/api/v1/namespaces/%s/configmaps/%s' % (KUBE_HOST, NAMESPACE, name)
-        LOG.info('Request kubernetes configmaps url %s.', url)
-        resp = requests.get(url,
-                            headers={'Authorization': 'Bearer %s' % KUBE_TOKEN},
-                            verify=KUBE_CERT)
-        if resp.status_code != 200:
-            LOG.error('Cannot get configmap %s.', name)
-            LOG.error(resp.text)
-            return None
-        return resp.json()
-
-
-    def update_configmap(name, configmap):
-        url = '%s/api/v1/namespaces/%s/configmaps/%s' % (KUBE_HOST, NAMESPACE, name)
-        resp = requests.put(url,
-                            json=configmap,
-                            headers={'Authorization': 'Bearer %s' % KUBE_TOKEN},
-                            verify=KUBE_CERT)
-        LOG.info('Updata cinder-etc configmap success!')
-        if resp.status_code != 200:
-            LOG.error('Cannot update cinder-etc configmap %s.', name)
-            LOG.error(resp.text)
-            return False
-        return True
-
-
-    def update_connection_fields(content):
-        tmp = tempfile.NamedTemporaryFile(prefix='tmp', suffix='.ini', dir='/tmp')
-        with open(tmp.name, 'w') as f:
-            f.write(content)
-        config = ConfigParser.RawConfigParser(**PARSER_OPTS)
-        config.read(tmp.name)
-        conn_info = "mysql+pymysql://" + CINDER_DATABASE_USER + ":" + CINDER_DATABASE_PASSWORD + "@" + CINDER_DATABASE_URL + "/" + CINDER_DATABASE_NAME
-        LOG.info('Updata cinder-etc coonfigmap, mysql url is %s.', conn_info)
-        config.set("database", "connection", conn_info)
-        config.set("keystone_authtoken", "password", CINDER_KEYSTONE_PASSWORD)
-        config.set("keystone_authtoken", "auth_url", OS_INTERNAL_URL)
-        config.set("keystone_authtoken", "www_authenticate_uri", OS_INTERNAL_URL)
-        config.write(open(tmp.name, "w"))
-        with open(tmp.name, 'r') as f:
-            info = f.read()
-        return info
-
-
-    def main():
-        read_kube_config()
-        updated_keys = ""
-        configmap = get_configmap_definition(CONFIG_MAP_NAME)
-        conf = configmap['data']['cinder.conf']
-        updated_keys = update_connection_fields(conf)
-
-        configmap['data']['cinder.conf'] = updated_keys
-        if not update_configmap(CONFIG_MAP_NAME, configmap):
-            sys.exit(1)
-
-    if __name__ == "__main__":
-        main()
+  db-init.sh: |
+{{- include "common.scripts.db_init" . | indent 4 }}
+  db-sync.sh: |
+{{- include "common.scripts.db_sync" . | indent 4 }}
+  ks-register-services.sh: |
+{{- include "common.scripts.ks_register_services" . | indent 4  }}
+  ks-register-users.sh: |
+{{- include "common.scripts.ks_register_users" . | indent 4  }}
+  volume-type-create.sh: |
+{{ tuple "bin/_volume_type_create.sh.tpl" . | include "common.utils.template" | indent 4 }}
+  lvm-create.sh: |
+{{ tuple "bin/_lvm_create.sh.tpl" . | include "common.utils.template" | indent 4 }}
+  lvm-clean.sh: |
+{{ tuple "bin/_lvm_clean.sh.tpl" . | include "common.utils.template" | indent 4 }}
+  cinder-cm-render.py: |
+{{ tuple "bin/_cinder_cm_render.py.tpl" . | include "common.utils.template" | indent 4 }}
