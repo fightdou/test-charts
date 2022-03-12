@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: cinder-bootstrap
+  name: cinder-type-create
   namespace: {{ .Release.Namespace | quote }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
 spec:
@@ -10,72 +10,72 @@ spec:
       containers:
         - name: cinder-bootstrap
           image: {{ template "kolla.toolbox.image" . }}
-          imagePullPolicy: {{ .Values.image.kollaToolboxImage.pullPolicy }}
+          imagePullPolicy: {{ .Values.global.pullPolicy }}
           command:
             - /bin/sh
             - -c
-            - /tmp/bootstrap.sh
+            - /tmp/volume-type-create.sh
           env:
             - name: OS_USERNAME
               valueFrom:
                 secretKeyRef:
                   key: OS_USERNAME
-                  name: {{ .Values.keystone.secrets.identity.admin }}
+                  name: {{ .Values.endpoints.auth.secretName }}
             - name: OS_PASSWORD
               valueFrom:
                 secretKeyRef:
                   key: keystone-admin-password
-                  name: {{ index .Values "keystone" "openstack-dep" "gen-password" "secretName" }}
+                  name: {{ index .Values "openstack-dep" "gen-password" "secretName" }}
             - name: OS_AUTH_URL
               valueFrom:
                 secretKeyRef:
-                  key: OS_AUTH_URL
-                  name: {{ .Values.keystone.secrets.identity.admin }}
+                  key: OS_INTERNAL_URL
+                  name: {{ .Values.endpoints.auth.secretName }}
             - name: OS_INTERFACE
               valueFrom:
                 secretKeyRef:
                   key: OS_INTERFACE
-                  name: {{ .Values.keystone.secrets.identity.admin }}
+                  name: {{ .Values.endpoints.auth.secretName }}
             - name: OS_DOMAIN_NAME
               valueFrom:
                 secretKeyRef:
                   key: OS_PROJECT_DOMAIN_NAME
-                  name: {{ .Values.keystone.secrets.identity.admin }}
+                  name: {{ .Values.endpoints.auth.secretName }}
             - name: OS_REGION_NAME
               valueFrom:
                 secretKeyRef:
                   key: OS_REGION_NAME
-                  name: {{ .Values.keystone.secrets.identity.admin }}
+                  name: {{ .Values.endpoints.auth.secretName }}
             - name: OS_IDENTITY_API_VERSION
               valueFrom:
                 secretKeyRef:
                   key: OS_IDENTITY_API_VERSION
-                  name: {{ .Values.keystone.secrets.identity.admin }}
+                  name: {{ .Values.endpoints.auth.secretName }}
             - name: OS_PROJECT_DOMAIN_NAME
               valueFrom:
                 secretKeyRef:
                   key: OS_PROJECT_DOMAIN_NAME
-                  name: {{ .Values.keystone.secrets.identity.admin }}
+                  name: {{ .Values.endpoints.auth.secretName }}
             - name: OS_USER_DOMAIN_NAME
               valueFrom:
                 secretKeyRef:
                   key: OS_USER_DOMAIN_NAME
-                  name: {{ .Values.keystone.secrets.identity.admin }}
+                  name: {{ .Values.endpoints.auth.secretName }}
             - name: OS_PROJECT_NAME
               valueFrom:
                 secretKeyRef:
                   key: OS_PROJECT_NAME
-                  name: {{ .Values.keystone.secrets.identity.admin }}
+                  name: {{ .Values.endpoints.auth.secretName }}
           volumeMounts:
           - mountPath: /tmp
             name: pod-tmp
-          - mountPath: /tmp/bootstrap.sh
+          - mountPath: /tmp/volume-type-create.sh
             name: cinder-bin
-            subPath: bootstrap.sh
+            subPath: volume-type-create.sh
       initContainers:
         - name: init
           image: {{ template "entrypoint.image" . }}
-          imagePullPolicy: {{ .Values.image.entrypointImage.pullPolicy }}
+          imagePullPolicy: {{ .Values.global.pullPolicy }}
           command:
             - kubernetes-entrypoint
           env:
@@ -92,7 +92,7 @@ spec:
             - name: PATH
               value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
             - name: DEPENDENCY_SERVICE
-              value: {{ .Release.Namespace }}:{{ include "joinListWithComma" .Values.dependencies.bootstrap.service }}
+              value: {{ .Release.Namespace }}:{{ include "common.utils.joinListWithComma" .Values.dependencies.type_create.service }}
       restartPolicy: OnFailure
       serviceAccount: {{ .Values.serviceAccountName}}
       serviceAccountName: {{ .Values.serviceAccountName}}
@@ -101,5 +101,5 @@ spec:
           name: pod-tmp
         - name: cinder-bin
           configMap:
-            defaultMode: 493
+            defaultMode: 0755
             name: cinder-bin

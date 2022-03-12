@@ -13,7 +13,7 @@
 apiVersion: v2
 description: Openstack cinder service
 name: cinder
-version: 1.0.0
+version: 1.0.1
 home: https://kungze.github.io/charts/
 maintainers:
   - name: Kungze
@@ -23,7 +23,7 @@ dependencies:
     repository: https://fightdou.github.io/test-charts
     version: 1.x.x
   - name: common
-    repository: https://charts.bitnami.com/bitnami
+    repository: https://fightdou.github.io/test-charts
     tags:
       - bitnami-common
     version: 1.x.x

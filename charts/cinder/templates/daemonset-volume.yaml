@@ -17,7 +17,7 @@ spec:
           command:
             - kubernetes-entrypoint
           image: {{ template "entrypoint.image" . }}
-          imagePullPolicy: {{ .Values.image.entrypointImage.pullPolicy }}
+          imagePullPolicy: {{ .Values.global.pullPolicy }}
           env:
           - name: POD_NAME
             valueFrom:
@@ -34,11 +34,11 @@ spec:
           - name: PATH
             value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
           - name: DEPENDENCY_SERVICE
-            value: {{ .Release.Namespace }}:{{ include "joinListWithComma" .Values.dependencies.cinder_volume.service }}
+            value: {{ .Release.Namespace }}:{{ include "common.utils.joinListWithComma" .Values.dependencies.cinder_volume.service }}
         {{ if .Values.conf.create_loop_device }}
         - name: loop
           image: {{ template "cinder.loop.image" . }}
-          imagePullPolicy: {{ .Values.image.cinderLoopImage.pullPolicy }}
+          imagePullPolicy: {{ .Values.global.pullPolicy }}
           securityContext:
             runAsUser: 0
             privileged: true
@@ -56,12 +56,12 @@ spec:
       containers:
         - name: cinder-volume
           image: {{ template "cinder.volume.image" . }}
-          imagePullPolicy: {{ .Values.image.cinderVolumeImage.pullPolicy }}
+          imagePullPolicy: {{ .Values.global.pullPolicy }}
           lifecycle:
             postStart:
               exec:
                 command:
-                - /tmp/cinder-lvm.sh
+                - /tmp/lvm-create.sh
             preStop:
               exec:
                 command:
@@ -110,9 +110,9 @@ spec:
               name: modules
             - mountPath: /var/log/kolla/cinder
               name: kollalog
-            - mountPath: /tmp/cinder-lvm.sh
+            - mountPath: /tmp/lvm-create.sh
               name: cinder-bin
-              subPath: cinder-lvm.sh
+              subPath: lvm-create.sh
             - mountPath: /tmp/lvm-clean.sh
               name: cinder-bin
               subPath: lvm-clean.sh
@@ -132,11 +132,11 @@ spec:
             type: DirectoryOrCreate
           name: kollalog
         - configMap:
-            defaultMode: 365
+            defaultMode: 0644
             name: cinder-etc
           name: cinder-etc
         - configMap:
-            defaultMode: 493
+            defaultMode: 0755
             name: cinder-bin
           name: cinder-bin
         - hostPath:

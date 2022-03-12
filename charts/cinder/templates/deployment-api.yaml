@@ -18,7 +18,7 @@ spec:
           - kubernetes-entrypoint
           name: init
           image: {{ template "entrypoint.image" . }}
-          imagePullPolicy: {{ .Values.image.entrypointImage.pullPolicy }}
+          imagePullPolicy: {{ .Values.global.pullPolicy }}
           env:
           - name: POD_NAME
             valueFrom:
@@ -35,11 +35,11 @@ spec:
           - name: PATH
             value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
           - name: DEPENDENCY_JOBS
-            value: {{ include "joinListWithComma" .Values.dependencies.cinder_api.jobs }}
+            value: {{ include "common.utils.joinListWithComma" .Values.dependencies.cinder_api.jobs }}
       containers:
         - name: cinder-api
           image: {{ template "cinder.api.image" . }}
-          imagePullPolicy: {{ .Values.image.cinderApiImage.pullPolicy }}
+          imagePullPolicy: {{ .Values.global.pullPolicy }}
           {{- if .Values.livenessProbe.enabled }}
           livenessProbe: {{- include "common.tplvalues.render" (dict "value" (omit .Values.livenessProbe "enabled") "context" $) | nindent 12 }}
           {{- else if .Values.customLivenessProbe }}
