@@ -3,16 +3,15 @@
 ## Please, note that this will override the image parameters, including dependencies, configured to use the global value
 ## Current available global Docker image parameters: imageRegistry, imagePullSecrets and storageClass
 
-## @param global.imageRegistry Global Docker registry secret names as an array
-## @param global.imagePullSecrets Global Docker image pullPolicy
+## @param global.imageRegistry Global Docker image registry
 ## @param global.storageClass Global StorageClass for Persistent Volume(s)
+## @param global.imageTag Global docker image tag
+## @param global.pullPolicy Global image pull policy
 global:
-  imageRegistry: ""
-  ## E.g.
-  ## imagePullSecrets:
-  ##   - myRegistryKeySecretName
-  imagePullSecrets: []
+  imageRegistry: docker.io
   storageClass: ""
+  imageTag: xena
+  pullPolicy: IfNotPresent
 
 ## @section Common parameters
 
@@ -111,181 +110,67 @@ lifecycle: ""
 
 ## openstack cinder image
 image:
-  ## @param image.cinderApiImage.registry Moodle image registry
-  ## @param image.cinderApiImage.repository Moodle image repository
-  ## @param image.cinderApiImage.tag Moodle image tag (immutable tags are recommended)
-  ## @param image.cinderApiImage.pullPolicy Moodle image pull policy
-  ## @param image.cinderApiImage.pullSecrets Specify docker-registry secret names as an array
-  cinderApiImage:
-    registry: docker.io
+  ## @param image.cinderApi.repository cinderApi image repository
+  cinderApi:
     repository: kolla/ubuntu-binary-cinder-api
-    tag: xena
-    ## Specify a imagePullPolicy
-    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-    pullPolicy: IfNotPresent
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ## e.g:
-    ## pullSecrets:
-    ##   - myRegistryKeySecretName
-    pullSecrets: []
-  ## @param image.cinderVolumeImage.registry Moodle image registry
-  ## @param image.cinderVolumeImage.repository Moodle image repository
-  ## @param image.cinderVolumeImage.tag Moodle image tag (immutable tags are recommended)
-  ## @param image.cinderVolumeImage.pullPolicy Moodle image pull policy
-  ## @param image.cinderVolumeImage.pullSecrets Specify docker-registry secret names as an array
-  cinderVolumeImage:
-    registry: docker.io
+  ## @param image.cinderVolume.repository cinderVolume image repository
+  cinderVolume:
     repository: kolla/ubuntu-binary-cinder-volume
-    tag: xena
-    ## Specify a imagePullPolicy
-    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-    pullPolicy: IfNotPresent
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ## e.g:
-    ## pullSecrets:
-    ##   - myRegistryKeySecretName
-    pullSecrets: []
-  ## @param image.cinderSchedulerImage.registry Moodle image registry
-  ## @param image.cinderSchedulerImage.repository Moodle image repository
-  ## @param image.cinderSchedulerImage.tag Moodle image tag (immutable tags are recommended)
-  ## @param image.cinderSchedulerImage.pullPolicy Moodle image pull policy
-  ## @param image.cinderSchedulerImage.pullSecrets Specify docker-registry secret names as an array
-  cinderSchedulerImage:
-    registry: docker.io
+  ## @param image.cinderScheduler.repository cinderScheduler image repository
+  cinderScheduler:
     repository: kolla/ubuntu-binary-cinder-scheduler
-    tag: xena
-    ## Specify a imagePullPolicy
-    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-    pullPolicy: IfNotPresent
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ## e.g:
-    ## pullSecrets:
-    ##   - myRegistryKeySecretName
-    pullSecrets: []
-  ## @param image.cinderBackupImage.registry Moodle image registry
-  ## @param image.cinderBackupImage.repository Moodle image repository
-  ## @param image.cinderBackupImage.tag Moodle image tag (immutable tags are recommended)
-  ## @param image.cinderBackupImage.pullPolicy Moodle image pull policy
-  ## @param image.cinderBackupImage.pullSecrets Specify docker-registry secret names as an array
-  cinderBackupImage:
-    registry: docker.io
+  ## @param image.cinderBackup.repository cinderBackup image repository
+  cinderBackup:
     repository: kolla/ubuntu-binary-cinder-backup
-    tag: xena
-    ## Specify a imagePullPolicy
-    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-    pullPolicy: IfNotPresent
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ## e.g:
-    ## pullSecrets:
-    ##   - myRegistryKeySecretName
-    pullSecrets: []
-  ## @param image.entrypointImage.registry Moodle image registry
-  ## @param image.entrypointImage.repository Moodle image repository
-  ## @param image.entrypointImage.tag Moodle image tag (immutable tags are recommended)
-  ## @param image.entrypointImage.pullPolicy Moodle image pull policy
-  ## @param image.entrypointImage.pullSecrets Specify docker-registry secret names as an array
-  entrypointImage:
+  ## @param image.dbSync.repository dbSync image repository
+  dbSync:
+    repository: kolla/ubuntu-binary-cinder-api
+  ## @param image.kollaToolbox.repository kollaToolbox image repository
+  kollaToolbox:
+    repository: kolla/ubuntu-binary-kolla-toolbox
+  ## @param image.entrypoint.registry entrypoint image registry
+  ## @param image.entrypoint.repository entrypoint image repository
+  ## @param image.entrypoint.tag entrypoint image tag
+  entrypoint:
     registry: quay.io
     repository: airshipit/kubernetes-entrypoint
     tag: v1.0.0
-    ## Specify a imagePullPolicy
-    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-    pullPolicy: IfNotPresent
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ## e.g:
-    ## pullSecrets:
-    ##   - myRegistryKeySecretName
-    pullSecrets: []
-  ## @param image.cinderLoopImage.registry Moodle image registry
-  ## @param image.cinderLoopImage.repository Moodle image repository
-  ## @param image.cinderLoopImage.tag Moodle image tag (immutable tags are recommended)
-  ## @param image.cinderLoopImage.pullPolicy Moodle image pull policy
-  ## @param image.cinderLoopImage.pullSecrets Specify docker-registry secret names as an array
-  cinderLoopImage:
-    registry: docker.io
+  ## @param image.cinderLoop.repository cinderLoop image repository
+  ## @param image.cinderLoop.tag cinderLoop image tag (immutable tags are recommended)
+  cinderLoop:
     repository: docker/loop
     tag: latest
-    ## Specify a imagePullPolicy
-    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-    pullPolicy: IfNotPresent
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ## e.g:
-    ## pullSecrets:
-    ##   - myRegistryKeySecretName
-    pullSecrets: []
-  ## @param image.kollaToolboxImage.registry Moodle image registry
-  ## @param image.kollaToolboxImage.repository Moodle image repository
-  ## @param image.kollaToolboxImage.tag Moodle image tag (immutable tags are recommended)
-  ## @param image.kollaToolboxImage.pullPolicy Moodle image pull policy
-  ## @param image.kollaToolboxImage.pullSecrets Specify docker-registry secret names as an array
-  kollaToolboxImage:
-    registry: docker.io
-    repository: kolla/ubuntu-binary-kolla-toolbox
-    tag: xena
-    ## Specify a imagePullPolicy
-    ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
-    ## ref: https://kubernetes.io/docs/user-guide/images/#pre-pulling-images
-    pullPolicy: IfNotPresent
-    ## Optionally specify an array of imagePullSecrets.
-    ## Secrets must be manually created in the namespace.
-    ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
-    ## e.g:
-    ## pullSecrets:
-    ##   - myRegistryKeySecretName
-    pullSecrets: []
 
 ## @skip dependencies
 dependencies:
   cinder_api:
     jobs:
       - cinder-db-sync
-      - cinder-ks-create
+      - cinder-register
   cinder_scheduler:
     service:
       - cinder-api
-    jobs:
-      - cinder-db-sync
-      - cinder-ks-create
   cinder_volume:
     service:
       - cinder-api
-    jobs:
-      - cinder-db-sync
-      - cinder-ks-create
   db_init:
-    service:
-      - mariadb
+    jobs:
+      - cinder-cm-render
   db_sync:
     jobs:
       - cinder-db-init
-  ks_create:
-    jobs:
-      - keystone-bootstrap
-  bootstrap:
+  type_create:
     service:
       - cinder-api
+  register:
+    service:
+      - keystone-api
 
 ## @skip endpoints
 endpoints:
+  secret: cinder-endpoint
   auth:
+    secretName: keystone-admin-secret
     admin:
       os_internal_url: ""
     cinder:
@@ -295,12 +180,11 @@ endpoints:
       user_domain_name: service
       project_domain_name: service
       username: cinder
-      db_password_placeholder: ""
-  oslo_db:
-    username: cinder
-    database: cinder
-    db_password_placeholder: ""
-    port: 3306
+## @skip database
+database:
+  username: cinder
+  database: cinder
+  port: 3306
 
 ## @section Cinder config file
 ## @param conf.create_loop_device [t#创建loop设备] 是否创建loop设备
@@ -385,25 +269,18 @@ ingress:
 
 ## @section Keystone Details
 ## @param keystone.enabled [t#部署 keystone] 是否部署keystone
-## @param keystone.endpoints.auth.admin.os_auth_url [t#keystone publicUrl] 访问keystone的public endpoints
-## @param keystone.endpoints.auth.admin.os_internal_url [t#keystone internalUrl] 访问keystone的internal endpoints
-## @param keystone.openstack-dep.enabled [t#部署 openstack 依赖环境] 是否部署 openstack 依赖环境
-## @param keystone.openstack-dep.gen-password.secretName [t#Secret Name] openstack 环境密码的 secret 名称
-## @param keystone.openstack-dep.openstackEnv.rabbitmqUrl [t#部署 openstack 依赖环境] 访问rabbitmq的Url，格式：rabbitmq
-## @param keystone.openstack-dep.openstackEnv.mariadbUrl [t#部署 openstack 依赖环境] 是否部署 openstack 依赖环境
-## @param keystone.openstack-dep.openstackEnv.memcacheUrl [t#部署 openstack 依赖环境] 是否部署 openstack 依赖环境
+## @param keystone.endpoints.secret [t#keystone endpoint secret] keystone endpoint 信息的 secret 名称
 keystone:
   enabled: true
   endpoints:
-    auth:
-      admin:
-        os_auth_url: ""
-        os_internal_url: ""
-  openstack-dep:
-    enabled: true
-    gen-password:
-      secretName: openstack-password
-    openstackEnv:
-      rabbitmqUrl: ""
-      mariadbUrl: ""
-      memcacheUrl: ""
+    secret: keystone-endpoint
+
+## @section Openstack-dep Details
+## @param openstack-dep.enabled [t#部署 openstack 依赖环境] 是否部署 openstack 依赖环境
+## @param openstack-dep.gen-password.secretName [t#Secret Name] openstack 环境密码的 secret 名称
+## @param openstack-dep.connInfoSecret [t#ConnInfo secret name] openstack 依赖环境中生成服务URL得 secret 名称
+openstack-dep:
+  enabled: true
+  gen-password:
+    secretName: openstack-password
+  connInfoSecret: openstack-conn-info

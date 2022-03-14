@@ -18,7 +18,7 @@ spec:
           - kubernetes-entrypoint
           name: init
           image: {{ template "entrypoint.image" . }}
-          imagePullPolicy: {{ .Values.image.entrypointImage.pullPolicy }}
+          imagePullPolicy: {{ .Values.global.pullPolicy }}
           env:
           - name: POD_NAME
             valueFrom:
@@ -35,13 +35,13 @@ spec:
           - name: PATH
             value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
           - name: DEPENDENCY_JOBS
-            value: {{ include "joinListWithComma" .Values.dependencies.cinder_scheduler.jobs }}
+            value: {{ include "common.utils.joinListWithComma" .Values.dependencies.cinder_scheduler.jobs }}
           - name: DEPENDENCY_SERVICE
-            value: {{ .Release.Namespace }}:{{ include "joinListWithComma" .Values.dependencies.cinder_scheduler.service }}
+            value: {{ .Release.Namespace }}:{{ include "common.utils.joinListWithComma" .Values.dependencies.cinder_scheduler.service }}
       containers:
         - name: cinder-scheduler
           image: {{ template "cinder.scheduler.image" . }}
-          imagePullPolicy: {{ .Values.image.cinderSchedulerImage.pullPolicy }}
+          imagePullPolicy: {{ .Values.global.pullPolicy }}
           securityContext:
             runAsUser: 0
           {{- if .Values.resources }}
