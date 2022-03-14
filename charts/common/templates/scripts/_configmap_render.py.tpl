@@ -17,7 +17,7 @@ RABBITMQ_URL = os.environ['RABBITMQ_URL']
 MEMCACHE_URL = os.environ['MEMCACHE_URL']
 CONF_FILE_NAME = os.environ['CONF_FILE_NAME']
 AUTH_URL = os.environ['AUTH_URL']
-CINDER_KEYSTONE_PASSWORD = os.environ['CINDER_KEYSTONE_PASSWORD'
+CINDER_KEYSTONE_PASSWORD = os.environ['CINDER_KEYSTONE_PASSWORD']
 
 LOG_DATEFMT = "%Y-%m-%d %H:%M:%S"
 LOG_FORMAT = "%(asctime)s.%(msecs)03d - %(levelname)s - %(message)s"
@@ -62,6 +62,7 @@ def update_configmap(name, configmap):
 
 def update_connection_fields(content):
     tmp = tempfile.NamedTemporaryFile(prefix='tmp', suffix='.ini', dir='/tmp')
+    LOG.info('Start update configmap file data %s.', CONF_FILE_NAME)
     with open(tmp.name, 'w') as f:
         f.seek(0, 0)
         for line in content.split("\n"):
