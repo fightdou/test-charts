@@ -72,7 +72,7 @@ spec:
             - mountPath: /tmp
               name: pod-tmp
             - mountPath: /etc/sudoers.d
-              name sudoer
+              name: sudoer
             - mountPath: /tmp/db-init.sh
               name: {{ $configMapBin | quote }}
               subPath: db-init.sh
