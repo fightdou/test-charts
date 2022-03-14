@@ -71,6 +71,8 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: pod-tmp
+            - mountPath: /etc/sudoers.d
+              name sudoer
             - mountPath: /tmp/db-init.sh
               name: {{ $configMapBin | quote }}
               subPath: db-init.sh
@@ -104,6 +106,8 @@ spec:
       volumes:
       - emptyDir: {}
         name: pod-tmp
+      - emptyDir: {}
+        name: sudoers
       - configMap:
           defaultMode: 0755
           name: {{ $configMapBin | quote }}
