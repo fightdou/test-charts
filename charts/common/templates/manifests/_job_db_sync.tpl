@@ -22,8 +22,6 @@ spec:
         - name: {{ printf "%s-%s" $serviceName "db-sync" | quote }}
           image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.dbSync "global" $envAll.Values.global) | quote }}
           imagePullPolicy: {{ $envAll.Values.global.pullPolicy }}
-            initialDelaySeconds: 5
-            periodSeconds: 5
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: "COPY_ALWAYS"
