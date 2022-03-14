@@ -650,6 +650,19 @@ entries:
   - annotations:
       category: Openstack
     apiVersion: v2
+    created: "2022-03-14T13:29:48.650594196Z"
+    description: Automatic generation openstack relate password
+    digest: 0ae5565482cb5cc718918096ebb03a3a3b7deb83d11a4b32811b7a96afccf7a9
+    home: https://kungze.github.io/charts/
+    maintainers:
+    - name: Kungze
+    name: gen-password
+    urls:
+    - https://github.com/fightdou/test-charts/releases/download/gen-password-1.0.10/gen-password-1.0.10.tgz
+    version: 1.0.10
+  - annotations:
+      category: Openstack
+    apiVersion: v2
     created: "2022-02-25T10:00:54.80280173Z"
     description: Automatic generation openstack relate password
     digest: cc445348cd1b4bbe87215fa8f047dbaf8ba6bcea4fcf96e8f97d18a82500ca79
@@ -1487,4 +1500,4 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/openstack-dep-1.0.0/openstack-dep-1.0.0.tgz
     version: 1.0.0
-generated: "2022-03-14T10:54:04.358988376Z"
+generated: "2022-03-14T13:29:48.651092001Z"
