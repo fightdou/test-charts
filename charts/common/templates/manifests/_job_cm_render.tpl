@@ -21,16 +21,12 @@ spec:
           command:
             - /bin/sh
             - -c
-            - python3 {{ printf "%s/%s-%s" "/tmp" $serviceName "cm-render.py" | quote }}
+            - python3 /tmp/configmap-render.py
           env:
             - name: KUBERNETES_NAMESPACE
               value: {{ $envAll.Release.Namespace }}
             - name: CONFIG_MAP_NAME
               value: {{ printf "%s-%s" $serviceName "etc" | quote }}
-            - name: DB_NAME
-              value: {{ $envAll.Values.database.database | quote }}
-            - name: DB_USERNAME
-              value: {{ $envAll.Values.database.username | quote }}
             - name: DB_PASSWORD
               valueFrom:
                 secretKeyRef:
@@ -57,9 +53,9 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: pod-tmp
-            - mountPath: {{ printf "%s/%s-%s" "/tmp" $serviceName "cm-render.py" | quote }}
+            - mountPath: /tmp/configmap-render.py
               name: {{ $configMapBin | quote }}
-              subPath: {{ printf "%s-%s" $serviceName "cm-render.py" | quote }}
+              subPath: configmap-render.py
             - mountPath: /etc/sudoers.d/kolla_ansible_sudoers
               name: {{ $configMapEtc | quote }}
               subPath: kolla-toolbox-sudoer
