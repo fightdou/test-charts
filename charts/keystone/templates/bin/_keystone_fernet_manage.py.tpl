@@ -1,4 +1,19 @@
 #!/usr/bin/env python
+
+{{/*
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/}}
+
 import argparse
 import base64
 import errno
@@ -34,7 +49,7 @@ LOG.setLevel(logging.INFO)
 def read_kube_config():
     global KUBE_HOST, KUBE_TOKEN
     KUBE_HOST = "https://%s:%s" % ('kubernetes.default',
-                                    os.environ['KUBERNETES_SERVICE_PORT'])
+                                   os.environ['KUBERNETES_SERVICE_PORT'])
     with open('/var/run/secrets/kubernetes.io/serviceaccount/token', 'r') as f:
         KUBE_TOKEN = f.read()
 
@@ -105,11 +120,11 @@ def write_to_files(data):
 
 def execute_command(cmd):
     LOG.info("Executing 'keystone-manage %s --keystone-user=%s "
-                "--keystone-group=%s' command.",
-                cmd, KEYSTONE_USER, KEYSTONE_GROUP)
+             "--keystone-group=%s' command.",
+             cmd, KEYSTONE_USER, KEYSTONE_GROUP)
     subprocess.call(['keystone-manage', cmd,  #nosec
-                        '--keystone-user=%s' % KEYSTONE_USER,
-                        '--keystone-group=%s' % KEYSTONE_GROUP])
+                     '--keystone-user=%s' % KEYSTONE_USER,
+                     '--keystone-group=%s' % KEYSTONE_GROUP])
 
 def main():
     parser = argparse.ArgumentParser()
@@ -121,7 +136,7 @@ def main():
     is_credential = args.command.startswith('credential')
 
     SECRET_NAME = ('keystone-credential-keys' if is_credential else
-                    'keystone-fernet-keys')
+                   'keystone-fernet-keys')
 
     read_kube_config()
     secret = get_secret_definition(SECRET_NAME)
@@ -131,8 +146,8 @@ def main():
 
     if args.command in ('fernet_rotate', 'credential_rotate'):
         LOG.info("Copying existing %s keys from secret '%s' to %s.",
-                    'credential' if is_credential else 'fernet', SECRET_NAME,
-                    FERNET_DIR)
+                 'credential' if is_credential else 'fernet', SECRET_NAME,
+                 FERNET_DIR)
         write_to_files(secret['data'])
 
     if args.command in ('credential_setup', 'fernet_setup'):
@@ -148,11 +163,11 @@ def main():
     if not update_secret(SECRET_NAME, secret):
         sys.exit(1)
     LOG.info("%s fernet keys have been placed to secret '%s'",
-                len(updated_keys), SECRET_NAME)
+             len(updated_keys), SECRET_NAME)
     LOG.debug("Placed keys: %s", updated_keys)
     LOG.info("%s keys %s has been completed",
-                "Credential" if is_credential else 'Fernet',
-                "rotation" if args.command.endswith('_rotate') else "generation")
+             "Credential" if is_credential else 'Fernet',
+             "rotation" if args.command.endswith('_rotate') else "generation")
 
     if args.command == 'credential_rotate':
         # `credential_rotate` needs doing `credential_migrate` as well once all
@@ -162,7 +177,7 @@ def main():
 
         migrate_wait = int(os.getenv('KEYSTONE_CREDENTIAL_MIGRATE_WAIT', "60"))
         LOG.info("Waiting %d seconds to execute `credential_migrate`.",
-                    migrate_wait)
+                 migrate_wait)
         time.sleep(migrate_wait)
 
         execute_command('credential_migrate')

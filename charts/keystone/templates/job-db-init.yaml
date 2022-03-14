@@ -2,5 +2,5 @@
 {{- end }}
 
 {{- $envAll := index . -}}
-{{- $dbInitJob := dict "envAll" . "serviceName" "keystone" "dbUserPasswordName" "keystone-database-password" -}}
+{{- $dbInitJob := dict "envAll" . "serviceName" "keystone" "dbUserPasswordName" "keystone-database-password" "jobAnnotations" (include "metadata.annotations.job.db_init" . | fromYaml) -}}
 {{ $dbInitJob | include "common.manifests.job_db_init" }}

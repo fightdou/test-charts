@@ -3,6 +3,7 @@ chart-dirs:
 chart-repos:
   - fightdou=https://fightdou.github.io/test-charts
 debug: true
+timeout: 10m
 excluded-charts:
   - common
 remote: origin
