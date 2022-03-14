@@ -20,5 +20,11 @@ data:
 {{ tuple "bin/_lvm_create.sh.tpl" . | include "common.utils.template" | indent 4 }}
   lvm-clean.sh: |
 {{ tuple "bin/_lvm_clean.sh.tpl" . | include "common.utils.template" | indent 4 }}
-  cinder-cm-render.py: |
-{{ tuple "bin/_cinder_cm_render.py.tpl" . | include "common.utils.template" | indent 4 }}
+  configmap-render.py: |
+{{ include "common.scripts.configmap_render" . | indent 4 }}
+  {{- if .Values.conf.ceph.enabled }}
+  ceph-toolbox.sh: |
+{{ tuple "bin/_ceph_toolbox.sh.tpl" . | include "common.utils.template" | indent 4 }}
+  create-ceph-cm-secrets.py: |
+{{ tuple "bin/_create_ceph_cm_secrets.py.tpl" . | include "common.utils.template" | indent 4 }}
+  {{- end }}

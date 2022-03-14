@@ -1,3 +1,6 @@
+{{- define "metadata.annotations.job.db_sync" }}
+{{- end }}
+
 {{- define "cinder.sync_db.volumeMounts" -}}
 {{- $envAll := index . 0 -}}
 volumeMounts:
@@ -8,5 +11,5 @@ volumeMounts:
 
 {{- $local := dict "podVolMounts" false -}}
 {{- $_ := set $local "podVolMounts" ( index ( tuple . | include "cinder.sync_db.volumeMounts" | toString | fromYaml ) "volumeMounts" ) }}
-{{- $dbSyncJob := dict "envAll" . "serviceName" "cinder" "podVolMounts" $local.podVolMounts -}}
+{{- $dbSyncJob := dict "envAll" . "serviceName" "cinder" "podVolMounts" $local.podVolMounts "jobAnnotations" (include "metadata.annotations.job.db_sync" . | fromYaml) -}}
 {{ $dbSyncJob | include "common.manifests.job_db_sync" }}

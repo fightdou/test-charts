@@ -153,6 +153,9 @@ dependencies:
   cinder_volume:
     service:
       - cinder-api
+  cinder_backup:
+    service:
+      - cinder-api
   db_init:
     jobs:
       - cinder-cm-render
@@ -187,23 +190,66 @@ database:
   port: 3306
 
 ## @section Cinder config file
-## @param conf.create_loop_device [t#创建loop设备] 是否创建loop设备
-## @param conf.loop_name [t#loop 设备名称] cinder 后端存储创建的 loop 设备名称
-## @param conf.dd_lvm_bs [t#loop 设备bs] cinder 后端存储创建的 loop 设备 bs 大小 默认为1M
-## @param conf.dd_lvm_count [t#loop 设备count] cinder 后端存储创建的 loop 设备 count 次数 默认为2048
-## @param conf.kolla_log_dir [t#kolla 日志目录] 存放 kolla 日志文件的目录
-## @param conf.volume_type [t#cinder 卷类型] cinder 后端存储的卷类型，默认为lvm
-## @param conf.vg_name [t#vg 名称] cinder 后端存储所创建的卷组名
-## @param conf.volume_driver [t#cinder 卷驱动] cinder 后端存储驱动，默认为lvm
+
+## @setion conf
+## @param conf.kolla_log_dir 存放 kolla 日志文件的目录
+## @param conf.enabled_notification_topics 是否开启 notification
+## @param conf.lvm.enabled 是否对接 lvm 后端
+## @param conf.lvm.create_loop_device 是否创建 loop 设备
+## @param conf.lvm.loop_name loop 设备名称
+## @param conf.lvm.dd_lvm_bs loop 设备块大小
+## @param conf.lvm.dd_lvm_count loop 设备写次数
+## @param conf.lvm.vg_name lvm 创建的卷组名称
+## @param conf.lvm.volume_type lvm 后端卷类型
+## @param conf.ceph.enabled 是否对接 ceph 后端
+## @param conf.ceph.volume_type ceph 后端卷类型
+## @param conf.ceph.pool_name ceph 池名称
+## @param conf.ceph.rbd_user ceph 用户名
+## @param conf.ceph.rbd_secret_uuid ceph secret uuid
+## @param conf.ceph.size ceph pool 副本数
+## @param conf.ceph.poolFailureDomain ceph pool 失败域
+## @param conf.ceph.rook_namespace rook-ceph 命名空间
+## @param conf.ceph.rook_cm_name rook-ceph 配置信息的 configmap 名称
+## @param conf.ceph.rook_secret_name rook-ceph 密钥相关的 secrets 名称
+## @param conf.ceph.ceph_username_fields rook-ceph secrets 配置中的 username 字段
+## @param conf.ceph.ceph_secret_fields rook-ceph secrets 配置中的 keyring 字段
+## @param conf.ceph.ceph_cm_name ceph configmap 名称 读取rook-ceph命名空间中的 configmap 注册到自己的命名空间
+## @param conf.ceph.ceph_secret_name ceph secrets 名称 读取rook-ceph命名空间中的 secret 注册到自己的命名空间
+## @param conf.backup.enabled 是否对接 ceph backup
+## @param conf.backup.backup_user ceph backup pool 用户名称
+## @param conf.backup.backup_pool_name ceph backup pool 名称
+## @param conf.backup.size ceph backup pool 副本数
 conf:
-  create_loop_device: true
-  loop_name: /dev/loop0
-  dd_lvm_bs: 1M
-  dd_lvm_count: 2048
   kolla_log_dir: /var/log/kolla/cinder
-  volume_type: lvm1
-  vg_name: cinder-volumes
-  volume_driver: cinder.volume.drivers.lvm.LVMVolumeDriver
+  enabled_notification_topics: false
+  lvm:
+    enabled: true
+    create_loop_device: true
+    loop_name: /dev/loop0
+    dd_lvm_bs: 1M
+    dd_lvm_count: 2048
+    vg_name: cinder-volumes
+    volume_type: lvm1
+  ceph:
+    enabled: false
+    volume_type: rbd1
+    pool_name: volumes
+    rbd_user: admin
+    rbd_secret_uuid: ""
+    size: 1
+    poolFailureDomain: host
+    rook_namespace: rook-ceph
+    rook_cm_name: rook-ceph-mon-endpoints
+    rook_secret_name: rook-ceph-mon
+    ceph_username_fields: ceph-username
+    ceph_secret_fields: ceph-secret
+    ceph_cm_name: ceph-mon-endpoints
+    ceph_secret_name: ceph-mon
+  backup:
+    enabled: false
+    backup_user: admin
+    backup_pool_name: backups
+    size: 1
 
 ## @section Traffic Exposure Parameters
 
