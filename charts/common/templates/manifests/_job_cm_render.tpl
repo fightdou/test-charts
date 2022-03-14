@@ -1,6 +1,7 @@
 {{- define "common.manifests.job_cm_render" -}}
 {{- $envAll := index . "envAll" -}}
 {{- $serviceName := index . "serviceName" -}}
+{{- $jobAnnotations := index . "jobAnnotations" -}}
 {{- $dbUserPasswordName := index . "dbUserPasswordName" -}}
 {{- $podEnvVars := index . "podEnvVars" | default false -}}
 {{- $configMapBin := index . "configMapBin" | default (printf "%s-%s" $serviceName "bin" ) -}}
@@ -11,6 +12,10 @@ kind: Job
 metadata:
   name: {{ printf "%s-%s" $serviceName "cm-render" | quote }}
   namespace: {{ $envAll.Release.Namespace | quote }}
+  annotations:
+{{- if $jobAnnotations }}
+{{ toYaml $jobAnnotations | indent 4 }}
+{{- end }}
 spec:
   template:
     spec:
