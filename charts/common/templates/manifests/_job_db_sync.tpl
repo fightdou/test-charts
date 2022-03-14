@@ -22,6 +22,8 @@ spec:
         - name: {{ printf "%s-%s" $serviceName "db-sync" | quote }}
           image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.dbSync "global" $envAll.Values.global) | quote }}
           imagePullPolicy: {{ $envAll.Values.global.pullPolicy }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: "COPY_ALWAYS"
@@ -48,8 +50,6 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: pod-tmp
-            - mountPath: /var/lib/kolla/config_files
-              name: configdir
             - mountPath: {{ printf "%s-%s" "/var/log/kolla/" $serviceName | quote }}
               name: logdir
             - mountPath: /var/lib/kolla/config_files/config.json
@@ -88,8 +88,6 @@ spec:
       volumes:
       - emptyDir: {}
         name: pod-tmp
-      - emptyDir: {}
-        name: configdir
       - emptyDir: {}
         name: logdir
       - configMap:
