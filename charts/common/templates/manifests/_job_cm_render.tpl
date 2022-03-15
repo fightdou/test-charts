@@ -1,6 +1,7 @@
 {{- define "common.manifests.job_cm_render" -}}
 {{- $envAll := index . "envAll" -}}
 {{- $serviceName := index . "serviceName" -}}
+{{- $mariadbSvcName := index . "mariadbSvcName" -}}
 {{- $jobAnnotations := index . "jobAnnotations" -}}
 {{- $dbUserPasswordName := index . "dbUserPasswordName" -}}
 {{- $podEnvVars := index . "podEnvVars" | default false -}}
@@ -84,7 +85,7 @@ spec:
             - name: PATH
               value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
             - name: DEPENDENCY_SERVICE
-              value: {{ $envAll.Release.Namespace }}:{{ $envAll.Release.Name }}-mariadb
+              value: {{ $envAll.Release.Namespace }}:{{ $mariadbSvcName | quote }}
       restartPolicy: OnFailure
       serviceAccount: {{ $envAll.Values.serviceAccountName}}
       serviceAccountName: {{ $envAll.Values.serviceAccountName}}
