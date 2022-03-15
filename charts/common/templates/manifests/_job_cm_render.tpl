@@ -1,7 +1,6 @@
 {{- define "common.manifests.job_cm_render" -}}
 {{- $envAll := index . "envAll" -}}
 {{- $serviceName := index . "serviceName" -}}
-{{- $mariadbSvcName := index . "mariadbSvcName" -}}
 {{- $jobAnnotations := index . "jobAnnotations" -}}
 {{- $dbUserPasswordName := index . "dbUserPasswordName" -}}
 {{- $podEnvVars := index . "podEnvVars" | default false -}}
@@ -65,6 +64,7 @@ spec:
             - mountPath: /etc/sudoers.d/kolla_ansible_sudoers
               name: {{ $configMapEtc | quote }}
               subPath: kolla-toolbox-sudoer
+      {{- if index  $envAll.Values "openstack-dep" "enabled" }}
       initContainers:
         - name: init
           image: {{ include "common.images.image" (dict "imageRoot" $envAll.Values.image.entrypoint "global" $envAll.Values.global) | quote }}
@@ -85,7 +85,8 @@ spec:
             - name: PATH
               value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
             - name: DEPENDENCY_SERVICE
-              value: {{ $envAll.Release.Namespace }}:{{ $mariadbSvcName | quote }}
+              value: {{ $envAll.Release.Namespace }}:{{ $envAll.Release.Name }}-mariadb
+      {{- end }}
       restartPolicy: OnFailure
       serviceAccount: {{ $envAll.Values.serviceAccountName}}
       serviceAccountName: {{ $envAll.Values.serviceAccountName}}
