@@ -192,7 +192,6 @@ endpoints:
 database:
   username: keystone
   database: keystone
-  db_password_placeholder: ""
   port: 3306
 
 ## @section Traffic Exposure Parameters
