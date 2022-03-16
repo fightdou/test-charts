@@ -3,7 +3,7 @@ chart-dirs:
 chart-repos:
   - fightdou=https://fightdou.github.io/test-charts
 debug: true
-timeout: 10m
+helm-extra-args: --timeout 1000s
 excluded-charts:
   - common
 remote: origin
