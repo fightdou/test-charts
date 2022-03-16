@@ -4,6 +4,29 @@ entries:
   - annotations:
       category: Openstack
     apiVersion: v2
+    created: "2022-03-16T11:58:35.889564786Z"
+    dependencies:
+    - condition: keystone.enabled
+      name: keystone
+      repository: https://fightdou.github.io/test-charts
+      version: 1.x.x
+    - name: common
+      repository: https://fightdou.github.io/test-charts
+      tags:
+      - bitnami-common
+      version: 1.x.x
+    description: Openstack cinder service
+    digest: c6c5d8ebd6fe43c097aca0b1cce64cf4e062f110a0a8d6c2b2417b205f4f62ac
+    home: https://kungze.github.io/charts/
+    maintainers:
+    - name: Kungze
+    name: cinder
+    urls:
+    - https://github.com/fightdou/test-charts/releases/download/cinder-1.0.2/cinder-1.0.2.tgz
+    version: 1.0.2
+  - annotations:
+      category: Openstack
+    apiVersion: v2
     created: "2022-03-12T07:49:03.353244981Z"
     dependencies:
     - condition: keystone.enabled
@@ -838,27 +861,6 @@ entries:
   - annotations:
       category: Openstack
     apiVersion: v2
-    created: "2022-03-16T11:58:24.557218862Z"
-    dependencies:
-    - condition: openstack-dep.enabled
-      name: openstack-dep
-      repository: https://fightdou.github.io/test-charts
-      version: 1.x.x
-    - name: common
-      repository: https://fightdou.github.io/test-charts
-      version: 1.x.x
-    description: Openstack keystone service
-    digest: 78d404a9e6bc79d4513ea62610760a2452930b8896e4dfa39ac8f1e13b201280
-    home: https://kungze.github.io/charts/
-    maintainers:
-    - name: Kungze
-    name: keystone
-    urls:
-    - https://github.com/fightdou/test-charts/releases/download/keystone-1.0.8/keystone-1.0.8.tgz
-    version: 1.0.8
-  - annotations:
-      category: Openstack
-    apiVersion: v2
     created: "2022-03-14T10:54:04.358598675Z"
     dependencies:
     - condition: openstack-dep.enabled
@@ -1563,4 +1565,4 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/openstack-dep-1.0.0/openstack-dep-1.0.0.tgz
     version: 1.0.0
-generated: "2022-03-16T11:58:24.557566286Z"
+generated: "2022-03-16T11:58:35.889872089Z"
