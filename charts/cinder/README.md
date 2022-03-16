@@ -1,6 +1,6 @@
 # Cinder Charts
 
-cinder charts 用来安装 openstack cinder 服务。该 charts 对接的 cinder 后端存储为 lvm。该charts 会自动创建一个 loop 设备，用来创建 cinder lvm 所用的逻辑卷.
+cinder charts 用来安装 openstack cinder 服务。该 charts 支持 lvm、ceph 两种后端类型。
 
 ## Parameters
 
@@ -50,57 +50,52 @@ cinder charts 用来安装 openstack cinder 服务。该 charts 对接的 cinder
 
 ### cinder Image parameters
 
-| Name                                     | Form title | Description                                       | Value                                  |
-| ---------------------------------------- | ---------- | ------------------------------------------------- | -------------------------------------- |
-| `image.cinderApiImage.registry`          |            | Moodle image registry                             | `docker.io`                            |
-| `image.cinderApiImage.repository`        |            | Moodle image repository                           | `kolla/ubuntu-binary-cinder-api`       |
-| `image.cinderApiImage.tag`               |            | Moodle image tag (immutable tags are recommended) | `xena`                                 |
-| `image.cinderApiImage.pullPolicy`        |            | Moodle image pull policy                          | `IfNotPresent`                         |
-| `image.cinderApiImage.pullSecrets`       |            | Specify docker-registry secret names as an array  | `[]`                                   |
-| `image.cinderVolumeImage.registry`       |            | Moodle image registry                             | `docker.io`                            |
-| `image.cinderVolumeImage.repository`     |            | Moodle image repository                           | `kolla/ubuntu-binary-cinder-volume`    |
-| `image.cinderVolumeImage.tag`            |            | Moodle image tag (immutable tags are recommended) | `xena`                                 |
-| `image.cinderVolumeImage.pullPolicy`     |            | Moodle image pull policy                          | `IfNotPresent`                         |
-| `image.cinderVolumeImage.pullSecrets`    |            | Specify docker-registry secret names as an array  | `[]`                                   |
-| `image.cinderSchedulerImage.registry`    |            | Moodle image registry                             | `docker.io`                            |
-| `image.cinderSchedulerImage.repository`  |            | Moodle image repository                           | `kolla/ubuntu-binary-cinder-scheduler` |
-| `image.cinderSchedulerImage.tag`         |            | Moodle image tag (immutable tags are recommended) | `xena`                                 |
-| `image.cinderSchedulerImage.pullPolicy`  |            | Moodle image pull policy                          | `IfNotPresent`                         |
-| `image.cinderSchedulerImage.pullSecrets` |            | Specify docker-registry secret names as an array  | `[]`                                   |
-| `image.cinderBackupImage.registry`       |            | Moodle image registry                             | `docker.io`                            |
-| `image.cinderBackupImage.repository`     |            | Moodle image repository                           | `kolla/ubuntu-binary-cinder-backup`    |
-| `image.cinderBackupImage.tag`            |            | Moodle image tag (immutable tags are recommended) | `xena`                                 |
-| `image.cinderBackupImage.pullPolicy`     |            | Moodle image pull policy                          | `IfNotPresent`                         |
-| `image.cinderBackupImage.pullSecrets`    |            | Specify docker-registry secret names as an array  | `[]`                                   |
-| `image.entrypointImage.registry`         |            | Moodle image registry                             | `quay.io`                              |
-| `image.entrypointImage.repository`       |            | Moodle image repository                           | `airshipit/kubernetes-entrypoint`      |
-| `image.entrypointImage.tag`              |            | Moodle image tag (immutable tags are recommended) | `v1.0.0`                               |
-| `image.entrypointImage.pullPolicy`       |            | Moodle image pull policy                          | `IfNotPresent`                         |
-| `image.entrypointImage.pullSecrets`      |            | Specify docker-registry secret names as an array  | `[]`                                   |
-| `image.cinderLoopImage.registry`         |            | Moodle image registry                             | `docker.io`                            |
-| `image.cinderLoopImage.repository`       |            | Moodle image repository                           | `docker/loop`                          |
-| `image.cinderLoopImage.tag`              |            | Moodle image tag (immutable tags are recommended) | `latest`                               |
-| `image.cinderLoopImage.pullPolicy`       |            | Moodle image pull policy                          | `IfNotPresent`                         |
-| `image.cinderLoopImage.pullSecrets`      |            | Specify docker-registry secret names as an array  | `[]`                                   |
-| `image.kollaToolboxImage.registry`       |            | Moodle image registry                             | `docker.io`                            |
-| `image.kollaToolboxImage.repository`     |            | Moodle image repository                           | `kolla/ubuntu-binary-kolla-toolbox`    |
-| `image.kollaToolboxImage.tag`            |            | Moodle image tag (immutable tags are recommended) | `xena`                                 |
-| `image.kollaToolboxImage.pullPolicy`     |            | Moodle image pull policy                          | `IfNotPresent`                         |
-| `image.kollaToolboxImage.pullSecrets`    |            | Specify docker-registry secret names as an array  | `[]`                                   |
+| Name                               | Form title | Description                                           | Value                                  |
+| ---------------------------------- | ---------- | ----------------------------------------------------- | -------------------------------------- |
+| `image.cinderApi.repository`       |            | cinderApi image repository                            | `kolla/ubuntu-binary-cinder-api`       |
+| `image.cinderVolume.repository`    |            | cinderVolume image repository                         | `kolla/ubuntu-binary-cinder-volume`    |
+| `image.cinderScheduler.repository` |            | cinderScheduler image repository                      | `kolla/ubuntu-binary-cinder-scheduler` |
+| `image.cinderBackup.repository`    |            | cinderBackup image repository                         | `kolla/ubuntu-binary-cinder-backup`    |
+| `image.dbSync.repository`          |            | dbSync image repository                               | `kolla/ubuntu-binary-cinder-api`       |
+| `image.kollaToolbox.repository`    |            | kollaToolbox image repository                         | `kolla/ubuntu-binary-kolla-toolbox`    |
+| `image.entrypoint.registry`        |            | entrypoint image registry                             | `quay.io`                              |
+| `image.entrypoint.repository`      |            | entrypoint image repository                           | `airshipit/kubernetes-entrypoint`      |
+| `image.entrypoint.tag`             |            | entrypoint image tag                                  | `v1.0.0`                               |
+| `image.cinderLoop.repository`      |            | cinderLoop image repository                           | `docker/loop`                          |
+| `image.cinderLoop.tag`             |            | cinderLoop image tag (immutable tags are recommended) | `latest`                               |
 
 
 ### Cinder config file
 
-| Name                      | Form title   | Description                             | Value                                       |
-| ------------------------- | ------------ | --------------------------------------- | ------------------------------------------- |
-| `conf.create_loop_device` | 创建loop设备     | 是否创建loop设备                              | `true`                                      |
-| `conf.loop_name`          | loop 设备名称    | cinder 后端存储创建的 loop 设备名称                | `/dev/loop0`                                |
-| `conf.dd_lvm_bs`          | loop 设备bs    | cinder 后端存储创建的 loop 设备 bs 大小 默认为1M      | `1M`                                        |
-| `conf.dd_lvm_count`       | loop 设备count | cinder 后端存储创建的 loop 设备 count 次数 默认为2048 | `2048`                                      |
-| `conf.kolla_log_dir`      | kolla 日志目录   | 存放 kolla 日志文件的目录                        | `/var/log/kolla/cinder`                     |
-| `conf.volume_type`        | cinder 卷类型   | cinder 后端存储的卷类型，默认为lvm                  | `lvm1`                                      |
-| `conf.vg_name`            | vg 名称        | cinder 后端存储所创建的卷组名                      | `cinder-volumes`                            |
-| `conf.volume_driver`      | cinder 卷驱动   | cinder 后端存储驱动，默认为lvm                    | `cinder.volume.drivers.lvm.LVMVolumeDriver` |
+| Name                               | Form title | Description                                               | Value                     |
+| ---------------------------------- | ---------- | --------------------------------------------------------- | ------------------------- |
+| `conf.kolla_log_dir`               |            | 存放 kolla 日志文件的目录                                          | `/var/log/kolla/cinder`   |
+| `conf.enabled_notification_topics` |            | 是否开启 notification                                         | `false`                   |
+| `conf.lvm.enabled`                 |            | 是否对接 lvm 后端                                               | `true`                    |
+| `conf.lvm.create_loop_device`      |            | 是否创建 loop 设备                                              | `true`                    |
+| `conf.lvm.loop_name`               |            | loop 设备名称                                                 | `/dev/loop0`              |
+| `conf.lvm.dd_lvm_bs`               |            | loop 设备块大小                                                | `1M`                      |
+| `conf.lvm.dd_lvm_count`            |            | loop 设备写次数                                                | `2048`                    |
+| `conf.lvm.vg_name`                 |            | lvm 创建的卷组名称                                               | `cinder-volumes`          |
+| `conf.lvm.volume_type`             |            | lvm 后端卷类型                                                 | `lvm1`                    |
+| `conf.ceph.enabled`                |            | 是否对接 ceph 后端                                              | `false`                   |
+| `conf.ceph.volume_type`            |            | ceph 后端卷类型                                                | `rbd1`                    |
+| `conf.ceph.pool_name`              |            | ceph 池名称                                                  | `volumes`                 |
+| `conf.ceph.rbd_user`               |            | ceph 用户名                                                  | `admin`                   |
+| `conf.ceph.rbd_secret_uuid`        |            | ceph secret uuid                                          | `""`                      |
+| `conf.ceph.size`                   |            | ceph pool 副本数                                             | `1`                       |
+| `conf.ceph.poolFailureDomain`      |            | ceph pool 失败域                                             | `host`                    |
+| `conf.ceph.rook_namespace`         |            | rook-ceph 命名空间                                            | `rook-ceph`               |
+| `conf.ceph.rook_cm_name`           |            | rook-ceph 配置信息的 configmap 名称                              | `rook-ceph-mon-endpoints` |
+| `conf.ceph.rook_secret_name`       |            | rook-ceph 密钥相关的 secrets 名称                                | `rook-ceph-mon`           |
+| `conf.ceph.ceph_username_fields`   |            | rook-ceph secrets 配置中的 username 字段                        | `ceph-username`           |
+| `conf.ceph.ceph_secret_fields`     |            | rook-ceph secrets 配置中的 keyring 字段                         | `ceph-secret`             |
+| `conf.ceph.ceph_cm_name`           |            | ceph configmap 名称 读取rook-ceph命名空间中的 configmap 注册到自己的命名空间  | `ceph-mon-endpoints`      |
+| `conf.ceph.ceph_secret_name`       |            | ceph secrets 名称 读取rook-ceph命名空间中的 secret 注册到自己的命名空间       | `ceph-mon`                |
+| `conf.backup.enabled`              |            | 是否对接 ceph backup                                          | `false`                   |
+| `conf.backup.backup_user`          |            | ceph backup pool 用户名称                                     | `admin`                   |
+| `conf.backup.backup_pool_name`     |            | ceph backup pool 名称                                       | `backups`                 |
+| `conf.backup.size`                 |            | ceph backup pool 副本数                                      | `1`                       |
 
 
 ### Traffic Exposure Parameters
@@ -132,13 +127,16 @@ cinder charts 用来安装 openstack cinder 服务。该 charts 对接的 cinder
 
 ### Keystone Details
 
-| Name                                              | Form title           | Description                   | Value                |
-| ------------------------------------------------- | -------------------- | ----------------------------- | -------------------- |
-| `keystone.enabled`                                | 部署 keystone          | 是否部署keystone                  | `true`               |
-| `keystone.endpoints.auth.admin.os_auth_url`       | keystone publicUrl   | 访问keystone的public endpoints   | `""`                 |
-| `keystone.endpoints.auth.admin.os_internal_url`   | keystone internalUrl | 访问keystone的internal endpoints | `""`                 |
-| `keystone.openstack-dep.enabled`                  | 部署 openstack 依赖环境    | 是否部署 openstack 依赖环境           | `true`               |
-| `keystone.openstack-dep.gen-password.secretName`  | Secret Name          | openstack 环境密码的 secret 名称     | `openstack-password` |
-| `keystone.openstack-dep.openstackEnv.rabbitmqUrl` | 部署 openstack 依赖环境    | 访问rabbitmq的Url，格式：rabbitmq    | `""`                 |
-| `keystone.openstack-dep.openstackEnv.mariadbUrl`  | 部署 openstack 依赖环境    | 是否部署 openstack 依赖环境           | `""`                 |
-| `keystone.openstack-dep.openstackEnv.memcacheUrl` | 部署 openstack 依赖环境    | 是否部署 openstack 依赖环境           | `""`                 |
+| Name                        | Form title               | Description                     | Value               |
+| --------------------------- | ------------------------ | ------------------------------- | ------------------- |
+| `keystone.enabled`          | 部署 keystone              | 是否部署keystone                    | `true`              |
+| `keystone.endpoints.secret` | keystone endpoint secret | keystone endpoint 信息的 secret 名称 | `keystone-endpoint` |
+
+
+### Openstack-dep Details
+
+| Name                                    | Form title           | Description                       | Value                 |
+| --------------------------------------- | -------------------- | --------------------------------- | --------------------- |
+| `openstack-dep.enabled`                 | 部署 openstack 依赖环境    | 是否部署 openstack 依赖环境               | `true`                |
+| `openstack-dep.gen-password.secretName` | Secret Name          | openstack 环境密码的 secret 名称         | `openstack-password`  |
+| `openstack-dep.connInfoSecret`          | ConnInfo secret name | openstack 依赖环境中生成服务URL得 secret 名称 | `openstack-conn-info` |

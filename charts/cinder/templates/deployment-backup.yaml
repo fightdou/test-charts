@@ -1,7 +1,8 @@
+{{- if .Values.conf.backup.enabled }}
 apiVersion: {{ include "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
 metadata:
-  name: cinder-scheduler
+  name: cinder-backup
   namespace: {{ .Release.Namespace | quote }}
   labels: {{- include "common.labels.standard" . | nindent 4 }}
 spec:
@@ -11,7 +12,7 @@ spec:
   template:
     metadata:
       labels: {{- include "common.labels.standard" . | nindent 8 }}
-        app.kubernetes.io/component: cinder-scheduler
+        app.kubernetes.io/component: cinder-backup
     spec:
       initContainers:
         - command:
@@ -35,21 +36,26 @@ spec:
           - name: PATH
             value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/
           - name: DEPENDENCY_SERVICE
-            value: {{ .Release.Namespace }}:{{ include "common.utils.joinListWithComma" .Values.dependencies.cinder_scheduler.service }}
+            value: {{ .Release.Namespace }}:{{ include "common.utils.joinListWithComma" .Values.dependencies.cinder_backup.service }}
       containers:
-        - name: cinder-scheduler
-          image: {{ template "cinder.scheduler.image" . }}
+        - name: cinder-backup
+          image: {{ template "cinder.backup.image" . }}
           imagePullPolicy: {{ .Values.global.pullPolicy }}
           securityContext:
             runAsUser: 0
           {{- if .Values.resources }}
           resources: {{- toYaml .Values.resources | nindent 12 }}
           {{- end }}
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                - /tmp/ceph-toolbox.sh
           env:
             - name: KOLLA_CONFIG_STRATEGY
               value: "COPY_ALWAYS"
             - name: KOLLA_SERVICE_NAME
-              value: "cinder-scheduler"
+              value: "cinder-backup"
             - name: PATH
               value: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
             - name: LANG
@@ -76,7 +82,14 @@ spec:
               subPath: cinder.conf
             - mountPath: /var/lib/kolla/config_files/config.json
               name: cinder-etc
-              subPath: cinder-scheduler.json
+              subPath: cinder-backup.json
+            - mountPath: /etc/ceph
+              name: etc-ceph
+            - mountPath: /tmp/ceph-toolbox.sh
+              name: cinder-bin
+              subPath: ceph-toolbox.sh
+            - mountPath: /etc/rook
+              name: mon-endpoint-volume
       {{- if .Values.podSecurityContext.enabled }}
       securityContext: {{- omit .Values.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
@@ -85,11 +98,24 @@ spec:
       volumes:
         - emptyDir: {}
           name: pod-tmp
+        - emptyDir: {}
+          name: etc-ceph
+        - name: mon-endpoint-volume
+          configMap:
+            name: {{ .Values.conf.ceph.ceph_cm_name }}
+            items:
+              - key: data
+                path: mon-endpoints
         - hostPath:
             path: {{ .Values.conf.kolla_log_dir }}
             type: DirectoryOrCreate
           name: kollalog
         - configMap:
+            defaultMode: 0755
+            name: cinder-bin
+          name: cinder-bin
+        - configMap:
             defaultMode: 365
             name: cinder-etc
           name: cinder-etc
+{{- end }}
