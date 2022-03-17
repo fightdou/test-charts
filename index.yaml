@@ -875,6 +875,27 @@ entries:
   - annotations:
       category: Openstack
     apiVersion: v2
+    created: "2022-03-17T04:40:13.112981782Z"
+    dependencies:
+    - condition: openstack-dep.enabled
+      name: openstack-dep
+      repository: https://fightdou.github.io/test-charts
+      version: 1.x.x
+    - name: common
+      repository: https://fightdou.github.io/test-charts
+      version: 1.x.x
+    description: Openstack keystone service
+    digest: 708e63de298d0898e195bb71a02f7127d1459b6ea07bb0d8db2830528db57d05
+    home: https://kungze.github.io/charts/
+    maintainers:
+    - name: Kungze
+    name: keystone
+    urls:
+    - https://github.com/fightdou/test-charts/releases/download/keystone-1.0.9/keystone-1.0.9.tgz
+    version: 1.0.9
+  - annotations:
+      category: Openstack
+    apiVersion: v2
     created: "2022-03-14T10:54:04.358598675Z"
     dependencies:
     - condition: openstack-dep.enabled
@@ -1579,4 +1600,4 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/openstack-dep-1.0.0/openstack-dep-1.0.0.tgz
     version: 1.0.0
-generated: "2022-03-17T03:28:23.565298008Z"
+generated: "2022-03-17T04:40:13.113493684Z"
