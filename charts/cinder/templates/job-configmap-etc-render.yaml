@@ -15,7 +15,7 @@ env:
     valueFrom:
       secretKeyRef:
         key: KEYSTONE_INTERNAL_ENDPOINT
-        name: {{ index $envAll.Values.keystone.endpoints.secret }}
+        name: {{ index $envAll.Values "openstack-dep" "connInfoSecret"  }}
 {{- end -}}
 
 {{- $envAll := index . -}}
