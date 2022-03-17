@@ -7,7 +7,7 @@ osapi_volume_workers = 5
 volume_name_template = volume-%s
 os_region_name = {{ .Values.endpoints.auth.cinder.region_name }}
 
-{{- if and (.Values.conf.lvm.enabled) (.Values.conf.ceph.volume_type) }}
+{{- if and .Values.conf.lvm.enabled .Values.conf.ceph.enabled }}
 enabled_backends = {{ printf "%s,%s" (.Values.conf.lvm.volume_type) (.Values.conf.ceph.volume_type) }}
 default_volume_type = {{ .Values.conf.ceph.volume_type }}
 {{- else if .Values.conf.lvm.enabled }}

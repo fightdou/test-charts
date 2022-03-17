@@ -22,6 +22,8 @@ data:
 {{ tuple "bin/_lvm_clean.sh.tpl" . | include "common.utils.template" | indent 4 }}
   configmap-render.py: |
 {{ include "common.scripts.configmap_render" . | indent 4 }}
+  update-openstack-conn-info.py: |
+{{- include "common.scripts.update_openstack_conn_info" . | indent 4  }}
   {{- if .Values.conf.ceph.enabled }}
   ceph-toolbox.sh: |
 {{ tuple "bin/_ceph_toolbox.sh.tpl" . | include "common.utils.template" | indent 4 }}

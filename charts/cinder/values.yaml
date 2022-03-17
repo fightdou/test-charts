@@ -156,6 +156,9 @@ dependencies:
   cinder_backup:
     service:
       - cinder-api
+  cm_render:
+    jobs:
+      - cinder-update-openstack-conn-info
   db_init:
     jobs:
       - cinder-cm-render
@@ -171,7 +174,6 @@ dependencies:
 
 ## @skip endpoints
 endpoints:
-  secret: cinder-endpoint
   auth:
     secretName: keystone-admin-secret
     admin:
@@ -315,13 +317,8 @@ ingress:
 
 ## @section Keystone Details
 ## @param keystone.enabled [t#部署 keystone] 是否部署keystone
-## @param keystone.endpoints.secret [t#keystone endpoint secret] keystone endpoint 信息的 secret 名称
 keystone:
   enabled: true
-  endpoints:
-    secret: keystone-endpoint
-
-## @section Openstack-dep Details
 ## @param openstack-dep.enabled [t#部署 openstack 依赖环境] 是否部署 openstack 依赖环境
 ## @param openstack-dep.gen-password.secretName [t#Secret Name] openstack 环境密码的 secret 名称
 ## @param openstack-dep.connInfoSecret [t#ConnInfo secret name] openstack 依赖环境中生成服务URL得 secret 名称
