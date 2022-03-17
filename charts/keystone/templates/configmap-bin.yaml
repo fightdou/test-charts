@@ -12,6 +12,8 @@ data:
 {{- include "common.scripts.db_sync" . | indent 4 }}
   ks-register-services.sh: |
 {{- include "common.scripts.ks_register_services" . | indent 4  }}
+  update-openstack-conn-info.py: |
+{{- include "common.scripts.update_openstack_conn_info" . | indent 4  }}
   keystone-startup.sh: |-
 {{ tuple "bin/_keystone_startup.sh.tpl" . | include "common.utils.template" |indent 4 }}
   bootstrap.sh: |

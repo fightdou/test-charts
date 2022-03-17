@@ -138,6 +138,9 @@ dependencies:
     jobs:
       - keystone-fernet-setup
       - keystone-bootstrap
+  cm_render:
+    jobs:
+      - keystone-update-openstack-conn-info
   db_init:
     jobs:
       - keystone-cm-render
@@ -173,7 +176,6 @@ jobs:
 
 ## @skip endpoints
 endpoints:
-  secret: keystone-endpoint
   cluster_domain_suffix: cluster.local
   auth:
     secretName: keystone-admin-secret
