@@ -132,5 +132,5 @@ cinder charts 用来安装 openstack cinder 服务。该 charts 支持 lvm、cep
 | --------------------------------------- | -------------------- | --------------------------------- | --------------------- |
 | `keystone.enabled`                      | 部署 keystone          | 是否部署keystone                      | `true`                |
 | `openstack-dep.enabled`                 | 部署 openstack 依赖环境    | 是否部署 openstack 依赖环境               | `true`                |
-| `openstack-dep.gen-password.secretName` | Secret Name          | openstack 环境密码的 secret 名称         | `openstack-password`  |
+| `openstack-dep.passwordSecretName`      | Secret Name          | openstack 环境密码的 secret 名称         | `openstack-password`  |
 | `openstack-dep.connInfoSecret`          | ConnInfo secret name | openstack 依赖环境中生成服务URL得 secret 名称 | `openstack-conn-info` |
