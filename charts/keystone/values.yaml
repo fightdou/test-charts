@@ -261,7 +261,6 @@ ingress:
 openstack-dep:
   enabled: true
   ## @param openstack-dep.connInfoSecret [t#ConnInfo secret name] openstack 依赖环境中生成服务URL得 secret 名称
-  ## @param openstack-dep.gen-password.secretName [t#Password secret name] openstack 依赖环境中自动生成服务相关密码得 secret 名称
+  ## @param openstack-dep.passwordSecretName [t#Password secret name] openstack 依赖环境中自动生成服务相关密码得 secret 名称
   connInfoSecret: openstack-conn-info
-  gen-password:
-    secretName: openstack-password
+  passwordSecretName: openstack-password
