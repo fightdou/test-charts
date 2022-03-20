@@ -320,10 +320,9 @@ ingress:
 keystone:
   enabled: true
 ## @param openstack-dep.enabled [t#部署 openstack 依赖环境] 是否部署 openstack 依赖环境
-## @param openstack-dep.gen-password.secretName [t#Secret Name] openstack 环境密码的 secret 名称
+## @param openstack-dep.passwordSecretName [t#Secret Name] openstack 环境密码的 secret 名称
 ## @param openstack-dep.connInfoSecret [t#ConnInfo secret name] openstack 依赖环境中生成服务URL得 secret 名称
 openstack-dep:
   enabled: true
-  gen-password:
-    secretName: openstack-password
+  passwordSecretName: openstack-password
   connInfoSecret: openstack-conn-info

@@ -36,7 +36,7 @@ env:
     valueFrom:
       secretKeyRef:
         key: cinder-keystone-password
-        name: {{ index $envAll.Values "openstack-dep" "gen-password" "secretName" }}
+        name: {{ index $envAll.Values "openstack-dep" "passwordSecretName" }}
 {{- end }}
 
 {{- define "cinder.register.podVolMounts" -}}
