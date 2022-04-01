@@ -4,6 +4,29 @@ entries:
   - annotations:
       category: Openstack
     apiVersion: v2
+    created: "2022-04-01T11:55:34.311020233Z"
+    dependencies:
+    - condition: keystone.enabled
+      name: keystone
+      repository: https://fightdou.github.io/test-charts
+      version: 1.x.x
+    - name: common
+      repository: https://fightdou.github.io/test-charts
+      tags:
+      - bitnami-common
+      version: 1.x.x
+    description: Openstack cinder service
+    digest: e732283e1731b614aa49f80ca4f301d338fa321c996bf29dbacef014806bd500
+    home: https://kungze.github.io/charts/
+    maintainers:
+    - name: Kungze
+    name: cinder
+    urls:
+    - https://github.com/fightdou/test-charts/releases/download/cinder-1.0.5/cinder-1.0.5.tgz
+    version: 1.0.5
+  - annotations:
+      category: Openstack
+    apiVersion: v2
     created: "2022-03-20T08:59:35.264425142Z"
     dependencies:
     - condition: keystone.enabled
@@ -1779,4 +1802,4 @@ entries:
     urls:
     - https://github.com/fightdou/test-charts/releases/download/openstack-dep-1.0.0/openstack-dep-1.0.0.tgz
     version: 1.0.0
-generated: "2022-03-20T08:59:35.265114346Z"
+generated: "2022-04-01T11:55:34.311573143Z"
