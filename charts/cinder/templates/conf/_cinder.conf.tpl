@@ -5,6 +5,7 @@ use_forwarded_for = true
 use_stderr = False
 osapi_volume_workers = 5
 volume_name_template = volume-%s
+volumes_dir = /var/lib/cinder/volumes
 os_region_name = {{ .Values.endpoints.auth.cinder.region_name }}
 
 {{- if and .Values.conf.lvm.enabled .Values.conf.ceph.enabled }}
@@ -98,6 +99,6 @@ image_upload_use_cinder_backend = False
 volume_group = {{ .Values.conf.lvm.vg_name }}
 volume_driver = cinder.volume.drivers.lvm.LVMVolumeDriver
 volume_backend_name = {{ .Values.conf.lvm.volume_type }}
-target_helper = tgtadm
+target_helper = {{ .Values.conf.lvm.lvm_target_helper }}
 target_protocol = iscsi
 {{- end }}

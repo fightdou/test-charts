@@ -20,3 +20,7 @@ data:
 {{ tuple "conf/_cinder_backup.json.tpl" . | include "common.utils.template" | indent 4 }}
   db-sync.json: |
 {{ tuple "conf/_cinder_db_sync.json.tpl" . | include "common.utils.template" | indent 4 }}
+  {{- if eq .Values.conf.lvm.lvm_target_helper "tgtadm" }}
+  tgtd.json: |
+{{ tuple "conf/_tgtd.json.tpl" . | include "common.utils.template" | indent 4 }}
+  {{- end }}
