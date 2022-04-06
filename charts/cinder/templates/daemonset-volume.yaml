@@ -130,10 +130,12 @@ spec:
               name: pod-tmp
             - mountPath: /dev
               name: devices
-            - mountPath: /run/udev
-              name: run-udev
+            - mountPath: /run
+              name: run-dir
             - mountPath: /lib/modules
               name: modules
+            - mountPath: /sys
+              name: sys
             - mountPath: /var/log/kolla/cinder
               name: kollalog
             - mountPath: /var/lib/kolla/config_files/cinder.conf
@@ -150,6 +152,16 @@ spec:
               name: cinder-bin
               subPath: lvm-clean.sh
             {{- end }}
+            {{- if eq .Values.conf.lvm.lvm_target_helper "tgtadm" }}
+            - mountPath: /var/lib/cinder/volumes
+              name: cinderlib
+            - name: etciscsi
+              mountPath: /etc/iscsi
+              mountPropagation: HostToContainer
+            - name: etcmultipath
+              mountPath: /etc/multipath
+              mountPropagation: Bidirectional
+            {{- end }}
             {{- if .Values.conf.ceph.enabled }}
             - mountPath: /etc/ceph
               name: etc-ceph
@@ -159,6 +171,56 @@ spec:
             - mountPath: /etc/rook
               name: mon-endpoint-volume
             {{- end }}
+        {{- if eq .Values.conf.lvm.lvm_target_helper "tgtadm" }}
+        - name: tgtd
+          image: {{ template "kolla.tgtd.image" . }}
+          imagePullPolicy: {{ .Values.global.pullPolicy }}
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          ports:
+            - name: iscsi
+              containerPort: 3260
+              hostPort: 3260
+          env:
+            - name: KOLLA_CONFIG_STRATEGY
+              value: "COPY_ALWAYS"
+            - name: KOLLA_SERVICE_NAME
+              value: "tgtd"
+            - name: PATH
+              value: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+            - name: LANG
+              value: "en_US.UTF-8"
+            - name: KOLLA_BASE_DISTRO
+              value: "ubuntu"
+            - name: KOLLA_DISTRO_PYTHON_VERSION
+              value: "3.8"
+            - name: KOLLA_BASE_ARCH
+              value: "x86_64"
+            - name: SETUPTOOLS_USE_DISTUTILS
+              value: "stdlib"
+            - name: PS1
+              value: "$(tput bold)($(printenv KOLLA_SERVICE_NAME))$(tput sgr0)[$(id -un)@$(hostname -s) $(pwd)]$ "
+            - name: DEBIAN_FRONTEND
+              value: "noninteractive"
+          volumeMounts:
+            - mountPath: /dev
+              name: devices
+            - mountPath: /var/lib/cinder/volumes
+              name: cinderlib
+            - mountPath: /run
+              name: run-dir
+            - mountPath: /lib/modules
+              name: modules
+            - mountPath: /sys
+              name: sys
+            - mountPath: /etc/iscsi
+              name: etciscsi
+              mountPropagation: HostToContainer
+            - mountPath: /var/lib/kolla/config_files/config.json
+              name: cinder-etc
+              subPath: tgtd.json
+      {{- end }}
       serviceAccount: {{ .Values.serviceAccountName}}
       serviceAccountName: {{ .Values.serviceAccountName}}
       volumes:
@@ -191,10 +253,24 @@ spec:
             type: DirectoryOrCreate
           name: devices
         - hostPath:
-            path: /run/udev
-            type: ""
-          name: run-udev
+            path: /run
+            type: DirectoryOrCreate
+          name: run-dir
         - hostPath:
             path: /lib/modules
             type: DirectoryOrCreate
           name: modules
+        - name: sys
+          hostPath:
+            path: /sys
+            type: DirectoryOrCreate
+        {{- if eq .Values.conf.lvm.lvm_target_helper "tgtadm" }}
+        - emptyDir: {}
+          name: cinderlib
+        - name: etciscsi
+          hostPath:
+            path: /etc/iscsi
+        - name: etcmultipath
+          hostPath:
+            path: /etc/multipath
+        {{- end }}

@@ -29,6 +29,12 @@ Return the proper cinder backup image name
 {{- end -}}
 
 {{/*
+Return the proper tgtd image name
+*/}}
+{{- define "kolla.tgtd.image" -}}
+{{- include "common.images.image" (dict "imageRoot" .Values.image.tgtd "global" .Values.global) -}}
+{{- end -}}
+{{/*
 Return the proper kolla toolbox image name
 */}}
 {{- define "kolla.toolbox.image" -}}

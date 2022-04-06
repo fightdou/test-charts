@@ -122,6 +122,9 @@ image:
   ## @param image.cinderBackup.repository cinderBackup image repository
   cinderBackup:
     repository: kolla/ubuntu-binary-cinder-backup
+  ## @param image.tgtd.repository tgtd image repository
+  tgtd:
+    repository: kolla/ubuntu-binary-tgtd
   ## @param image.dbSync.repository dbSync image repository
   dbSync:
     repository: kolla/ubuntu-binary-cinder-api
@@ -203,6 +206,7 @@ database:
 ## @param conf.lvm.dd_lvm_count loop 设备写次数
 ## @param conf.lvm.vg_name lvm 创建的卷组名称
 ## @param conf.lvm.volume_type lvm 后端卷类型
+## @param conf.lvm.lvm_target_helper lvm target 类型 Ubuntu镜像为 tgtadm centos 镜像为 lioadm，后期优化为自动配置的
 ## @param conf.ceph.enabled 是否对接 ceph 后端
 ## @param conf.ceph.volume_type ceph 后端卷类型
 ## @param conf.ceph.pool_name ceph 池名称
@@ -232,12 +236,13 @@ conf:
     dd_lvm_count: 2048
     vg_name: cinder-volumes
     volume_type: lvm1
+    lvm_target_helper: tgtadm
   ceph:
     enabled: false
     volume_type: rbd1
     pool_name: volumes
     rbd_user: admin
-    rbd_secret_uuid: ""
+    rbd_secret_uuid: "AQAcUANij7k6IhAANoVPTlE7fMY4X5draPMOqg=="
     size: 1
     poolFailureDomain: host
     rook_namespace: rook-ceph
